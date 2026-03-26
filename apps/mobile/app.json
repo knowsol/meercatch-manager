@@ -1,0 +1,15 @@
+{
+  "expo": {
+    "name": "Meercatch",
+    "slug": "meercatch",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "backgroundColor": "#1e40af"
+    },
+    "ios": { "supportsTablet": false, "bundleIdentifier": "com.meercatch.app" },
+    "android": { "adaptiveIcon": { "backgroundColor": "#1e40af" }, "package": "com.meercatch.app" }
+  }
+}

@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>탐지 중단 — Meercatch 매니저</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f4f8; }
+
+    nav { background: #1e40af; color: #fff; padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+    .nav-brand { font-size: 18px; font-weight: 800; }
+    .nav-links { display: flex; gap: 4px; }
+    .nav-link { color: #bfdbfe; text-decoration: none; font-size: 14px; padding: 6px 14px; border-radius: 6px; transition: background .2s; }
+    .nav-link:hover, .nav-link.active { background: rgba(255,255,255,.15); color: #fff; }
+    .nav-right { display: flex; align-items: center; gap: 12px; }
+    .nav-user { font-size: 13px; color: #bfdbfe; }
+    .btn-logout { background: rgba(255,255,255,.15); border: none; color: #fff; font-size: 13px; padding: 5px 12px; border-radius: 6px; cursor: pointer; }
+
+    .container { max-width: 1000px; margin: 0 auto; padding: 24px; }
+    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .page-title { font-size: 20px; font-weight: 800; color: #1e293b; }
+    .btn-new { padding: 9px 20px; background: #f97316; color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+    .btn-new:hover { background: #ea6c0a; }
+
+    .table-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,.06); overflow: hidden; }
+    .table-header { padding: 16px 20px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
+    .table-title { font-size: 15px; font-weight: 700; color: #1e293b; }
+    .table-count { font-size: 13px; color: #64748b; }
+    table { width: 100%; border-collapse: collapse; }
+    thead th { background: #f8fafc; padding: 11px 16px; text-align: left; font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #e2e8f0; }
+    tbody tr { border-bottom: 1px solid #f1f5f9; transition: background .1s; }
+    tbody tr:hover { background: #f8fafc; }
+    tbody tr:last-child { border-bottom: none; }
+    td { padding: 12px 16px; font-size: 14px; color: #374151; }
+    .empty-row td { text-align: center; padding: 40px; color: #94a3b8; }
+
+    .badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 99px; font-size: 12px; font-weight: 700; }
+    .badge-ACTIVE    { background: #dcfce7; color: #166534; }
+    .badge-EXPIRED   { background: #f1f5f9; color: #64748b; }
+    .badge-CANCELLED { background: #fee2e2; color: #dc2626; }
+    .badge-CLASS     { background: #e0f2fe; color: #0369a1; }
+    .badge-GRADE     { background: #fef3c7; color: #b45309; }
+
+    .btn-cancel-pause {
+      padding: 5px 12px;
+      border: 1.5px solid #ef4444;
+      background: #fff;
+      color: #ef4444;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-cancel-pause:hover { background: #ef4444; color: #fff; }
+
+    /* Modal */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 200; align-items: center; justify-content: center; }
+    .modal-overlay.show { display: flex; }
+    .modal { background: #fff; border-radius: 16px; padding: 28px 32px; width: 100%; max-width: 440px; box-shadow: 0 8px 40px rgba(0,0,0,.16); }
+    .modal h3 { font-size: 17px; font-weight: 700; color: #1e293b; margin-bottom: 20px; }
+    .modal-field { margin-bottom: 14px; }
+    .modal-field label { display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 5px; }
+    .modal-field select, .modal-field input { width: 100%; padding: 9px 12px; border: 1.5px solid #e2e8f0; border-radius: 7px; font-size: 14px; color: #1e293b; outline: none; }
+    .modal-field select:focus, .modal-field input:focus { border-color: #3b82f6; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+    .btn-modal-cancel { padding: 9px 18px; border: 1.5px solid #e2e8f0; background: #fff; border-radius: 7px; font-size: 14px; cursor: pointer; }
+    .btn-modal-confirm { padding: 9px 18px; background: #f97316; color: #fff; border: none; border-radius: 7px; font-size: 14px; font-weight: 600; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="nav-brand">🔍 Meercatch</div>
+    <div class="nav-links">
+      <a href="/dashboard.html" class="nav-link">탐지 현황</a>
+      <a href="/false-positive.html" class="nav-link">오탐 검토</a>
+      <a href="/pause.html" class="nav-link active">탐지 중단</a>
+    </div>
+    <div class="nav-right">
+      <span class="nav-user" id="navUser"></span>
+      <button class="btn-logout" onclick="logout()">로그아웃</button>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="page-header">
+      <div class="page-title">탐지 중단 관리</div>
+      <button class="btn-new" onclick="openModal()">+ 새 중단 설정</button>
+    </div>
+
+    <div class="table-card">
+      <div class="table-header">
+        <span class="table-title">중단 이력</span>
+        <span class="table-count" id="tableCount">0건</span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>범위</th>
+            <th>대상</th>
+            <th>시작</th>
+            <th>종료</th>
+            <th>사유</th>
+            <th>상태</th>
+            <th>해제</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <tr class="empty-row"><td colspan="7">불러오는 중...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 새 중단 설정 Modal -->
+  <div class="modal-overlay" id="pauseModal">
+    <div class="modal">
+      <h3>⏸ 탐지 중단 설정</h3>
+      <div class="modal-field">
+        <label>범위 유형</label>
+        <select id="scopeType" onchange="loadScopeTargets()">
+          <option value="grade">학년</option>
+          <option value="class">반</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>학년</label>
+        <select id="gradeSelect" onchange="loadClassTargets()">
+          <option value="">학년 선택</option>
+        </select>
+      </div>
+      <div class="modal-field" id="classField" style="display:none;">
+        <label>반</label>
+        <select id="classSelect">
+          <option value="">반 선택</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>시작 일시</label>
+        <input type="datetime-local" id="pauseStart" />
+      </div>
+      <div class="modal-field">
+        <label>종료 일시</label>
+        <input type="datetime-local" id="pauseEnd" />
+      </div>
+      <div class="modal-field">
+        <label>사유</label>
+        <input type="text" id="pauseReason" placeholder="예) 학교 체험학습, 시험 기간" />
+      </div>
+      <div class="modal-actions">
+        <button class="btn-modal-cancel" onclick="closeModal()">취소</button>
+        <button class="btn-modal-confirm" onclick="submitPause()">설정</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/config.js"></script>
+  <script>
+    const API      = window.API_URL || 'http://192.168.0.200:4002';
+    const token    = localStorage.getItem('mgr_token');
+    const schoolId = localStorage.getItem('mgr_schoolId');
+    if (!token) location.href = '/index.html';
+
+    document.getElementById('navUser').textContent = localStorage.getItem('mgr_name') || '매니저';
+
+    const authHeaders = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    };
+
+    // ── 중단 목록 로드 ────────────────────────────────────
+    async function loadPauses() {
+      try {
+        const res   = await fetch(`${API}/manager/detection-pauses`, { headers: authHeaders });
+        const pauses = await res.json();
+        const tbody = document.getElementById('tableBody');
+        document.getElementById('tableCount').textContent = `${pauses.length}건`;
+
+        if (!pauses.length) {
+          tbody.innerHTML = '<tr class="empty-row"><td colspan="7">중단 설정 내역이 없습니다.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = pauses.map(p => `
+          <tr>
+            <td><span class="badge badge-${p.scope_type}">${p.scope_type === 'CLASS' ? '반' : '학년'}</span></td>
+            <td>${p.scope_name || '—'}</td>
+            <td>${fmtDate(p.start_at)}</td>
+            <td>${fmtDate(p.end_at)}</td>
+            <td>${p.reason || '—'}</td>
+            <td><span class="badge badge-${p.status}">${p.status === 'ACTIVE' ? '활성' : p.status === 'EXPIRED' ? '만료' : '해제'}</span></td>
+            <td>${p.status === 'ACTIVE'
+              ? `<button class="btn-cancel-pause" onclick="cancelPause('${p.pause_id}')">해제</button>`
+              : '—'
+            }</td>
+          </tr>`).join('');
+      } catch (e) {
+        document.getElementById('tableBody').innerHTML =
+          '<tr class="empty-row"><td colspan="7">목록을 불러오지 못했습니다.</td></tr>';
+      }
+    }
+
+    async function cancelPause(pauseId) {
+      if (!confirm('탐지 중단을 해제하시겠습니까?')) return;
+      try {
+        const res = await fetch(`${API}/manager/detection-pauses/${pauseId}`, {
+          method: 'DELETE', headers: authHeaders,
+        });
+        if (res.ok) { alert('해제되었습니다.'); loadPauses(); }
+        else { const d = await res.json(); alert(d.error || '해제 실패'); }
+      } catch (e) { alert('서버에 연결할 수 없습니다.'); }
+    }
+
+    // ── 학년/반 로드 ──────────────────────────────────────
+    async function loadScopeTargets() {
+      const scopeType = document.getElementById('scopeType').value;
+      document.getElementById('classField').style.display =
+        scopeType === 'class' ? 'block' : 'none';
+    }
+
+    async function loadGrades() {
+      try {
+        const res    = await fetch(`${API}/managed/schools/${schoolId}/grades`, { headers: authHeaders });
+        const grades = await res.json();
+        const sel    = document.getElementById('gradeSelect');
+        sel.innerHTML = '<option value="">학년 선택</option>';
+        grades.forEach(g => {
+          const opt = document.createElement('option');
+          opt.value = g.grade_id;
+          opt.textContent = g.name;
+          sel.appendChild(opt);
+        });
+      } catch (e) { console.error('학년 로드 실패', e); }
+    }
+
+    async function loadClassTargets() {
+      const gradeId = document.getElementById('gradeSelect').value;
+      const sel     = document.getElementById('classSelect');
+      sel.innerHTML = '<option value="">반 선택</option>';
+      if (!gradeId) return;
+      try {
+        const res     = await fetch(`${API}/managed/grades/${gradeId}/classes`, { headers: authHeaders });
+        const classes = await res.json();
+        classes.forEach(c => {
+          const opt = document.createElement('option');
+          opt.value = c.class_id;
+          opt.textContent = c.name;
+          sel.appendChild(opt);
+        });
+      } catch (e) { console.error('반 로드 실패', e); }
+    }
+
+    // ── Modal 열기/닫기 ───────────────────────────────────
+    async function openModal() {
+      await loadGrades();
+      const now  = new Date();
+      const pad  = n => String(n).padStart(2, '0');
+      const local = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+      document.getElementById('pauseStart').value = local;
+      document.getElementById('pauseEnd').value   = '';
+      document.getElementById('pauseReason').value = '';
+      document.getElementById('pauseModal').classList.add('show');
+    }
+    function closeModal() {
+      document.getElementById('pauseModal').classList.remove('show');
+    }
+
+    // ── 중단 설정 제출 ─────────────────────────────────────
+    async function submitPause() {
+      const scopeType = document.getElementById('scopeType').value;
+      const gradeId   = document.getElementById('gradeSelect').value;
+      const classId   = document.getElementById('classSelect').value;
+      const startAt   = document.getElementById('pauseStart').value;
+      const endAt     = document.getElementById('pauseEnd').value;
+      const reason    = document.getElementById('pauseReason').value;
+
+      const targetId  = scopeType === 'grade' ? gradeId : classId;
+      if (!targetId)   { alert('대상을 선택해주세요.'); return; }
+      if (!startAt || !endAt) { alert('시작/종료 일시를 입력해주세요.'); return; }
+      if (new Date(endAt) <= new Date(startAt)) { alert('종료 일시는 시작 일시 이후여야 합니다.'); return; }
+
+      const endpoint = scopeType === 'grade'
+        ? `/manager/grades/${targetId}/pause`
+        : `/manager/classes/${targetId}/pause`;
+
+      try {
+        const res = await fetch(`${API}${endpoint}`, {
+          method: 'POST',
+          headers: authHeaders,
+          body: JSON.stringify({
+            startAt: new Date(startAt).toISOString(),
+            endAt:   new Date(endAt).toISOString(),
+            reason,
+          }),
+        });
+        if (res.ok) {
+          alert('탐지 중단이 설정되었습니다.');
+          closeModal();
+          loadPauses();
+        } else {
+          const d = await res.json();
+          alert(d.error || '설정 실패');
+        }
+      } catch (e) {
+        alert('서버에 연결할 수 없습니다.');
+      }
+    }
+
+    function fmtDate(iso) {
+      if (!iso) return '—';
+      const d = new Date(iso);
+      const p = n => String(n).padStart(2, '0');
+      return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+    }
+    function logout() { localStorage.clear(); location.href = '/index.html'; }
+
+    loadPauses();
+  </script>
+</body>
+</html>
