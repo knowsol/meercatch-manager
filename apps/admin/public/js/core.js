@@ -49,11 +49,11 @@ function mkKPI(label, value, sub, colorClass) {
 /** toast(msg, type) — show toast. type: 'ok'|'err'|'warn'|'info' */
 function toast(msg, type) {
   type = type || 'ok';
-  const icons = { ok: '✅', err: '❌', warn: '⚠️', info: 'ℹ️' };
+  const icons = { ok: '✓', err: '✕', warn: '!', info: 'i' };
   const container = document.getElementById('toast-container');
   if (!container) return;
   const el = h('div', { class: 'toast ' + type },
-    h('span', { class: 'toast-icon' }, icons[type] || '✅'),
+    h('span', { class: 'toast-icon' }, icons[type] || '✓'),
     h('span', { class: 'toast-msg' }, msg)
   );
   container.appendChild(el);

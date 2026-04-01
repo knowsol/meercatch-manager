@@ -95,7 +95,21 @@ const DUMMY = {
     { pauseId:'ps5', grade:2, cls:2, pauseType:'전체', groupId:'g5',  requester:'오선생',  requesterRole:'teacher', startAt:'2026-03-14 09:00', endAt:'2026-03-14 17:00', status:'EXPIRED',   reason:'수학여행',         cancelReason:null },
     { pauseId:'ps6', grade:1, cls:2, pauseType:'선정성', groupId:'g2', requester:'이선생', requesterRole:'teacher', startAt:'2026-03-13 08:30', endAt:'2026-03-13 16:30', status:'CANCELLED', reason:'성교육 수업',       cancelReason:'수업 취소' },
     { pauseId:'ps7', grade:3, cls:2, pauseType:'전체', groupId:'g8',  requester:'장선생',  requesterRole:'teacher', startAt:'2026-03-12 09:00', endAt:'2026-03-12 18:00', status:'EXPIRED',   reason:'학교 행사',        cancelReason:null },
-    { pauseId:'ps8', grade:2, cls:1, pauseType:'폭력', groupId:'g4',  requester:'오선생',  requesterRole:'teacher', startAt:'2026-03-10 10:00', endAt:'2026-03-10 12:00', status:'EXPIRED',   reason:'역사 수업 영상 시청', cancelReason:null },
+    { pauseId:'ps8',  grade:2, cls:1, pauseType:'폭력', groupId:'g4',  requester:'오선생',  requesterRole:'teacher', startAt:'2026-03-10 10:00', endAt:'2026-03-10 12:00', status:'EXPIRED',   reason:'역사 수업 영상 시청', cancelReason:null },
+    { pauseId:'ps9',  grade:1, cls:3, pauseType:'전체', groupId:'g3',  requester:'이선생',  requesterRole:'teacher', startAt:'2026-03-09 09:00', endAt:'2026-03-09 15:00', status:'EXPIRED',   reason:'현장체험학습',       cancelReason:null },
+    { pauseId:'ps10', grade:3, cls:3, pauseType:'선정성', groupId:'g9', requester:'장선생', requesterRole:'teacher', startAt:'2026-03-08 10:00', endAt:'2026-03-08 12:00', status:'EXPIRED',   reason:'보건 수업',         cancelReason:null },
+    { pauseId:'ps11', grade:1, cls:4, pauseType:'전체', groupId:'g10', requester:'정운영',  requesterRole:'staff',   startAt:'2026-03-07 08:00', endAt:'2026-03-07 18:00', status:'EXPIRED',   reason:'단말기 점검',       cancelReason:null },
+    { pauseId:'ps12', grade:2, cls:4, pauseType:'도박', groupId:'g11', requester:'오선생',  requesterRole:'teacher', startAt:'2026-03-06 13:00', endAt:'2026-03-06 15:00', status:'CANCELLED', reason:'경제 교육 수업',    cancelReason:'일정 변경' },
+    { pauseId:'ps13', grade:3, cls:1, pauseType:'전체', groupId:'g7',  requester:'박선생',  requesterRole:'teacher', startAt:'2026-03-05 09:00', endAt:'2026-03-05 17:00', status:'EXPIRED',   reason:'졸업앨범 촬영',     cancelReason:null },
+    { pauseId:'ps14', grade:1, cls:1, pauseType:'선정성', groupId:'g1', requester:'이선생', requesterRole:'teacher', startAt:'2026-03-04 10:00', endAt:'2026-03-04 12:00', status:'EXPIRED',   reason:'성교육 수업',       cancelReason:null },
+    { pauseId:'ps15', grade:2, cls:3, pauseType:'폭력', groupId:'g6',  requester:'김선생',  requesterRole:'teacher', startAt:'2026-03-03 14:00', endAt:'2026-03-03 16:00', status:'EXPIRED',   reason:'역사 다큐 시청',    cancelReason:null },
+    { pauseId:'ps16', grade:3, cls:4, pauseType:'전체', groupId:'g12', requester:'한운영',  requesterRole:'staff',   startAt:'2026-03-02 08:00', endAt:'2026-03-02 18:00', status:'EXPIRED',   reason:'네트워크 공사',     cancelReason:null },
+    { pauseId:'ps17', grade:1, cls:2, pauseType:'전체', groupId:'g2',  requester:'정운영',  requesterRole:'staff',   startAt:'2026-03-01 09:00', endAt:'2026-03-01 12:00', status:'EXPIRED',   reason:'소프트웨어 업데이트', cancelReason:null },
+    { pauseId:'ps18', grade:2, cls:2, pauseType:'선정성', groupId:'g5', requester:'오선생', requesterRole:'teacher', startAt:'2026-02-28 10:00', endAt:'2026-02-28 12:00', status:'EXPIRED',   reason:'미술 수업 누드화 감상', cancelReason:null },
+    { pauseId:'ps19', grade:3, cls:2, pauseType:'도박', groupId:'g8',  requester:'장선생',  requesterRole:'teacher', startAt:'2026-02-27 13:00', endAt:'2026-02-27 15:00', status:'CANCELLED', reason:'확률 수학 수업',    cancelReason:'수업 변경' },
+    { pauseId:'ps20', grade:1, cls:3, pauseType:'폭력', groupId:'g3',  requester:'이선생',  requesterRole:'teacher', startAt:'2026-02-26 09:00', endAt:'2026-02-26 11:00', status:'EXPIRED',   reason:'체육 수업 영상',    cancelReason:null },
+    { pauseId:'ps21', grade:2, cls:5, pauseType:'전체', groupId:'g14', requester:'한운영',  requesterRole:'staff',   startAt:'2026-02-25 08:00', endAt:'2026-02-25 18:00', status:'EXPIRED',   reason:'기기 초기화',       cancelReason:null },
+    { pauseId:'ps22', grade:1, cls:1, pauseType:'도박', groupId:'g1',  requester:'이선생',  requesterRole:'teacher', startAt:'2026-02-24 14:00', endAt:'2026-02-24 16:00', status:'EXPIRED',   reason:'금융교육 수업',     cancelReason:null },
   ],
   licenses: {
     type: '교육기관 라이선스',
@@ -134,3 +148,8 @@ const DUMMY = {
     notiType: 'basic',
   },
 };
+
+// Auto-sync deviceCount from actual devices array
+DUMMY.groups.forEach(g => { g.deviceCount = DUMMY.devices.filter(d => d.groupId === g.groupId).length; });
+DUMMY.stats.totalDevices = DUMMY.devices.length;
+DUMMY.licenses.usedDevices = DUMMY.devices.length;

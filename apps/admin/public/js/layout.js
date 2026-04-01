@@ -2,23 +2,46 @@
    layout.js — App shell, sidebar, header
 ============================================================ */
 
+function svgIcon(paths, size) {
+  const s = size || 18;
+  const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('width', s); svg.setAttribute('height', s); svg.setAttribute('viewBox','0 0 24 24');
+  svg.setAttribute('fill','none'); svg.setAttribute('stroke','currentColor'); svg.setAttribute('stroke-width','2');
+  svg.setAttribute('stroke-linecap','round'); svg.setAttribute('stroke-linejoin','round');
+  svg.innerHTML = paths;
+  return svg;
+}
+const IC = {
+  dashboard:   '<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>',
+  groups:      '<path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
+  devices:     '<rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18.01"/>',
+  policies:    '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+  pauses:      '<circle cx="12" cy="12" r="10"/><line x1="10" y1="15" x2="10" y2="9"/><line x1="14" y1="15" x2="14" y2="9"/>',
+  detections:  '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',
+  history:     '<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>',
+  users:       '<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>',
+  licenses:    '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>',
+  notifications:'<path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/>',
+  account:     '<path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+};
+
 const MENU = [
   { section: '메인' },
-  { id:'dashboard', icon:'📊', label:'대시보드' },
+  { id:'dashboard', iconKey:'dashboard', label:'대시보드' },
   { section: '운영 관리' },
-  { id:'groups',      icon:'🏫', label:'그룹 관리' },
-  { id:'devices',     icon:'📱', label:'단말기 관리' },
-  { id:'policies',    icon:'🛡️', label:'정책 관리' },
-  { id:'pauses-list', icon:'⏸️', label:'탐지중단' },
+  { id:'groups',      iconKey:'groups',    label:'그룹 관리' },
+  { id:'devices',     iconKey:'devices',   label:'단말기 관리' },
+  { id:'policies',    iconKey:'policies',  label:'정책 관리' },
+  { id:'pauses-list', iconKey:'pauses',    label:'탐지중단' },
   { section: '모니터링' },
-  { id:'detections',    icon:'🔍', label:'탐지 현황' },
-  { id:'pauses-history',icon:'📜', label:'중단 이력' },
+  { id:'detections',    iconKey:'detections',  label:'탐지 현황' },
+  { id:'pauses-history',iconKey:'history',     label:'중단 이력' },
   { section: '사용자 관리' },
-  { id:'users',       icon:'👥', label:'사용자 관리' },
+  { id:'users',       iconKey:'users',     label:'사용자 관리' },
   { section: '설정' },
-  { id:'licenses',      icon:'🔑', label:'라이선스' },
-  { id:'notifications', icon:'🔔', label:'알림 설정' },
-  { id:'account',       icon:'👤', label:'내 계정' },
+  { id:'licenses',      iconKey:'licenses',      label:'라이선스' },
+  { id:'notifications', iconKey:'notifications', label:'알림 설정' },
+  { id:'account',       iconKey:'account',       label:'내 계정' },
 ];
 
 // Track expanded state for parent menu items
@@ -32,13 +55,22 @@ function buildApp() {
       h('div', { class: 'mh-title', id: 'page-title' }, '대시보드'),
       h('div', { class: 'mh-actions' },
         h('button', { class: 'mh-icon-btn', title: '알림', onClick: () => navigate('notifications') },
-          '🔔',
+          (function(){ const s=document.createElementNS('http://www.w3.org/2000/svg','svg');s.setAttribute('width','18');s.setAttribute('height','18');s.setAttribute('viewBox','0 0 24 24');s.setAttribute('fill','none');s.setAttribute('stroke','currentColor');s.setAttribute('stroke-width','2');s.setAttribute('stroke-linecap','round');s.setAttribute('stroke-linejoin','round');s.innerHTML='<path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/>';return s;})(),
           h('span', { class: 'mh-notif-dot' })
         ),
-        h('div', { class: 'mh-user', onClick: () => navigate('account') },
-          h('div', { class: 'mh-user-avatar' }, D.user.name.charAt(0)),
-          h('span', { class: 'mh-user-name' }, D.user.name)
-        )
+        (function(){
+          const dropdown = h('div', { style:'display:none;position:absolute;top:100%;right:0;margin-top:6px;background:#fff;border:1px solid var(--bd);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.1);min-width:140px;z-index:200;overflow:hidden' },
+            h('div', { style:'padding:10px 14px;font-size:13px;cursor:pointer;transition:background .1s', onMouseEnter:function(){this.style.background='#f1f5f9'}, onMouseLeave:function(){this.style.background='transparent'}, onClick: () => { dropdown.style.display='none'; navigate('account'); } }, '마이페이지'),
+            h('div', { style:'padding:10px 14px;font-size:13px;cursor:pointer;color:#ef4444;border-top:1px solid var(--bd);transition:background .1s', onMouseEnter:function(){this.style.background='#fef2f2'}, onMouseLeave:function(){this.style.background='transparent'}, onClick: () => { dropdown.style.display='none'; toast('로그아웃되었습니다.','info'); } }, '로그아웃')
+          );
+          const userBtn = h('div', { class: 'mh-user', style:'position:relative;cursor:pointer', onClick: (e) => { e.stopPropagation(); dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none'; } },
+            h('div', { class: 'mh-user-avatar' }, D.user.name.charAt(0)),
+            h('span', { class: 'mh-user-name' }, D.user.name),
+            dropdown
+          );
+          document.addEventListener('click', () => { dropdown.style.display = 'none'; });
+          return userBtn;
+        })()
       )
     ),
     h('div', { class: 'mb', id: 'page-body' })
@@ -71,27 +103,13 @@ function buildSidebar() {
   const sb = h('div', { class: 'sb' + (D.sbCollapsed ? ' collapsed' : ''), id: 'sidebar' },
     h('div', { class: 'sb-h' },
       h('div', { class: 'sb-logo-row' },
-        h('div', { class: 'sb-logo-icon' }, '🦦'),
+        h('div', { class: 'sb-logo-icon' }, 'M'),
         h('div', { class: 'sb-logo-text' }, 'Meercatch Manager')
       )
     ),
-    h('div', { class: 'sb-u' },
-      h('div', { class: 'sb-u-info' },
-        h('div', { class: 'sb-u-avatar' }, D.user.name.charAt(0)),
-        h('div', { class: 'sb-u-detail' },
-          h('div', { class: 'sb-u-name' }, D.user.name),
-          h('div', { class: 'sb-u-role' }, roleLabel[D.role] || D.role)
-        )
-      ),
-      h('div', { class: 'sb-u-actions' },
-        h('button', { class: 'sb-u-btn', onClick: () => navigate('account') }, '내 계정'),
-        h('button', { class: 'sb-u-btn', onClick: () => toast('로그아웃되었습니다.', 'info') }, '로그아웃')
-      )
+    h('div', { class: 'sb-u', style:'display:none' }
     ),
-    nav,
-    h('div', { class: 'sb-collapse-btn' },
-      h('button', { class: 'sb-toggle', id: 'sb-toggle', onClick: toggleSidebar, title: '사이드바 접기' }, '◀')
-    )
+    nav
   );
 
   return sb;
@@ -107,19 +125,21 @@ function buildMenuItems(container) {
       const isExpanded = _expanded[item.id] !== false; // default open
       const sub = h('div', { class: 'ni-sub' + (isExpanded ? ' open' : ''), id: 'sub-' + item.id });
       const arr = h('span', { class: 'arr' + (isExpanded ? ' open' : '') }, '▾');
+      const parentIcEl = h('span', { class: 'ic' }); if (item.iconKey && IC[item.iconKey]) parentIcEl.appendChild(svgIcon(IC[item.iconKey]));
       const parent = h('div', { class: 'ni', id: 'ni-' + item.id,
         onClick: () => toggleParent(item.id)
       },
-        h('span', { class: 'ic' }, item.icon),
+        parentIcEl,
         h('span', { class: 'ni-txt' }, item.label),
         arr
       );
 
       item.children.forEach(child => {
+        const childIcEl = h('span', { class: 'ic' }); if (child.iconKey && IC[child.iconKey]) childIcEl.appendChild(svgIcon(IC[child.iconKey]));
         const childEl = h('div', { class: 'ni', id: 'ni-' + child.id,
           onClick: () => navigate(child.id)
         },
-          h('span', { class: 'ic' }, child.icon),
+          childIcEl,
           h('span', { class: 'ni-txt' }, child.label)
         );
         sub.appendChild(childEl);
@@ -128,10 +148,11 @@ function buildMenuItems(container) {
       container.appendChild(parent);
       container.appendChild(sub);
     } else {
+      const niIcEl = h('span', { class: 'ic' }); if (item.iconKey && IC[item.iconKey]) niIcEl.appendChild(svgIcon(IC[item.iconKey]));
       const ni = h('div', { class: 'ni', id: 'ni-' + item.id,
         onClick: () => navigate(item.id)
       },
-        h('span', { class: 'ic' }, item.icon),
+        niIcEl,
         h('span', { class: 'ni-txt' }, item.label)
       );
       container.appendChild(ni);

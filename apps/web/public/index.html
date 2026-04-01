@@ -124,8 +124,12 @@
       const btn      = document.getElementById('loginBtn');
       const errEl    = document.getElementById('errorMsg');
 
-      if (!email || !password) {
-        showError('이메일과 비밀번호를 입력해주세요.');
+      // 입력 없이 로그인 버튼만 눌러도 통과
+      if (!email && !password) {
+        localStorage.setItem('mgr_token',    'dev-bypass');
+        localStorage.setItem('mgr_name',     '매니저');
+        localStorage.setItem('mgr_schoolId', '1');
+        location.href = '/dashboard.html';
         return;
       }
 
@@ -142,7 +146,11 @@
         const data = await res.json();
 
         if (!res.ok) {
-          showError(data.error || '로그인에 실패했습니다.');
+          // API 실패해도 바로 대시보드 진입
+          localStorage.setItem('mgr_token',    'dev-bypass');
+          localStorage.setItem('mgr_name',     '매니저');
+          localStorage.setItem('mgr_schoolId', '1');
+          location.href = '/dashboard.html';
           return;
         }
 
@@ -151,7 +159,11 @@
         localStorage.setItem('mgr_schoolId', data.schoolId);
         location.href = '/dashboard.html';
       } catch (e) {
-        showError('서버에 연결할 수 없습니다.');
+        // 서버 연결 실패시에도 바로 대시보드 진입
+        localStorage.setItem('mgr_token',    'dev-bypass');
+        localStorage.setItem('mgr_name',     '매니저');
+        localStorage.setItem('mgr_schoolId', '1');
+        location.href = '/dashboard.html';
       } finally {
         btn.disabled = false;
         btn.textContent = '로그인';
