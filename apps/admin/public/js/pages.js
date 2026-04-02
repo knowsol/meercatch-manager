@@ -137,46 +137,51 @@ function renderGroupList() {
   ));
 
   // Filter bar
-  let gradeFilter = '', statusFilter = '';
   const searchInp = h('input', { class: 'inp search', placeholder: '그룹 이름 검색...', type: 'text' });
-  const gradeSelect = h('select', { class: 'inp', style: { maxWidth: '120px' } },
+  const gradeSelect = h('select', { class: 'inp', style: 'max-width:120px' },
     h('option', { value: '' }, '전체 학년'),
     h('option', { value: '1' }, '1학년'),
     h('option', { value: '2' }, '2학년'),
     h('option', { value: '3' }, '3학년')
   );
-  const statusSelect = h('select', { class: 'inp', style: { maxWidth: '120px' } },
+  const statusSelect = h('select', { class: 'inp', style: 'max-width:120px' },
     h('option', { value: '' }, '전체 상태'),
     h('option', { value: 'active' }, '활성'),
     h('option', { value: 'inactive' }, '비활성')
   );
 
   const tableWrap = h('div', {});
+
+  const cols = [
+    { key:'name', label:'그룹 이름', render: (v,r) => {
+      const a = h('a', { href:'#' }, v);
+      a.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); openPanel(renderGroupDetailPanel(r.groupId)); });
+      return a;
+    }},
+    { key:'grade', label:'학년', width:'60px', render: v => `${v}학년` },
+    { key:'deviceCount', label:'단말 수', width:'80px', render: v => `${v}대` },
+    { key:'policyCount', label:'적용 정책', width:'80px', render: v => `${v}개` },
+    { key:'pauseStatus', label:'탐지 중단', width:'100px', render: v => v === 'paused' ? mkBd('bdg-warn','중단중') : mkBd('bdg-ok','정상') },
+    { key:'status', label:'상태', width:'80px', render: v => statusBadge(v) },
+    { key:'updatedAt', label:'최근 수정', render: v => fmtD(v) },
+  ];
+
   function renderTable() {
     const q = searchInp.value.toLowerCase();
-    const g = gradeSelect.value;
-    const s = statusSelect.value;
+    const gf = gradeSelect.value;
+    const sf = statusSelect.value;
+
     const filtered = DUMMY.groups.filter(gr => {
       if (q && !gr.name.toLowerCase().includes(q)) return false;
-      if (g && String(gr.grade) !== g) return false;
-      if (s && gr.status !== s) return false;
+      if (gf && String(gr.grade) !== gf) return false;
+      if (sf && gr.status !== sf) return false;
       return true;
     });
+
     tableWrap.innerHTML = '';
-    tableWrap.appendChild(mkTable([
-      { key:'name', label:'그룹 이름', render: (v,r) => {
-        const a = h('a', { href: '#' }, v);
-        a.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); openPanel(renderGroupDetailPanel(r.groupId)); });
-        return a;
-      }},
-      { key:'grade', label:'학년', width:'60px', render: (v) => `${v}학년` },
-      { key:'deviceCount', label:'단말 수', width:'80px', render: v => `${v}대` },
-      { key:'policyCount', label:'적용 정책', width:'80px', render: v => `${v}개` },
-      { key:'pauseStatus', label:'탐지 중단', width:'100px', render: v => v === 'paused' ? mkBd('bdg-warn','중단중') : mkBd('bdg-ok','정상') },
-      { key:'status', label:'상태', width:'80px', render: v => statusBadge(v) },
-      { key:'updatedAt', label:'최근 수정', render: v => fmtD(v) },
-    ], filtered, (row) => openPanel(renderGroupDetailPanel(row.groupId))));
+    tableWrap.appendChild(mkTable(cols, filtered, row => openPanel(renderGroupDetailPanel(row.groupId))));
   }
+
   searchInp.addEventListener('input', renderTable);
   gradeSelect.addEventListener('change', renderTable);
   statusSelect.addEventListener('change', renderTable);
@@ -533,6 +538,26 @@ function renderDeviceDetail(id) {
 }
 
 /* ----------------------------------------------------------
+   POLICY HELPERS
+---------------------------------------------------------- */
+const POLICY_AGES = ['초등학생','중학생','고등학생','성인'];
+const POLICY_SEVS = ['낮음','보통','높음','매우 높음'];
+function calcLevel(age, sev) {
+  const ai = POLICY_AGES.indexOf(age);
+  const si = POLICY_SEVS.indexOf(sev);
+  if (ai < 0 || si < 0) return '-';
+  return `Lv.${ai * 4 + si + 1}`;
+}
+function catBadge(cat) {
+  const lv = calcLevel(cat.age, cat.severity);
+  const color = cat.type === '선정성' ? 'bdg-err' : 'bdg-warn';
+  return h('div', { style:'display:flex;align-items:center;gap:4px' },
+    mkBd(color, cat.type),
+    h('span', { style:'font-size:12px;color:#64748b' }, `${cat.age} / ${cat.severity} (${lv})`)
+  );
+}
+
+/* ----------------------------------------------------------
    POLICY LIST
 ---------------------------------------------------------- */
 function renderPolicyList() {
@@ -575,7 +600,7 @@ function renderPolicyList() {
     tableWrap.appendChild(mkTable([
       { key:'name', label:'정책 이름', render:(v,r)=>{const a=h('a',{href:'#'},v);a.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();openPanel(renderPolicyDetailPanel(r.policyId))});return a;}},
       { key:'desc', label:'설명' },
-      { key:'types', label:'탐지 유형', render: v => h('div', { class: 'flex gap-8' }, ...v.map(t => detTypeBadge(t))) },
+      { key:'categories', label:'탐지 카테고리', render: v => h('div', { style:'display:flex;flex-direction:column;gap:4px' }, ...(v||[]).map(c => catBadge(c))) },
       { key:'appliedCount', label:'적용 그룹', width:'90px', render: v => `${v}개` },
       { key:'active', label:'상태', width:'80px', render: v => v ? mkBd('bdg-ok','활성') : mkBd('bdg-err','비활성') },
       { key:'updatedAt', label:'수정일', render: v => fmtD(v) },
@@ -1783,6 +1808,10 @@ function showSelectModal(title, items, labelFn, onConfirm, opts) {
 
 /* -- Group New Panel -- */
 function renderGroupNewPanel() {
+  const schoolSelect = h('select', { class:'inp' },
+    h('option', { value:'' }, '학교 선택'),
+    ...DUMMY.schools.map(s => h('option', { value:s.schoolId }, s.name))
+  );
   const gradeInp = h('select', { class: 'inp' },
     h('option', { value:'' }, '학년 선택'),
     ...[1,2,3].map(i => h('option', { value:String(i) }, i+'학년'))
@@ -1804,6 +1833,7 @@ function renderGroupNewPanel() {
   clsInp.addEventListener('change', autoName);
 
   const body = h('div', {},
+    fg('학교', schoolSelect, true),
     h('div', { class:'form-row section-gap' }, fg('학년', gradeInp, true), fg('반', clsInp, true)),
     fg('그룹 이름', nameInp, true),
     fg('그룹 설명', descInp, false),
@@ -1811,8 +1841,9 @@ function renderGroupNewPanel() {
   );
 
   function onSave() {
-    [gradeInp, clsInp, nameInp].forEach(el => el.classList.remove('error'));
+    [schoolSelect, gradeInp, clsInp, nameInp].forEach(el => el.classList.remove('error'));
     let ok = true;
+    if (!schoolSelect.value) { schoolSelect.classList.add('error'); ok = false; }
     if (!gradeInp.value) { gradeInp.classList.add('error'); ok = false; }
     if (!clsInp.value) { clsInp.classList.add('error'); ok = false; }
     if (!nameInp.value.trim()) { nameInp.classList.add('error'); ok = false; }
@@ -1837,6 +1868,9 @@ function renderGroupDetailPanel(id) {
   function renderTab() {
     tabContent.innerHTML = '';
     if (activeTab === 'info') {
+      const school = DUMMY.schools.find(s => s.schoolId === group.schoolId);
+      const schoolName = school ? school.name : '—';
+
       const nameInp = h('input', { class:'inp', value:group.name, type:'text', disabled:!isEditing });
       const descInp = h('textarea', { class:'inp', style:'min-height:80px', disabled:!isEditing }, '학급 그룹입니다.');
       if (!isEditing) { nameInp.style.background = '#f8fafc'; descInp.style.background = '#f8fafc'; }
@@ -1844,6 +1878,19 @@ function renderGroupDetailPanel(id) {
       const gradeInp = h('input', { class:'inp', value:group.grade, type:'number', min:'1', max:'6', disabled:!isEditing });
       const clsInp   = h('input', { class:'inp', value:group.cls,   type:'number', min:'1', max:'20', disabled:!isEditing });
       if (!isEditing) { gradeInp.style.background = '#f8fafc'; clsInp.style.background = '#f8fafc'; }
+
+      const schoolRow = isEditing
+        ? fg('학교', (function(){
+            const sel = h('select', { class:'inp' },
+              h('option', { value:'' }, '학교 선택'),
+              ...DUMMY.schools.map(s => h('option', { value:s.schoolId, selected: s.schoolId === group.schoolId }, s.name))
+            );
+            return sel;
+          })(), true)
+        : h('div', { class:'fg' },
+            h('label', {}, '학교'),
+            h('div', { style:'padding:6px 0' }, schoolName)
+          );
 
       const statusRow = isEditing
         ? fg('상태', (function(){
@@ -1859,6 +1906,7 @@ function renderGroupDetailPanel(id) {
           );
 
       tabContent.appendChild(h('div', {},
+        schoolRow,
         fg('그룹 이름', nameInp, true),
         fg('설명', descInp, false),
         h('div', { class:'form-row section-gap' },

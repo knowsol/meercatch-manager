@@ -47,32 +47,59 @@ const DUMMY = {
     { deviceId:'d18', name:'iPad-018', identifier:'R8S9T0U1V2', groupId:'g11', groupName:'2학년 4반', status:'offline', policyStatus:'pending',  lastContact:'2026-03-16 15:30', model:'iPad 9th Gen',  os:'iPadOS 16.7' },
   ],
   policies: [
-    { policyId:'p1', name:'기본 탐지 정책',     desc:'선정성·도박 기본 탐지',         types:['선정성','도박'],          active:true,  appliedCount:7,  updatedAt:'2026-03-10' },
-    { policyId:'p2', name:'강화 탐지 정책',     desc:'선정성·도박·폭력 강화 탐지',     types:['선정성','도박','폭력'],   active:true,  appliedCount:4,  updatedAt:'2026-03-12' },
-    { policyId:'p3', name:'선정성 전용 정책',   desc:'선정성 콘텐츠만 탐지',           types:['선정성'],                 active:true,  appliedCount:2,  updatedAt:'2026-03-08' },
-    { policyId:'p4', name:'도박 전용 정책',     desc:'도박 관련 콘텐츠만 탐지',        types:['도박'],                   active:false, appliedCount:0,  updatedAt:'2026-02-25' },
-    { policyId:'p5', name:'종합 탐지 정책',     desc:'모든 유해 콘텐츠 탐지',          types:['선정성','도박','폭력','혐오','마약'], active:true, appliedCount:1, updatedAt:'2026-03-15' },
-    { policyId:'p6', name:'경량 모니터링 정책', desc:'저사양 기기를 위한 경량 탐지',   types:['선정성'],                 active:true,  appliedCount:3,  updatedAt:'2026-03-05' },
+    { policyId:'p1', name:'기본 탐지 정책', desc:'선정성·도박 기본 탐지',
+      categories: [
+        { type:'선정성', age:'중학생', severity:'보통' },
+        { type:'도박', age:'중학생', severity:'낮음' }
+      ],
+      active:true, appliedCount:7, updatedAt:'2026-03-10' },
+    { policyId:'p2', name:'강화 탐지 정책', desc:'선정성·도박 강화 탐지',
+      categories: [
+        { type:'선정성', age:'고등학생', severity:'높음' },
+        { type:'도박', age:'고등학생', severity:'보통' }
+      ],
+      active:true, appliedCount:4, updatedAt:'2026-03-12' },
+    { policyId:'p3', name:'선정성 전용 정책', desc:'선정성 콘텐츠만 탐지',
+      categories: [
+        { type:'선정성', age:'초등학생', severity:'낮음' }
+      ],
+      active:true, appliedCount:2, updatedAt:'2026-03-08' },
+    { policyId:'p4', name:'도박 전용 정책', desc:'도박 관련 콘텐츠만 탐지',
+      categories: [
+        { type:'도박', age:'초등학생', severity:'보통' }
+      ],
+      active:false, appliedCount:0, updatedAt:'2026-02-25' },
+    { policyId:'p5', name:'종합 탐지 정책', desc:'선정성·도박 최고 수위 탐지',
+      categories: [
+        { type:'선정성', age:'성인', severity:'매우 높음' },
+        { type:'도박', age:'성인', severity:'매우 높음' }
+      ],
+      active:true, appliedCount:1, updatedAt:'2026-03-15' },
+    { policyId:'p6', name:'경량 모니터링 정책', desc:'저학년을 위한 경량 탐지',
+      categories: [
+        { type:'선정성', age:'초등학생', severity:'낮음' }
+      ],
+      active:true, appliedCount:3, updatedAt:'2026-03-05' },
   ],
   detections: [
     { detId:'e1',  detectedAt:'2026-03-17 14:32', type:'도박',   groupName:'2학년 3반', groupId:'g6',  deviceName:'iPad-015', deviceId:'d15', policy:'기본 탐지 정책',     status:'confirmed', thumb:101 },
     { detId:'e2',  detectedAt:'2026-03-17 13:58', type:'선정성', groupName:'1학년 1반', groupId:'g1',  deviceName:'iPad-001', deviceId:'d1',  policy:'강화 탐지 정책',     status:'confirmed', thumb:202 },
-    { detId:'e3',  detectedAt:'2026-03-17 12:45', type:'폭력',   groupName:'3학년 1반', groupId:'g7',  deviceName:'iPad-013', deviceId:'d13', policy:'강화 탐지 정책',     status:'reviewing', thumb:303 },
+    { detId:'e3',  detectedAt:'2026-03-17 12:45', type:'선정성', groupName:'3학년 1반', groupId:'g7',  deviceName:'iPad-013', deviceId:'d13', policy:'강화 탐지 정책',     status:'reviewing', thumb:303 },
     { detId:'e4',  detectedAt:'2026-03-17 11:20', type:'선정성', groupName:'2학년 2반', groupId:'g5',  deviceName:'iPad-009', deviceId:'d9',  policy:'기본 탐지 정책',     status:'confirmed', thumb:404 },
     { detId:'e5',  detectedAt:'2026-03-17 10:05', type:'도박',   groupName:'3학년 2반', groupId:'g8',  deviceName:'iPad-014', deviceId:'d14', policy:'기본 탐지 정책',     status:'dismissed', thumb:505 },
-    { detId:'e6',  detectedAt:'2026-03-17 09:30', type:'혐오',   groupName:'1학년 2반', groupId:'g2',  deviceName:'iPad-004', deviceId:'d4',  policy:'강화 탐지 정책',     status:'confirmed', thumb:606 },
+    { detId:'e6',  detectedAt:'2026-03-17 09:30', type:'선정성', groupName:'1학년 2반', groupId:'g2',  deviceName:'iPad-004', deviceId:'d4',  policy:'강화 탐지 정책',     status:'confirmed', thumb:606 },
     { detId:'e7',  detectedAt:'2026-03-17 08:55', type:'선정성', groupName:'2학년 1반', groupId:'g4',  deviceName:'iPad-006', deviceId:'d6',  policy:'기본 탐지 정책',     status:'confirmed', thumb:707 },
     { detId:'e8',  detectedAt:'2026-03-16 17:30', type:'도박',   groupName:'2학년 4반', groupId:'g11', deviceName:'iPad-018', deviceId:'d18', policy:'기본 탐지 정책',     status:'confirmed', thumb:808 },
     { detId:'e9',  detectedAt:'2026-03-16 16:10', type:'선정성', groupName:'1학년 3반', groupId:'g3',  deviceName:'iPad-005', deviceId:'d5',  policy:'선정성 전용 정책',   status:'confirmed', thumb:909 },
-    { detId:'e10', detectedAt:'2026-03-16 14:50', type:'폭력',   groupName:'3학년 3반', groupId:'g9',  deviceName:'iPad-016', deviceId:'d16', policy:'강화 탐지 정책',     status:'reviewing', thumb:111 },
+    { detId:'e10', detectedAt:'2026-03-16 14:50', type:'선정성', groupName:'3학년 3반', groupId:'g9',  deviceName:'iPad-016', deviceId:'d16', policy:'강화 탐지 정책',     status:'reviewing', thumb:111 },
     { detId:'e11', detectedAt:'2026-03-16 13:20', type:'선정성', groupName:'2학년 3반', groupId:'g6',  deviceName:'iPad-010', deviceId:'d10', policy:'기본 탐지 정책',     status:'confirmed', thumb:222 },
     { detId:'e12', detectedAt:'2026-03-16 11:45', type:'도박',   groupName:'1학년 4반', groupId:'g10', deviceName:'iPad-017', deviceId:'d17', policy:'기본 탐지 정책',     status:'dismissed', thumb:333 },
-    { detId:'e13', detectedAt:'2026-03-16 10:00', type:'마약',   groupName:'3학년 2반', groupId:'g8',  deviceName:'iPad-014', deviceId:'d14', policy:'종합 탐지 정책',     status:'confirmed', thumb:444 },
+    { detId:'e13', detectedAt:'2026-03-16 10:00', type:'도박',   groupName:'3학년 2반', groupId:'g8',  deviceName:'iPad-014', deviceId:'d14', policy:'종합 탐지 정책',     status:'confirmed', thumb:444 },
     { detId:'e14', detectedAt:'2026-03-15 16:30', type:'선정성', groupName:'2학년 2반', groupId:'g5',  deviceName:'iPad-008', deviceId:'d8',  policy:'강화 탐지 정책',     status:'confirmed', thumb:555 },
     { detId:'e15', detectedAt:'2026-03-15 15:00', type:'도박',   groupName:'1학년 1반', groupId:'g1',  deviceName:'iPad-002', deviceId:'d2',  policy:'기본 탐지 정책',     status:'confirmed', thumb:666 },
-    { detId:'e16', detectedAt:'2026-03-15 13:40', type:'혐오',   groupName:'3학년 1반', groupId:'g7',  deviceName:'iPad-013', deviceId:'d13', policy:'강화 탐지 정책',     status:'dismissed', thumb:777 },
+    { detId:'e16', detectedAt:'2026-03-15 13:40', type:'선정성', groupName:'3학년 1반', groupId:'g7',  deviceName:'iPad-013', deviceId:'d13', policy:'강화 탐지 정책',     status:'dismissed', thumb:777 },
     { detId:'e17', detectedAt:'2026-03-14 17:15', type:'선정성', groupName:'1학년 2반', groupId:'g2',  deviceName:'iPad-003', deviceId:'d3',  policy:'기본 탐지 정책',     status:'confirmed', thumb:888 },
-    { detId:'e18', detectedAt:'2026-03-14 14:30', type:'폭력',   groupName:'2학년 4반', groupId:'g11', deviceName:'iPad-018', deviceId:'d18', policy:'강화 탐지 정책',     status:'confirmed', thumb:999 },
+    { detId:'e18', detectedAt:'2026-03-14 14:30', type:'선정성', groupName:'2학년 4반', groupId:'g11', deviceName:'iPad-018', deviceId:'d18', policy:'강화 탐지 정책',     status:'confirmed', thumb:999 },
     { detId:'e19', detectedAt:'2026-03-14 11:20', type:'도박',   groupName:'2학년 1반', groupId:'g4',  deviceName:'iPad-006', deviceId:'d6',  policy:'기본 탐지 정책',     status:'reviewing', thumb:121 },
     { detId:'e20', detectedAt:'2026-03-13 16:00', type:'선정성', groupName:'3학년 4반', groupId:'g12', deviceName:'iPad-019', deviceId:'d19', policy:'경량 모니터링 정책', status:'confirmed', thumb:242 },
   ],
@@ -95,7 +122,7 @@ const DUMMY = {
     { pauseId:'ps5', grade:2, cls:2, pauseType:'전체', groupId:'g5',  requester:'오선생',  requesterRole:'teacher', startAt:'2026-03-14 09:00', endAt:'2026-03-14 17:00', status:'EXPIRED',   reason:'수학여행',         cancelReason:null },
     { pauseId:'ps6', grade:1, cls:2, pauseType:'선정성', groupId:'g2', requester:'이선생', requesterRole:'teacher', startAt:'2026-03-13 08:30', endAt:'2026-03-13 16:30', status:'CANCELLED', reason:'성교육 수업',       cancelReason:'수업 취소' },
     { pauseId:'ps7', grade:3, cls:2, pauseType:'전체', groupId:'g8',  requester:'장선생',  requesterRole:'teacher', startAt:'2026-03-12 09:00', endAt:'2026-03-12 18:00', status:'EXPIRED',   reason:'학교 행사',        cancelReason:null },
-    { pauseId:'ps8',  grade:2, cls:1, pauseType:'폭력', groupId:'g4',  requester:'오선생',  requesterRole:'teacher', startAt:'2026-03-10 10:00', endAt:'2026-03-10 12:00', status:'EXPIRED',   reason:'역사 수업 영상 시청', cancelReason:null },
+    { pauseId:'ps8',  grade:2, cls:1, pauseType:'선정성', groupId:'g4',  requester:'오선생',  requesterRole:'teacher', startAt:'2026-03-10 10:00', endAt:'2026-03-10 12:00', status:'EXPIRED',   reason:'역사 수업 영상 시청', cancelReason:null },
     { pauseId:'ps9',  grade:1, cls:3, pauseType:'전체', groupId:'g3',  requester:'이선생',  requesterRole:'teacher', startAt:'2026-03-09 09:00', endAt:'2026-03-09 15:00', status:'EXPIRED',   reason:'현장체험학습',       cancelReason:null },
     { pauseId:'ps10', grade:3, cls:3, pauseType:'선정성', groupId:'g9', requester:'장선생', requesterRole:'teacher', startAt:'2026-03-08 10:00', endAt:'2026-03-08 12:00', status:'EXPIRED',   reason:'보건 수업',         cancelReason:null },
     { pauseId:'ps11', grade:1, cls:4, pauseType:'전체', groupId:'g10', requester:'정운영',  requesterRole:'staff',   startAt:'2026-03-07 08:00', endAt:'2026-03-07 18:00', status:'EXPIRED',   reason:'단말기 점검',       cancelReason:null },

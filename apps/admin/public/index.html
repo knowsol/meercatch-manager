@@ -197,7 +197,9 @@
     .mb {
       flex: 1; overflow-y: auto; overflow-x: hidden; padding: 24px;
       scrollbar-width: thin; scrollbar-color: var(--bd2) transparent;
+      display: flex; flex-direction: column;
     }
+    .mb > div { flex: 1; }
     .mb::-webkit-scrollbar { width: 6px; }
     .mb::-webkit-scrollbar-thumb { background: var(--bd2); border-radius: 3px; }
 
