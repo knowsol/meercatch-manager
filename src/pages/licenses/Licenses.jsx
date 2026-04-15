@@ -1,80 +1,162 @@
+import { useState } from 'react';
+import { usePanel } from '../../context/PanelContext';
 import { useToastCtx } from '../../components/layout/Layout';
 import KPI from '../../components/common/KPI';
-import { StatusBadge } from '../../components/common/Badge';
+import Table from '../../components/common/Table';
+import { Badge } from '../../components/common/Badge';
 import { fmtD, fmtDT } from '../../components/common/helpers';
-import { licenses } from '../../data/dummy';
+import { DUMMY } from '../../data/dummy';
+
+function LicenseDetailPanel({ lic, onClose }) {
+  const toast = useToastCtx();
+  const pct = Math.round((lic.usedDevices / lic.devices) * 100);
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <div className="mod-h">
+        <button className="cx" onClick={onClose}>✕</button>
+        <h2>{lic.os} · {lic.detectionType}</h2>
+      </div>
+      <div className="mod-b" style={{ flex: 1, overflowY: 'auto' }}>
+        <div style={{ marginBottom: 16 }}>
+          {lic.status === 'active'
+            ? <Badge cls="bdg-ok">활성</Badge>
+            : <Badge cls="bdg-err">만료</Badge>
+          }
+        </div>
+        <dl className="info-row">
+          <dt>학교명</dt>        <dd>{lic.school}</dd>
+          <dt>라이선스 유형</dt> <dd>{lic.type}</dd>
+          <dt>OS</dt>            <dd>{lic.os}</dd>
+          <dt>탐지 항목</dt>     <dd>{lic.detectionType}</dd>
+          <dt>시리얼 키</dt>     <dd><span style={{ fontFamily: 'monospace', fontSize: 12, color: 'var(--t2)' }}>{lic.serialKey}</span></dd>
+          <dt>수량</dt>          <dd>{lic.devices}대</dd>
+          <dt>사용 단말</dt>     <dd>{lic.usedDevices} / {lic.devices}대 ({pct}%)</dd>
+          <dt>유효 시작</dt>     <dd>{fmtD(lic.validFrom)}</dd>
+          <dt>유효 종료</dt>     <dd>{fmtD(lic.validTo)}</dd>
+          <dt>최근 동기화</dt>   <dd>{fmtDT(lic.lastSync)}</dd>
+        </dl>
+        <div className="mt-12">
+          <div className="progress-bar" style={{ height: 8 }}>
+            <div
+              className={`progress-fill ${pct > 90 ? 'err' : pct > 70 ? 'warn' : 'ok'}`}
+              style={{ width: pct + '%' }}
+            />
+          </div>
+        </div>
+        <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid var(--bd)' }}>
+          <div className="card-title">지원 정보</div>
+          <dl className="info-row">
+            <dt>담당자</dt>   <dd>{lic.manager}</dd>
+            <dt>이메일</dt>   <dd><a href={`mailto:${lic.supportContact}`}>{lic.supportContact}</a></dd>
+            <dt>전화번호</dt> <dd>{lic.supportTel}</dd>
+          </dl>
+        </div>
+        <div className="mt-16">
+          <button className="btn btn-p btn-sm"
+            onClick={() => toast('라이선스 갱신 문의를 접수했습니다.', 'info')}>갱신 문의</button>
+          <button className="btn btn-outline btn-sm" style={{ marginLeft: 8 }}
+            onClick={() => toast('동기화 중...', 'info')}>🔄 동기화</button>
+        </div>
+      </div>
+      <div className="mod-f">
+        <div />
+        <div className="mod-f-right">
+          <button className="btn btn-outline" onClick={onClose}>닫기</button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function Licenses() {
+  const { openPanel, closePanel } = usePanel();
   const toast = useToastCtx();
+  const [search, setSearch] = useState('');
+  const [osFilter, setOsFilter] = useState('');
 
-  const usePct = Math.round((licenses.usedDevices / licenses.devices) * 100);
-  const remaining = licenses.devices - licenses.usedDevices;
-  const pctColor = usePct >= 90 ? 'err' : usePct >= 75 ? 'warn' : 'ok';
+  const lics = DUMMY.licenses;
+  const totDevices = DUMMY.licensesTotal;
+  const totUsed    = DUMMY.licensesUsed;
+  const totPct     = Math.round((totUsed / totDevices) * 100);
+  const remaining  = totDevices - totUsed;
+
+  const filtered = lics.filter(l => {
+    if (osFilter && l.os !== osFilter) return false;
+    const q = search.toLowerCase();
+    if (q && !l.os.toLowerCase().includes(q) && !l.serialKey.toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  const cols = [
+    {
+      key: 'os', label: 'OS', width: '120px',
+      render: v => <span style={{ fontWeight: 600, color: 'var(--t1)' }}>{v}</span>
+    },
+    {
+      key: 'detectionType', label: '탐지 항목', width: '120px',
+      render: v => {
+        const color = v === '선정성' ? '#ef4444' : v === '도박' ? '#f59e0b' : '#3b82f6';
+        return (
+          <span style={{
+            display: 'inline-block', padding: '2px 8px', borderRadius: 4,
+            fontSize: 12, fontWeight: 600,
+            background: color + '18', color
+          }}>{v}</span>
+        );
+      }
+    },
+    { key: 'devices',     label: '수량',     width: '80px',  render: v => `${v}대` },
+    { key: 'usedDevices', label: '사용 단말', width: '100px', render: (v, r) => `${v} / ${r.devices}대` },
+    { key: 'validFrom',   label: '유효 기간',               render: (v, r) => `${fmtD(v)} ~ ${fmtD(r.validTo)}` },
+    {
+      key: 'status', label: '상태', width: '80px',
+      render: v => v === 'active'
+        ? <Badge cls="bdg-ok">활성</Badge>
+        : <Badge cls="bdg-err">만료</Badge>
+    },
+  ];
 
   return (
     <div>
       <div className="ph">
-        <h1 className="ph-title">라이선스</h1>
-      </div>
-
-      <div style={{ maxWidth: 860 }}>
-        <div className="grid-4 mb-24">
-          <KPI label="총 단말" value={licenses.devices} />
-          <KPI label="사용 단말" value={`${usePct}%`} sub={`${licenses.usedDevices}대 사용 중`} color={pctColor} />
-          <KPI label="잔여 슬롯" value={remaining} color="ac" />
-          <KPI label="유효기간" value={fmtD(licenses.validTo)} />
+        <div className="ph-left">
+          <div className="ph-title">라이선스</div>
+          <div className="ph-sub">총 {lics.length}개 라이선스 등록</div>
         </div>
-
-        <div className="grid-2 mb-24">
-          <div className="card">
-            <div className="card-hd"><span className="card-title">라이선스 상세</span></div>
-            <dl className="info-row">
-              <dt>학교명</dt><dd>{licenses.school}</dd>
-              <dt>유형</dt><dd>{licenses.type}</dd>
-              <dt>시리얼키</dt><dd><code style={{ fontFamily: 'monospace', fontSize: 13 }}>{licenses.serialKey}</code></dd>
-              <dt>상태</dt><dd><StatusBadge status={licenses.status} /></dd>
-              <dt>유효시작</dt><dd>{fmtD(licenses.validFrom)}</dd>
-              <dt>유효종료</dt><dd>{fmtD(licenses.validTo)}</dd>
-              <dt>최근동기화</dt><dd>{fmtDT(licenses.lastSync)}</dd>
-            </dl>
-          </div>
-
-          <div className="card">
-            <div className="card-hd"><span className="card-title">단말 사용 현황</span></div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-              <span style={{ fontSize: 14, color: 'var(--text-sub)' }}>사용대수 / 전체</span>
-              <span style={{ fontWeight: 600 }}>{licenses.usedDevices} / {licenses.devices}대</span>
-            </div>
-            <div style={{ background: 'var(--border)', borderRadius: 6, height: 10, overflow: 'hidden', marginBottom: 20 }}>
-              <div
-                style={{
-                  width: `${usePct}%`,
-                  height: '100%',
-                  background: usePct >= 90 ? 'var(--err)' : usePct >= 75 ? 'var(--warn)' : 'var(--ok)',
-                  borderRadius: 6,
-                  transition: 'width 0.3s',
-                }}
-              />
-            </div>
-            <div className="card-hd" style={{ marginBottom: 8 }}><span className="card-title" style={{ fontSize: 13 }}>지원 정보</span></div>
-            <dl className="info-row">
-              <dt>담당자</dt><dd>{licenses.manager}</dd>
-              <dt>이메일</dt>
-              <dd>
-                <a href={`mailto:${licenses.supportContact}`} style={{ color: 'var(--primary)' }}>
-                  {licenses.supportContact}
-                </a>
-              </dd>
-              <dt>전화번호</dt><dd>{licenses.supportTel}</dd>
-            </dl>
-            <div className="sep" />
-            <div className="fb">
-              <button className="btn btn-p btn-sm" onClick={() => toast('갱신 문의 이메일이 전송되었습니다.', 'success')}>갱신 문의</button>
-              <button className="btn btn-outline btn-sm" onClick={() => toast('라이선스 동기화 완료', 'success')}>동기화</button>
-            </div>
-          </div>
+        <div className="ph-actions">
+          <button className="btn btn-p"
+            onClick={() => toast('라이선스 등록은 관리자에게 문의하세요.', 'info')}>
+            + 라이선스 등록
+          </button>
         </div>
       </div>
+
+      <div className="grid-4 section-gap">
+        <KPI label="총 수량"  value={totDevices} sub="등록된 전체 라이선스" />
+        <KPI label="사용 중"  value={totUsed}    sub={`${totPct}% 사용`}
+          color={totPct > 90 ? 'err' : totPct > 70 ? 'warn' : 'ok'} />
+        <KPI label="잔여"     value={remaining}  sub="추가 등록 가능" color="ac" />
+        <KPI label="등록 수"  value={lics.length} sub="라이선스 항목" />
+      </div>
+
+      <div className="fb">
+        <input className="inp search" placeholder="OS 또는 시리얼 키 검색..." type="text"
+          value={search} onChange={e => setSearch(e.target.value)} />
+        <select className="inp" style={{ maxWidth: 140 }} value={osFilter} onChange={e => setOsFilter(e.target.value)}>
+          <option value="">전체 OS</option>
+          {['Android', 'iOS', 'Windows', 'ChromeBook', 'WhaleBook'].map(o => (
+            <option key={o} value={o}>{o}</option>
+          ))}
+        </select>
+      </div>
+
+      <Table
+        cols={cols}
+        rows={filtered}
+        onRowClick={row => openPanel(
+          <LicenseDetailPanel lic={row} onClose={closePanel} />
+        )}
+      />
     </div>
   );
 }

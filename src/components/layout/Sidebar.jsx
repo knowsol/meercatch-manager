@@ -1,30 +1,77 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { currentUser } from '../../data/dummy';
+import { useAuth } from '../../context/AuthContext';
 
+const IC = {
+  dashboard:    '<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>',
+  groups:       '<path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
+  devices:      '<rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18.01"/>',
+  policies:     '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+  pauses:       '<circle cx="12" cy="12" r="10"/><line x1="10" y1="15" x2="10" y2="9"/><line x1="14" y1="15" x2="14" y2="9"/>',
+  detections:   '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',
+  users:        '<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>',
+  licenses:     '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>',
+  notifications:'<path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/>',
+  account:      '<path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+  components:   '<rect x="3" y="3" width="7" height="4" rx="1"/><rect x="14" y="3" width="7" height="4" rx="1"/><rect x="3" y="11" width="7" height="10" rx="1"/><rect x="14" y="11" width="7" height="4" rx="1"/><rect x="14" y="19" width="7" height="4" rx="1"/>',
+};
+
+function SvgIcon({ paths }) {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+      dangerouslySetInnerHTML={{ __html: paths }}
+    />
+  );
+}
+
+// m: 매니저관리, d: 직접관리
 const MENU = [
   { section: '메인' },
-  { id: 'dashboard',       icon: '📊', label: '대시보드',    path: '/' },
+  { id: 'dashboard',     icon: 'dashboard',     label: '대시보드',    path: '/',              roles: ['m', 'd'] },
   { section: '운영 관리' },
-  { id: 'groups',          icon: '🏫', label: '그룹 관리',   path: '/groups' },
-  { id: 'devices',         icon: '📱', label: '단말기 관리', path: '/devices' },
-  { id: 'policies',        icon: '🛡️', label: '정책 관리',   path: '/policies' },
-  { id: 'pauses',          icon: '⏸️', label: '탐지중단',    path: '/pauses' },
+  { id: 'groups',        icon: 'groups',        label: '그룹 관리',   path: '/groups',        roles: ['m'] },
+  { id: 'devices',       icon: 'devices',       label: '단말기 관리', path: '/devices',       roles: ['m', 'd'] },
+  { id: 'policies',      icon: 'policies',      label: '정책 관리',   path: '/policies',      roles: ['m'] },
+  { id: 'pauses',        icon: 'pauses',        label: '탐지중단',    path: '/pauses',        roles: ['m'] },
   { section: '모니터링' },
-  { id: 'detections',      icon: '🔍', label: '탐지 현황',   path: '/detections' },
-  { id: 'pauses-history',  icon: '📜', label: '중단 이력',   path: '/pauses-history' },
-  { section: '사용자 관리' },
-  { id: 'users',           icon: '👥', label: '사용자 관리', path: '/users' },
+  { id: 'detections',    icon: 'detections',    label: '탐지 현황',   path: '/detections',    roles: ['m', 'd'] },
+  { section: '직원 관리' },
+  { id: 'users',         icon: 'users',         label: '직원 관리',   path: '/users',         roles: ['m', 'd'] },
   { section: '설정' },
-  { id: 'licenses',        icon: '🔑', label: '라이선스',    path: '/licenses' },
-  { id: 'notifications',   icon: '🔔', label: '알림 설정',   path: '/notifications' },
-  { id: 'account',         icon: '👤', label: '내 계정',     path: '/account' },
+  { id: 'licenses',      icon: 'licenses',      label: '라이선스',    path: '/licenses',      roles: ['m', 'd'] },
+  { id: 'notifications', icon: 'notifications', label: '알림 설정',   path: '/notifications', roles: ['m'] },
+  { id: 'account',       icon: 'account',       label: '내 계정',     path: '/account',       roles: ['m', 'd'] },
+  { id: 'components',    icon: 'components',    label: '컴포넌트',    path: '/components',    roles: ['m', 'd'] },
 ];
+
+// role: 'manager' → 'm', 'direct' → 'd'
+function filterMenu(menu, role) {
+  const r = role === 'direct' ? 'd' : 'm';
+  const result = [];
+  for (let i = 0; i < menu.length; i++) {
+    const item = menu[i];
+    if (item.section) {
+      // 이 섹션 이후 보이는 메뉴가 하나라도 있을 때만 표시
+      const hasVisible = menu.slice(i + 1).some(
+        x => !x.section && x.roles.includes(r)
+          && !menu.slice(i + 1, menu.indexOf(x)).some(y => y.section)
+      );
+      if (hasVisible) result.push(item);
+    } else {
+      if (item.roles.includes(r)) result.push(item);
+    }
+  }
+  return result;
+}
 
 export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { role } = useAuth();
+
+  const visibleMenu = filterMenu(MENU, role);
 
   return (
     <div className={`sb${collapsed ? ' collapsed' : ''}`}>
@@ -35,29 +82,15 @@ export default function Sidebar() {
         </div>
       </div>
 
-      <div className="sb-u">
-        <div className="sb-u-info">
-          <div className="sb-u-avatar">{currentUser.name.charAt(0)}</div>
-          <div className="sb-u-detail">
-            <div className="sb-u-name">{currentUser.name}</div>
-            <div className="sb-u-role">관리자</div>
-          </div>
-        </div>
-        <div className="sb-u-actions">
-          <button className="sb-u-btn" onClick={() => navigate('/account')}>내 계정</button>
-          <button className="sb-u-btn">로그아웃</button>
-        </div>
-      </div>
-
       <nav className="sb-nav">
-        {MENU.map((item, i) => {
+        {visibleMenu.map((item, i) => {
           if (item.section) return <div key={i} className="ns">{item.section}</div>;
           const isActive = item.path === '/'
             ? location.pathname === '/'
             : location.pathname.startsWith(item.path);
           return (
             <div key={item.id} className={`ni${isActive ? ' a' : ''}`} onClick={() => navigate(item.path)}>
-              <span className="ic">{item.icon}</span>
+              <span className="ic"><SvgIcon paths={IC[item.icon]} /></span>
               <span className="ni-txt">{item.label}</span>
             </div>
           );

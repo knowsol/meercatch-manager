@@ -2,131 +2,165 @@ import { useState } from 'react';
 import { usePanel } from '../../context/PanelContext';
 import { useToastCtx } from '../../components/layout/Layout';
 import Table from '../../components/common/Table';
-import { StatusBadge } from '../../components/common/Badge';
-import SelectModal from '../../components/common/SelectModal';
-import { fmtDT } from '../../components/common/helpers';
-import { groups, devices, policies, pauses } from '../../data/dummy';
+import { StatusBadge, Badge } from '../../components/common/Badge';
+import { fmtD, fmtDT } from '../../components/common/helpers';
+import { DUMMY } from '../../data/dummy';
 
-const TABS = ['기본정보', '단말목록', '적용정책', '탐지중단현황'];
+function policyTypeBadge(policy) {
+  return policy.type === '선정성'
+    ? <Badge cls="bdg-err">{policy.type}</Badge>
+    : <Badge cls="bdg-warn">{policy.type}</Badge>;
+}
 
 export default function GroupDetailPanel({ groupId }) {
   const { closePanel } = usePanel();
   const toast = useToastCtx();
-  const [tab, setTab] = useState(0);
-  const [showModal, setShowModal] = useState(false);
+  const [activeTab, setActiveTab] = useState('info');
+  const [isEditing, setIsEditing] = useState(false);
+  const [name, setName] = useState('');
+  const [desc, setDesc] = useState('');
 
-  const group = groups.find(g => g.groupId === groupId) || {};
-  const [name, setName] = useState(group.name || '');
-  const [desc, setDesc] = useState(group.desc || '');
+  const group = DUMMY.groups.find(g => g.groupId === groupId) || DUMMY.groups[0];
+  const school = DUMMY.schools.find(s => s.schoolId === group.schoolId);
+  const schoolName = school ? school.name : '—';
 
-  const groupDevices = devices.filter(d => d.groupId === groupId);
-  const groupPauses = pauses.filter(p => p.groupName === group.name);
-  const appliedPolicies = policies.slice(0, group.policyCount || 0);
-  const availablePolicies = policies.filter(p => !appliedPolicies.find(ap => ap.policyId === p.policyId));
+  const devices = DUMMY.devices.filter(d => d.groupId === groupId);
+  const appliedPolicies = DUMMY.policies.filter(p => p.active).slice(0, group.policyCount);
+  const pauses = DUMMY.pauses.filter(p => p.groupId === groupId);
 
-  const deviceCols = [
-    { key: 'name', label: '단말 이름' },
-    { key: 'identifier', label: '식별자' },
-    { key: 'status', label: '상태', render: r => <StatusBadge status={r.status} /> },
-    { key: 'policyStatus', label: '정책 상태', render: r => <StatusBadge status={r.policyStatus} /> },
-    { key: 'lastContact', label: '최근 접속', render: r => fmtDT(r.lastContact) },
+  const tabs = [
+    { id: 'info',     label: '기본정보' },
+    { id: 'devices',  label: `단말목록 (${group.deviceCount})` },
+    { id: 'policies', label: '적용정책' },
+    { id: 'pauses',   label: '탐지중단현황' },
   ];
 
-  const policyCols = [
-    { key: 'name', label: '정책명' },
-    { key: 'desc', label: '설명' },
-    { key: 'appliedCount', label: '적용 그룹 수' },
-    {
-      key: 'action', label: '',
-      render: r => (
-        <button className="btn btn-xs btn-d" onClick={e => { e.stopPropagation(); toast(`${r.name} 정책 해제됨`, 'success'); }}>해제</button>
-      )
-    },
+  const devCols = [
+    { key: '_no',        label: 'No.', width: '48px' },
+    { key: 'name',       label: '단말 이름' },
+    { key: 'identifier', label: '식별자' },
+    { key: 'status',     label: '상태', width: '80px', render: v => <StatusBadge status={v} /> },
+    { key: 'lastContact',label: '최근 접속', render: v => fmtDT(v) },
+  ];
+
+  const polCols = [
+    { key: 'name',   label: '정책 이름' },
+    { key: 'type',   label: '탐지 유형', width: '90px', render: (_, r) => policyTypeBadge(r) },
+    { key: 'active', label: '상태', width: '80px', render: v => <StatusBadge status={v ? 'active' : 'inactive'} /> },
   ];
 
   const pauseCols = [
     { key: 'pauseType', label: '유형' },
     { key: 'requester', label: '요청자' },
-    { key: 'startAt', label: '시작', render: r => fmtDT(r.startAt) },
-    { key: 'endAt', label: '종료', render: r => fmtDT(r.endAt) },
-    { key: 'status', label: '상태', render: r => <StatusBadge status={r.status} /> },
+    { key: 'startAt',   label: '시작', render: v => fmtDT(v) },
+    { key: 'endAt',     label: '종료', render: v => fmtDT(v) },
+    { key: 'status',    label: '상태', width: '90px', render: v => {
+      if (v === 'ACTIVE') return <Badge cls="bdg-warn">진행중</Badge>;
+      if (v === 'EXPIRED') return <Badge cls="bdg-muted">만료</Badge>;
+      return <Badge cls="bdg-muted">취소</Badge>;
+    }},
   ];
 
-  const renderBody = () => {
-    if (tab === 0) return (
-      <div>
-        <div className="fg">
-          <label>그룹명</label>
-          <input className="inp" value={name} onChange={e => setName(e.target.value)} />
+  function renderFooter() {
+    if (activeTab === 'info') {
+      if (isEditing) return (
+        <div className="mod-f">
+          <div><button className="btn btn-outline" onClick={closePanel}>닫기</button></div>
+          <div className="mod-f-right">
+            <button className="btn btn-outline" onClick={() => setIsEditing(false)}>취소</button>
+            <button className="btn btn-p" onClick={() => { toast('저장되었습니다.'); setIsEditing(false); }}>저장</button>
+          </div>
         </div>
-        <div className="fg">
-          <label>설명</label>
-          <textarea className="inp" rows={3} value={desc} onChange={e => setDesc(e.target.value)} placeholder="설명" />
+      );
+      return (
+        <div className="mod-f">
+          <div><button className="btn btn-outline" onClick={closePanel}>닫기</button></div>
+          <div className="mod-f-right">
+            <button className="btn btn-outline" onClick={() => { setName(group.name); setDesc(''); setIsEditing(true); }}>수정</button>
+            <button className="btn btn-d" onClick={() => { if (window.confirm('이 그룹을 삭제하시겠습니까?')) { toast('삭제되었습니다.', 'warn'); closePanel(); } }}>삭제</button>
+          </div>
         </div>
-        <div className="fg">
-          <label>학년</label>
-          <input className="inp" value={`${group.grade}학년`} disabled />
-        </div>
-        <div className="fg">
-          <label>반</label>
-          <input className="inp" value={`${group.cls}반`} disabled />
-        </div>
-      </div>
-    );
-    if (tab === 1) return <Table cols={deviceCols} rows={groupDevices} />;
-    if (tab === 2) return (
-      <>
-        <Table cols={policyCols} rows={appliedPolicies} />
-        {showModal && (
-          <SelectModal
-            title="정책 추가"
-            items={availablePolicies}
-            getLabel={p => ({ name: p.name, sub: p.desc })}
-            onConfirm={selected => { toast(`${selected.length}개 정책 추가됨`, 'success'); }}
-            onClose={() => setShowModal(false)}
-          />
-        )}
-      </>
-    );
-    if (tab === 3) return <Table cols={pauseCols} rows={groupPauses} />;
-  };
-
-  const renderFooter = () => {
-    if (tab === 0) return (
-      <div className="mod-f-row">
+      );
+    }
+    if (activeTab === 'policies') return (
+      <div className="mod-f">
         <div><button className="btn btn-outline" onClick={closePanel}>닫기</button></div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button className="btn btn-d" onClick={() => { toast('그룹이 삭제되었습니다.', 'success'); closePanel(); }}>삭제</button>
-          <button className="btn btn-p" onClick={() => { toast('저장되었습니다.', 'success'); }}>저장</button>
+        <div className="mod-f-right">
+          <button className="btn btn-p" onClick={() => toast('정책 추가 기능', 'info')}>정책 추가</button>
         </div>
-      </div>
-    );
-    if (tab === 2) return (
-      <div className="mod-f-row">
-        <div><button className="btn btn-outline" onClick={closePanel}>닫기</button></div>
-        <div><button className="btn btn-p" onClick={() => setShowModal(true)}>정책 추가</button></div>
       </div>
     );
     return (
-      <div className="mod-f-row">
+      <div className="mod-f">
         <div><button className="btn btn-outline" onClick={closePanel}>닫기</button></div>
+        <div />
       </div>
     );
-  };
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <div className="mod-h">
         <button className="cx" onClick={closePanel}>✕</button>
-        <h2>{group.name || '그룹 상세'}</h2>
+        <h2>{schoolName}</h2>
       </div>
-      <div className="tabs mb-0">
-        {TABS.map((t, i) => (
-          <button key={t} className={`tab${tab === i ? ' active' : ''}`} onClick={() => setTab(i)}>{t}</button>
-        ))}
+      <div className="mod-b" style={{ flex: 1, overflowY: 'auto' }}>
+        <div className="tabs">
+          {tabs.map(t => (
+            <div key={t.id} className={`tab${activeTab === t.id ? ' a' : ''}`}
+              onClick={() => { setActiveTab(t.id); setIsEditing(false); }}>
+              {t.label}
+            </div>
+          ))}
+        </div>
+
+        {activeTab === 'info' && (
+          <div style={{ marginTop: 16 }}>
+            {isEditing ? (
+              <>
+                <div className="fg"><label>학교</label>
+                  <select className="inp" defaultValue={group.schoolId}>
+                    {DUMMY.schools.map(s => <option key={s.schoolId} value={s.schoolId}>{s.name}</option>)}
+                  </select>
+                </div>
+                <div className="fg"><label>학교유형</label>
+                  <div style={{ padding: '6px 0', color: '#64748b', fontSize: 14 }}>{school ? school.type : '—'}</div>
+                </div>
+                <div className="fg"><label>그룹 이름 <span className="req">*</span></label>
+                  <input className="inp" type="text" value={name} onChange={e => setName(e.target.value)} />
+                </div>
+                <div className="fg"><label>설명</label>
+                  <textarea className="inp" style={{ minHeight: 80 }} value={desc} onChange={e => setDesc(e.target.value)} />
+                </div>
+              </>
+            ) : (
+              <>
+                <dl className="info-row">
+                  <dt>학교</dt>       <dd>{schoolName}</dd>
+                  <dt>학교유형</dt>   <dd>{school ? school.type : '—'}</dd>
+                  <dt>그룹 이름</dt>  <dd>{group.name}</dd>
+                  <dt>상태</dt>       <dd><StatusBadge status={group.status} /></dd>
+                  <dt>탐지 중단</dt>  <dd>{group.pauseStatus === 'paused' ? <Badge cls="bdg-warn">중단중</Badge> : <Badge cls="bdg-ok">정상</Badge>}</dd>
+                  <dt>최근 수정</dt>  <dd>{fmtD(group.updatedAt)}</dd>
+                </dl>
+              </>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'devices' && (
+          <Table cols={devCols} rows={devices.map((d, i) => ({ ...d, _no: i + 1 }))} />
+        )}
+
+        {activeTab === 'policies' && (
+          <Table cols={polCols} rows={appliedPolicies} />
+        )}
+
+        {activeTab === 'pauses' && (
+          <Table cols={pauseCols} rows={pauses} />
+        )}
       </div>
-      <div className="mod-b">{renderBody()}</div>
-      <div className="mod-f">{renderFooter()}</div>
+      {renderFooter()}
     </div>
   );
 }

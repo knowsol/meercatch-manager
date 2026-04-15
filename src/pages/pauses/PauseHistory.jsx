@@ -1,60 +1,73 @@
 import { useState } from 'react';
 import Table from '../../components/common/Table';
-import { StatusBadge } from '../../components/common/Badge';
+import { Badge } from '../../components/common/Badge';
 import { fmtDT } from '../../components/common/helpers';
-import { pauses } from '../../data/dummy';
+import { DUMMY } from '../../data/dummy';
 
 export default function PauseHistory() {
   const [search, setSearch] = useState('');
-  const [grade, setGrade] = useState('');
+  const [schoolType, setSchoolType] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
 
-  const filtered = pauses.filter(p => {
-    const matchSearch = !search || p.groupName.includes(search) || p.requester.includes(search);
-    const matchGrade = !grade || String(p.grade) === grade;
-    const matchStatus = !statusFilter || p.status === statusFilter;
-    return matchSearch && matchGrade && matchStatus;
+  const filtered = DUMMY.pauses.filter(p => {
+    const q = search.toLowerCase();
+    if (q && !p.requester.toLowerCase().includes(q)) return false;
+    if (schoolType) {
+      const grp = DUMMY.groups.find(g => g.groupId === p.groupId);
+      const sch = grp ? DUMMY.schools.find(s => s.schoolId === grp.schoolId) : null;
+      if (!sch || sch.type !== schoolType) return false;
+    }
+    if (statusFilter && p.status !== statusFilter) return false;
+    return true;
   });
 
   const cols = [
-    { key: 'groupName', label: '학년/반' },
+    {
+      key: 'groupId', label: '학교', render: v => {
+        const grp = DUMMY.groups.find(g => g.groupId === v);
+        const sch = grp ? DUMMY.schools.find(s => s.schoolId === grp.schoolId) : null;
+        return sch ? sch.name : '—';
+      }
+    },
     { key: 'pauseType', label: '유형' },
     { key: 'requester', label: '요청자' },
-    { key: 'startAt', label: '시작', render: r => fmtDT(r.startAt) },
-    { key: 'endAt', label: '종료', render: r => fmtDT(r.endAt) },
-    { key: 'status', label: '상태', render: r => <StatusBadge status={r.status} /> },
+    { key: 'startAt', label: '시작', render: v => fmtDT(v) },
+    { key: 'endAt', label: '종료', render: v => fmtDT(v) },
+    { key: 'reason', label: '사유' },
+    { key: 'cancelReason', label: '취소사유', render: v => v || '—' },
+    {
+      key: 'status', label: '상태', width: 90, render: v => {
+        if (v === 'ACTIVE') return <Badge cls="bdg-warn">진행중</Badge>;
+        if (v === 'EXPIRED') return <Badge cls="bdg-muted">만료</Badge>;
+        return <Badge cls="bdg-muted">취소</Badge>;
+      }
+    },
   ];
 
   return (
-    <div>
-      <div className="ph">
-        <h1 className="ph-title">중단 이력</h1>
+    <div className="pg">
+      <div className="pg-h">
+        <h1>탐지 중단 이력</h1>
       </div>
 
-      <div className="fb mb-16">
-        <input
-          className="inp"
-          placeholder="그룹 / 요청자 검색..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-        />
-        <select className="inp" value={grade} onChange={e => setGrade(e.target.value)}>
-          <option value="">전체 학년</option>
-          <option value="1">1학년</option>
-          <option value="2">2학년</option>
-          <option value="3">3학년</option>
+      <div className="fb">
+        <input className="inp search" placeholder="요청자 검색..." type="text"
+          value={search} onChange={e => setSearch(e.target.value)} />
+        <select className="inp" style={{ maxWidth: 140 }} value={schoolType} onChange={e => setSchoolType(e.target.value)}>
+          <option value="">전체 학교유형</option>
+          <option value="중학교">중학교</option>
+          <option value="고등학교">고등학교</option>
+          <option value="초등학교">초등학교</option>
         </select>
-        <select className="inp" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
+        <select className="inp" style={{ maxWidth: 120 }} value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
           <option value="">전체 상태</option>
-          <option value="ACTIVE">활성</option>
+          <option value="ACTIVE">진행중</option>
           <option value="EXPIRED">만료</option>
           <option value="CANCELLED">취소</option>
         </select>
       </div>
 
-      <div className="card">
-        <Table cols={cols} rows={filtered} />
-      </div>
+      <Table cols={cols} rows={filtered} />
     </div>
   );
 }

@@ -2,84 +2,81 @@ import { useState } from 'react';
 import { usePanel } from '../../context/PanelContext';
 import KPI from '../../components/common/KPI';
 import Table from '../../components/common/Table';
-import { StatusBadge } from '../../components/common/Badge';
-import { groups, pauses } from '../../data/dummy';
+import { StatusBadge, Badge } from '../../components/common/Badge';
+import { fmtD } from '../../components/common/helpers';
+import { DUMMY } from '../../data/dummy';
 import GroupNewPanel from './GroupNewPanel';
 import GroupDetailPanel from './GroupDetailPanel';
 
 export default function GroupList() {
   const { openPanel } = usePanel();
   const [search, setSearch] = useState('');
-  const [grade, setGrade] = useState('');
+  const [schoolType, setSchoolType] = useState('');
   const [status, setStatus] = useState('');
 
-  const activeCount = groups.filter(g => g.status === 'active').length;
-  const pausedCount = groups.filter(g => g.pauseStatus === 'paused').length;
-  const totalDevices = groups.reduce((s, g) => s + g.deviceCount, 0);
+  const active = DUMMY.groups.filter(g => g.status === 'active').length;
+  const paused = DUMMY.groups.filter(g => g.pauseStatus === 'paused').length;
+  const totalDevices = DUMMY.groups.reduce((a, g) => a + g.deviceCount, 0);
+  const schoolTypes = [...new Set(DUMMY.schools.map(s => s.type))];
 
-  const filtered = groups.filter(g => {
-    const matchSearch = !search || g.name.includes(search);
-    const matchGrade = !grade || String(g.grade) === grade;
-    const matchStatus = !status || g.status === status;
-    return matchSearch && matchGrade && matchStatus;
+  const filtered = DUMMY.groups.filter(g => {
+    const q = search.toLowerCase();
+    if (q && !g.name.toLowerCase().includes(q)) return false;
+    if (status && g.status !== status) return false;
+    if (schoolType) {
+      const sch = DUMMY.schools.find(sc => sc.schoolId === g.schoolId);
+      if (!sch || sch.type !== schoolType) return false;
+    }
+    return true;
   });
 
   const cols = [
-    { key: 'name', label: '그룹명' },
-    { key: 'grade', label: '학년', render: r => `${r.grade}학년` },
-    { key: 'cls', label: '반', render: r => `${r.cls}반` },
-    { key: 'deviceCount', label: '단말 수' },
-    { key: 'policyCount', label: '적용 정책' },
-    { key: 'pauseStatus', label: '탐지 중단', render: r => <StatusBadge status={r.pauseStatus} /> },
-    { key: 'status', label: '상태', render: r => <StatusBadge status={r.status} /> },
+    { key: '_no',        label: 'No.',      width: '50px' },
+    { key: '_schoolName', label: '학교',      render: (_, r) => { const s = DUMMY.schools.find(sc => sc.schoolId === r.schoolId); return s ? s.name : '—'; } },
+    { key: '_schoolType', label: '학교유형',  width: '90px', render: (_, r) => { const s = DUMMY.schools.find(sc => sc.schoolId === r.schoolId); return s ? <Badge cls="bdg-ac">{s.type}</Badge> : '—'; } },
+    { key: 'deviceCount',label: '단말 수',   width: '80px',  render: v => v + '대' },
+    { key: 'policyCount',label: '적용 정책', width: '80px',  render: v => v + '개' },
+    { key: 'pauseStatus',label: '탐지 중단', width: '100px', render: v => v === 'paused' ? <Badge cls="bdg-warn">중단중</Badge> : <Badge cls="bdg-ok">정상</Badge> },
+    { key: 'status',     label: '상태',      width: '80px',  render: v => <StatusBadge status={v} /> },
+    { key: 'updatedAt',  label: '최근 수정', render: v => fmtD(v) },
   ];
+
+  const rows = filtered.map((r, i) => ({ ...r, _no: i + 1 }));
 
   return (
     <div>
       <div className="ph">
-        <div>
-          <h1 className="ph-title">그룹 관리</h1>
-          <p className="ph-sub">그룹을 생성하고 단말과 정책을 관리합니다.</p>
+        <div className="ph-left">
+          <div className="ph-title">그룹 목록</div>
+          <div className="ph-sub">총 {DUMMY.groups.length}개 그룹</div>
         </div>
         <div className="ph-actions">
-          <button className="btn btn-p" onClick={() => openPanel(<GroupNewPanel />)}>➕ 그룹 생성</button>
+          <button className="btn btn-p" onClick={() => openPanel(<GroupNewPanel />)}>+ 그룹 생성</button>
         </div>
       </div>
 
-      <div className="grid-4 mb-24">
-        <KPI label="전체" value={groups.length} />
-        <KPI label="활성" value={activeCount} color="ok" />
-        <KPI label="탐지중단" value={pausedCount} color="warn" />
-        <KPI label="총 단말" value={totalDevices} color="ac" />
+      <div className="grid-4 section-gap">
+        <KPI label="전체 그룹" value={DUMMY.groups.length} />
+        <KPI label="활성 그룹" value={active} color="ok" />
+        <KPI label="탐지 중단" value={paused} sub="현재 중단 중인 그룹" color="warn" />
+        <KPI label="총 단말"   value={totalDevices} sub="등록된 총 단말 수" color="ac" />
       </div>
 
-      <div className="fb mb-16">
-        <input
-          className="inp"
-          placeholder="그룹/학년 검색..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-        />
-        <select className="inp" value={grade} onChange={e => setGrade(e.target.value)}>
-          <option value="">전체</option>
-          <option value="1">1학년</option>
-          <option value="2">2학년</option>
-          <option value="3">3학년</option>
+      <div className="fb">
+        <input className="inp search" placeholder="그룹 이름 검색..." type="text"
+          value={search} onChange={e => setSearch(e.target.value)} />
+        <select className="inp" style={{ maxWidth: 130 }} value={schoolType} onChange={e => setSchoolType(e.target.value)}>
+          <option value="">전체 학교유형</option>
+          {schoolTypes.map(t => <option key={t} value={t}>{t}</option>)}
         </select>
-        <select className="inp" value={status} onChange={e => setStatus(e.target.value)}>
+        <select className="inp" style={{ maxWidth: 120 }} value={status} onChange={e => setStatus(e.target.value)}>
           <option value="">전체 상태</option>
-          <option value="active">active</option>
-          <option value="inactive">inactive</option>
+          <option value="active">활성</option>
+          <option value="inactive">비활성</option>
         </select>
       </div>
 
-      <div className="card">
-        <Table
-          cols={cols}
-          rows={filtered}
-          onRowClick={row => openPanel(<GroupDetailPanel groupId={row.groupId} />)}
-        />
-      </div>
+      <Table cols={cols} rows={rows} onRowClick={row => openPanel(<GroupDetailPanel groupId={row.groupId} />)} />
     </div>
   );
 }
