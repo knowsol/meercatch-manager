@@ -82,7 +82,9 @@ export default function Sidebar({ mobileOpen, onMobileClose }) {
     <div className={`sb${collapsed ? ' collapsed' : ''}${mobileOpen ? ' mobile-open' : ''}`}>
       <div className="sb-h" onClick={() => handleNavigate('/')} style={{ cursor: 'pointer' }}>
         <div className="sb-logo-row">
-          <div className="sb-logo-icon">M</div>
+          <div className="sb-logo-icon">
+            <img src="/logo.png" alt="Meercatch" style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 6, boxSizing: 'border-box' }} />
+          </div>
           <div className="sb-logo-text">Meercatch Manager</div>
         </div>
       </div>

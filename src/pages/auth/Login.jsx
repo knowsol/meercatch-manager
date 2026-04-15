@@ -134,14 +134,14 @@ export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
   const [loginRole, setLoginRole] = useState('direct');
-  const [id, setId] = useState('');
-  const [pw, setPw] = useState('');
+  const [id, setId] = useState('admin');
+  const [pw, setPw] = useState('admin1234');
   const [errors, setErrors] = useState({});
 
   const handleRoleChange = (role) => {
     setLoginRole(role);
-    setId('');
-    setPw('');
+    setId('admin');
+    setPw('admin1234');
     setErrors({});
   };
 
@@ -176,18 +176,20 @@ export default function Login() {
             onClick={handleLogin}
             style={{
               width: '100%', padding: 12, marginTop: 2,
-              background: '#3b82f6', color: '#fff',
+              background: 'var(--ac)', color: '#fff',
               border: 'none', borderRadius: 10,
               fontSize: 15, fontWeight: 600, cursor: 'pointer',
               transition: 'background .15s',
             }}
-            onMouseEnter={e => e.currentTarget.style.background = '#2563eb'}
-            onMouseLeave={e => e.currentTarget.style.background = '#3b82f6'}
+            onMouseEnter={e => e.currentTarget.style.filter = 'brightness(0.88)'}
+            onMouseLeave={e => e.currentTarget.style.filter = 'none'}
           >
             로그인
           </button>
         </div>
-        <HintBox loginRole={loginRole} />
+        <div style={{ textAlign: 'center', marginTop: 20, fontSize: 12, color: '#94a3b8' }}>
+          © {new Date().getFullYear()} Meercat.ch
+        </div>
       </div>
     </div>
   );
