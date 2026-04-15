@@ -65,7 +65,7 @@ function filterMenu(menu, role) {
   return result;
 }
 
-export default function Sidebar() {
+export default function Sidebar({ mobileOpen, onMobileClose }) {
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -73,9 +73,14 @@ export default function Sidebar() {
 
   const visibleMenu = filterMenu(MENU, role);
 
+  const handleNavigate = (path) => {
+    navigate(path);
+    onMobileClose?.();
+  };
+
   return (
-    <div className={`sb${collapsed ? ' collapsed' : ''}`}>
-      <div className="sb-h">
+    <div className={`sb${collapsed ? ' collapsed' : ''}${mobileOpen ? ' mobile-open' : ''}`}>
+      <div className="sb-h" onClick={() => handleNavigate('/')} style={{ cursor: 'pointer' }}>
         <div className="sb-logo-row">
           <div className="sb-logo-icon">M</div>
           <div className="sb-logo-text">Meercatch Manager</div>
@@ -89,7 +94,7 @@ export default function Sidebar() {
             ? location.pathname === '/'
             : location.pathname.startsWith(item.path);
           return (
-            <div key={item.id} className={`ni${isActive ? ' a' : ''}`} onClick={() => navigate(item.path)}>
+            <div key={item.id} className={`ni${isActive ? ' a' : ''}`} onClick={() => handleNavigate(item.path)}>
               <span className="ic"><SvgIcon paths={IC[item.icon]} /></span>
               <span className="ni-txt">{item.label}</span>
             </div>

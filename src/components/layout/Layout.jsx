@@ -80,6 +80,7 @@ export default function Layout({ children }) {
   const navigate = useNavigate();
   const [showDropdown, setShowDropdown] = useState(false);
   const [bannerDismissed, setBannerDismissed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const title = PAGE_TITLES[location.pathname] || '대시보드';
   const initial = userName ? userName.charAt(0) : 'a';
@@ -87,10 +88,14 @@ export default function Layout({ children }) {
   return (
     <ToastCtx.Provider value={toast}>
       <div className="app">
-        <Sidebar />
+        {mobileOpen && <div className="sb-overlay" onClick={() => setMobileOpen(false)} />}
+        <Sidebar mobileOpen={mobileOpen} onMobileClose={() => setMobileOpen(false)} />
         <div className="mn">
           {/* Header */}
           <div className="mh">
+            <button className="mh-hamburger" onClick={() => setMobileOpen(o => !o)} aria-label="메뉴 열기">
+              <span /><span /><span />
+            </button>
             <div className="mh-title">{title}</div>
             <div className="mh-actions">
               {role !== 'direct' && (
