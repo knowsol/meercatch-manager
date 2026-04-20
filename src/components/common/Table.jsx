@@ -1,3 +1,4 @@
+'use client'
 export default function Table({ cols, rows, onRowClick }) {
   if (!rows || rows.length === 0) {
     return (

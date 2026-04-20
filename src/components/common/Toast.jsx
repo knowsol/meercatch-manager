@@ -1,3 +1,4 @@
+'use client'
 export default function ToastContainer({ toasts }) {
   const icons = { ok: '✓', err: '✕', warn: '!', info: 'i' };
   return (

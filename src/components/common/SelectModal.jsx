@@ -1,3 +1,4 @@
+'use client'
 import { useState } from 'react';
 
 export default function SelectModal({ title, items, getLabel, onConfirm, onClose }) {

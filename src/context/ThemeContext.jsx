@@ -1,9 +1,10 @@
+'use client'
 import { createContext, useContext, useState, useEffect } from 'react';
 
 const ThemeContext = createContext();
 
 export function ThemeProvider({ children }) {
-  const [theme, setThemeState] = useState(() => localStorage.getItem('mc_theme') || 'light');
+  const [theme, setThemeState] = useState(() => (typeof window !== 'undefined' ? localStorage.getItem('mc_theme') : null) || 'light');
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);

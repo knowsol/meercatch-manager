@@ -1,3 +1,4 @@
+'use client'
 export default function KPI({ label, value, sub, color }) {
   return (
     <div className="kpi">

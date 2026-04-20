@@ -1,5 +1,6 @@
+'use client'
 import { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
 
 const IC = {
@@ -67,14 +68,14 @@ function filterMenu(menu, role) {
 
 export default function Sidebar({ mobileOpen, onMobileClose }) {
   const [collapsed, setCollapsed] = useState(false);
-  const navigate = useNavigate();
-  const location = useLocation();
+  const router = useRouter();
+  const pathname = usePathname();
   const { role } = useAuth();
 
   const visibleMenu = filterMenu(MENU, role);
 
   const handleNavigate = (path) => {
-    navigate(path);
+    router.push(path);
     onMobileClose?.();
   };
 
@@ -93,8 +94,8 @@ export default function Sidebar({ mobileOpen, onMobileClose }) {
         {visibleMenu.map((item, i) => {
           if (item.section) return <div key={i} className="ns">{item.section}</div>;
           const isActive = item.path === '/'
-            ? location.pathname === '/'
-            : location.pathname.startsWith(item.path);
+            ? pathname === '/'
+            : pathname.startsWith(item.path);
           return (
             <div key={item.id} className={`ni${isActive ? ' a' : ''}`} onClick={() => handleNavigate(item.path)}>
               <span className="ic"><SvgIcon paths={IC[item.icon]} /></span>

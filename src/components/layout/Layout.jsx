@@ -1,5 +1,6 @@
+'use client'
 import { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useRouter, usePathname } from 'next/navigation';
 import Sidebar from './Sidebar';
 import PanelShell from '../common/Panel';
 import ToastContainer from '../common/Toast';
@@ -37,7 +38,7 @@ function BellIcon() {
 }
 
 function ExpiryBanner({ onDismiss }) {
-  const navigate = useNavigate();
+  const router = useRouter();
   const today = new Date(); today.setHours(0, 0, 0, 0);
   const deadline = new Date(today.getTime() + 14 * 24 * 60 * 60 * 1000);
   const expiring = (DUMMY.licenses || [])
@@ -58,7 +59,7 @@ function ExpiryBanner({ onDismiss }) {
         {' '}(가장 빠른 만료: <strong>{top.os}</strong> — {days}일 후)
       </span>
       <button
-        onClick={() => navigate('/licenses')}
+        onClick={() => router.push('/licenses')}
         style={{
           background: 'none', border: '1px solid #f59e0b', cursor: 'pointer',
           color: '#b45309', fontSize: 12, fontWeight: 600,
@@ -76,13 +77,13 @@ function ExpiryBanner({ onDismiss }) {
 export default function Layout({ children }) {
   const { toasts, toast } = useToast();
   const { userName, logout, role } = useAuth();
-  const location = useLocation();
-  const navigate = useNavigate();
+  const pathname = usePathname();
+  const router = useRouter();
   const [showDropdown, setShowDropdown] = useState(false);
   const [bannerDismissed, setBannerDismissed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const title = PAGE_TITLES[location.pathname] || '대시보드';
+  const title = PAGE_TITLES[pathname] || '대시보드';
   const initial = userName ? userName.charAt(0) : 'a';
 
   return (
@@ -99,7 +100,7 @@ export default function Layout({ children }) {
             <div className="mh-title">{title}</div>
             <div className="mh-actions">
               {role !== 'direct' && (
-                <button className="mh-icon-btn" title="알림" onClick={() => navigate('/notifications')} style={{ position: 'relative' }}>
+                <button className="mh-icon-btn" title="알림" onClick={() => router.push('/notifications')} style={{ position: 'relative' }}>
                   <BellIcon />
                   <span className="mh-notif-dot" />
                 </button>
@@ -119,7 +120,7 @@ export default function Layout({ children }) {
                     minWidth: 140, zIndex: 200, overflow: 'hidden',
                   }}>
                     <div
-                      onClick={() => { setShowDropdown(false); navigate('/account'); }}
+                      onClick={() => { setShowDropdown(false); router.push('/account'); }}
                       style={{ padding: '10px 14px', fontSize: 13, cursor: 'pointer', color: 'var(--t1)' }}
                       onMouseEnter={e => e.target.style.background = 'var(--bg3)'}
                       onMouseLeave={e => e.target.style.background = 'transparent'}

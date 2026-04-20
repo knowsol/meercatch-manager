@@ -1,3 +1,4 @@
+'use client'
 import { usePanel } from '../../context/PanelContext';
 
 export default function PanelShell() {

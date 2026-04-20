@@ -1,3 +1,4 @@
+'use client'
 const STATUS_MAP = {
   active: ['bdg-ok','활성'], inactive: ['bdg-err','비활성'],
   online: ['bdg-ok','온라인'], offline: ['bdg-err','오프라인'],
