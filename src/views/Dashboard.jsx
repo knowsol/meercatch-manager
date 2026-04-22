@@ -75,7 +75,6 @@ export default function Dashboard() {
         <div className="card mt-20">
           <div className="card-title">라이선스 현황</div>
           <dl className="info-row">
-            <dt>학교명</dt>       <dd>{DUMMY.licenses[0].school}</dd>
             <dt>라이선스 유형</dt> <dd>{DUMMY.licenses[0].type}</dd>
             <dt>OS 종류</dt>      <dd>{DUMMY.licenses.length}종</dd>
             <dt>단말 사용</dt>    <dd>{DUMMY.licensesUsed} / {DUMMY.licensesTotal}대 ({licUsePct}%)</dd>
@@ -110,7 +109,6 @@ export default function Dashboard() {
           <div className="card">
             <div className="card-title">라이선스 현황</div>
             <dl className="info-row">
-              <dt>학교명</dt>       <dd>{DUMMY.licenses[0].school}</dd>
               <dt>라이선스 유형</dt> <dd>{DUMMY.licenses[0].type}</dd>
               <dt>OS 종류</dt>      <dd>{DUMMY.licenses.length}종</dd>
               <dt>단말 사용</dt>    <dd>{DUMMY.licensesUsed} / {DUMMY.licensesTotal}대 ({licUsePct}%)</dd>

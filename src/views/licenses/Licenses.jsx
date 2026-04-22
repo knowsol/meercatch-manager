@@ -54,9 +54,7 @@ function LicenseDetailPanel({ lic, onClose }) {
         </div>
         <div className="mt-16">
           <button className="btn btn-p btn-sm"
-            onClick={() => toast('라이선스 갱신 문의를 접수했습니다.', 'info')}>갱신 문의</button>
-          <button className="btn btn-outline btn-sm" style={{ marginLeft: 8 }}
-            onClick={() => toast('동기화 중...', 'info')}>🔄 동기화</button>
+            onClick={() => window.location.href = 'mailto:support@meercatch.com?subject=라이선스 갱신 문의'}>갱신 문의</button>
         </div>
       </div>
       <div className="mod-f">

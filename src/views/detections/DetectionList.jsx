@@ -38,7 +38,6 @@ export default function DetectionList() {
     { key: 'detectedAt', label: '탐지 시각', render: v => fmtDT(v) },
     { key: 'type',       label: '유형',    width: '80px', render: v => <DetTypeBadge type={v} /> },
     { key: 'deviceName', label: '단말' },
-    { key: 'policy',     label: '탐지 정책' },
     {
       key: 'content', label: 'URL/도메인', render: (v, r) =>
         r.type === '도박' && v && v.length > 0

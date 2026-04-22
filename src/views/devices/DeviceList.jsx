@@ -1,7 +1,6 @@
 'use client'
 import { useState } from 'react';
 import { usePanel } from '../../context/PanelContext';
-import { useToastCtx } from '../../components/layout/Layout';
 import Table from '../../components/common/Table';
 import { Badge } from '../../components/common/Badge';
 import { fmtDT } from '../../components/common/helpers';
@@ -10,7 +9,6 @@ import DeviceDetailPanel from './DeviceDetailPanel';
 
 export default function DeviceList() {
   const { openPanel } = usePanel();
-  const toast = useToastCtx();
   const [search, setSearch] = useState('');
   const [groupId, setGroupId] = useState('');
   const [status, setStatus] = useState('');
@@ -26,9 +24,6 @@ export default function DeviceList() {
   });
 
   const cols = [
-    { key: 'name',        label: '단말 이름', render: (v, r) => (
-      <a href="#" onClick={e => { e.preventDefault(); e.stopPropagation(); openPanel(<DeviceDetailPanel deviceId={r.deviceId} />); }}>{v}</a>
-    )},
     { key: 'identifier',  label: '식별자', render: v => <span style={{ fontFamily: 'monospace', fontSize: 12, color: '#64748b' }}>{v}</span> },
     { key: 'os',          label: 'OS',     width: '110px' },
     { key: 'model',       label: '모델',   width: '120px' },
@@ -42,9 +37,6 @@ export default function DeviceList() {
         <div className="ph-left">
           <div className="ph-title">단말기 관리</div>
           <div className="ph-sub">총 {DUMMY.devices.length}대 등록</div>
-        </div>
-        <div className="ph-actions">
-          <button className="btn btn-p" onClick={() => toast('단말기 등록 기능은 MDM에서 처리됩니다.', 'info')}>+ 단말기 등록</button>
         </div>
       </div>
 
@@ -60,11 +52,6 @@ export default function DeviceList() {
               <div className="kpi-l">활성 단말</div>
               <div className="kpi-v ok">{active}</div>
             </div>
-          </div>
-          <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid var(--bd)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div className="kpi-s">라이선스 한도 · 현재 접속 중</div>
-            <button className="btn btn-outline btn-sm" style={{ padding: '2px 10px', fontSize: 11, height: 'auto', lineHeight: 1.6 }}
-              onClick={() => toast('라이선스 현황 확인', 'info')}>현황 보기</button>
           </div>
         </div>
       </div>
