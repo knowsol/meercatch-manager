@@ -52,9 +52,11 @@ function LicenseDetailPanel({ lic, onClose }) {
             <dt>전화번호</dt> <dd>{lic.supportTel}</dd>
           </dl>
         </div>
-        <div className="mt-16">
-          <button className="btn btn-p btn-sm"
-            onClick={() => window.location.href = 'mailto:support@meercatch.com?subject=라이선스 갱신 문의'}>갱신 문의</button>
+        <div className="mt-16" style={{ paddingTop: 16, borderTop: '1px solid var(--bd)' }}>
+          <div className="card-title" style={{ marginBottom: 6 }}>갱신 문의</div>
+          <a href="mailto:partners@knowwheresoft.com" style={{ fontSize: 13, color: 'var(--ac)' }}>
+            partners@knowwheresoft.com
+          </a>
         </div>
       </div>
       <div className="mod-f">
