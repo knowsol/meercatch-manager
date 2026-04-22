@@ -39,9 +39,6 @@ export default function Pagination({ page, total, pageSize = PAGE_SIZE, onChange
   };
 
   const pages = getPages();
-  const from = Math.min((page - 1) * pageSize + 1, total);
-  const to = Math.min(page * pageSize, total);
-
   return (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 4, marginTop: 16, paddingBottom: 4 }}>
       <button onClick={() => onChange(page - 1)} disabled={page === 1} style={navStyle(page === 1)}>‹</button>
@@ -65,7 +62,6 @@ export default function Pagination({ page, total, pageSize = PAGE_SIZE, onChange
       )}
 
       <button onClick={() => onChange(page + 1)} disabled={page === totalPages} style={navStyle(page === totalPages)}>›</button>
-      <span style={{ marginLeft: 8, fontSize: 12, color: 'var(--t2)' }}>{from}–{to} / {total}개</span>
     </div>
   );
 }
