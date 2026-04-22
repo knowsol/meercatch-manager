@@ -29,7 +29,6 @@ export default function DetectionDetailPanel({ detId }) {
           <dt>탐지시각</dt><dd>{fmtDT(det.detectedAt)}</dd>
           <dt>탐지유형</dt><dd><DetTypeBadge type={det.type} /></dd>
           <dt>단말</dt><dd>{det.deviceName}</dd>
-          <dt>탐지정책</dt><dd>{det.policy}</dd>
         </dl>
 
         {det.type === '도박' && det.content && det.content.length > 0 && (
@@ -56,9 +55,7 @@ export default function DetectionDetailPanel({ detId }) {
         <div />
         <div className="mod-f-right">
           <button className="btn btn-outline" onClick={closePanel}>닫기</button>
-          <button className="btn btn-p" onClick={() => handleAction('confirmed', '확인')}>확인</button>
-          <button className="btn btn-warn" onClick={() => handleAction('reviewing', '검토')}>검토</button>
-          <button className="btn btn-outline" onClick={() => handleAction('dismissed', '무시')}>무시</button>
+          <button className="btn btn-p" onClick={() => handleAction('confirmed', '저장')}>저장</button>
         </div>
       </div>
     </div>
