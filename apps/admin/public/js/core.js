@@ -112,7 +112,13 @@ function fg(label, inputEl, required) {
 function mkTable(cols, rows, onRowClick) {
   const thead = h('thead', {},
     h('tr', {},
-      ...cols.map(c => h('th', { style: c.width ? { width: c.width } : {} }, c.label))
+      ...cols.map(c => {
+        const isNodeLabel = c.label instanceof Node;
+        const th = h('th', { style: Object.assign(c.width ? { width: c.width } : {}, isNodeLabel ? { textAlign:'center' } : {}) });
+        if (isNodeLabel) th.appendChild(c.label);
+        else if (c.label != null) th.textContent = c.label;
+        return th;
+      })
     )
   );
   const tbody = h('tbody', {});
@@ -130,7 +136,7 @@ function mkTable(cols, rows, onRowClick) {
       if (onRowClick) tr.addEventListener('click', () => onRowClick(row));
       cols.forEach(c => {
         const val = c.render ? c.render(row[c.key], row) : (row[c.key] != null ? row[c.key] : '—');
-        const td = h('td', {});
+        const td = h('td', { style: c.align ? { textAlign: c.align } : {} });
         if (val instanceof Node) td.appendChild(val);
         else td.textContent = val;
         tr.appendChild(td);
@@ -140,6 +146,52 @@ function mkTable(cols, rows, onRowClick) {
   }
   const table = h('table', { class: 'dt' }, thead, tbody);
   return h('div', { class: 'dt-wrap' }, table);
+}
+
+/**
+ * mkPagination(currentPage, totalPages, onPageChange)
+ * Renders: |< < 1 2 3 [4] 5 6 7 > >|
+ */
+function mkPagination(currentPage, totalPages, onPageChange) {
+  const S = {
+    wrap: 'display:flex;align-items:center;justify-content:center;gap:4px;padding:8px 0;flex-shrink:0',
+    btn: (active, disabled) =>
+      `min-width:32px;height:32px;padding:0 6px;border-radius:6px;border:1px solid ${active?'#3b82f6':disabled?'#e2e8f0':'#e2e8f0'};` +
+      `background:${active?'#3b82f6':'#fff'};color:${active?'#fff':disabled?'#cbd5e1':'#374151'};` +
+      `cursor:${disabled?'default':'pointer'};font-size:13px;font-weight:${active?'600':'400'};` +
+      `display:inline-flex;align-items:center;justify-content:center;transition:all .15s`,
+  };
+
+  const wrap = h('div', { style: S.wrap });
+
+  function mkBtn(label, page, active=false, disabled=false) {
+    const btn = h('button', { style: S.btn(active, disabled) }, label);
+    if (!disabled && !active) btn.addEventListener('click', () => onPageChange(page));
+    btn.disabled = disabled;
+    return btn;
+  }
+
+  // |< first, < prev
+  wrap.appendChild(mkBtn('|◀', 1, false, currentPage === 1));
+  wrap.appendChild(mkBtn('◀', currentPage - 1, false, currentPage === 1));
+
+  // page number buttons (show up to 7 around current)
+  const delta = 3;
+  let start = Math.max(1, currentPage - delta);
+  let end = Math.min(totalPages, currentPage + delta);
+  if (end - start < 6) {
+    if (start === 1) end = Math.min(totalPages, start + 6);
+    else start = Math.max(1, end - 6);
+  }
+  for (let p = start; p <= end; p++) {
+    wrap.appendChild(mkBtn(String(p), p, p === currentPage, false));
+  }
+
+  // > next, >| last
+  wrap.appendChild(mkBtn('▶', currentPage + 1, false, currentPage === totalPages));
+  wrap.appendChild(mkBtn('▶|', totalPages, false, currentPage === totalPages));
+
+  return wrap;
 }
 
 /** confirm(msg, onOk) — confirmation modal */

@@ -24,7 +24,53 @@ function mkPanel(title, bodyEl, onSave, saveLabel, extraBtns) {
 /* ----------------------------------------------------------
    DASHBOARD
 ---------------------------------------------------------- */
+function renderDirectDashboard() {
+  const s = DUMMY.stats;
+  const page = h('div', {});
+
+  page.appendChild(h('div', { class:'grid-4 section-gap' },
+    mkKPI('전체 라이선스', DUMMY.licensesTotal, '라이선스 한도', ''),
+    mkKPI('활성 라이선스', DUMMY.licensesUsed, '현재 사용 중', 'ok'),
+    mkKPI('오늘 탐지', s.todayDetections, '금일 유해 콘텐츠', 'err'),
+    mkKPI('이번 주 탐지', s.weeklyDetections, '지난 7일', 'warn')
+  ));
+
+  const recentDets = DUMMY.detections.slice(0, 5);
+  const detCard = h('div', { class:'card section-gap' },
+    h('div', { class:'flex-between mb-16' },
+      h('div', { class:'card-title', style:{marginBottom:0} }, '최근 탐지 현황'),
+      h('button', { class:'btn btn-outline btn-sm', onClick:()=>navigate('detections') }, '전체 보기')
+    ),
+    mkTable([
+      { key:'detectedAt', label:'탐지 시각', width:'160px', render: v=>fmtDT(v) },
+      { key:'type', label:'유형', width:'80px', render: v=>detTypeBadge(v) },
+      { key:'deviceName', label:'단말', width:'100px' },
+      { key:'status', label:'상태', width:'80px', render: v=>statusBadge(v) },
+    ], recentDets, ()=>navigate('detections'))
+  );
+  page.appendChild(detCard);
+
+  const usePct = Math.round((DUMMY.licensesUsed / DUMMY.licensesTotal) * 100);
+  const licCard = h('div', { class:'card' },
+    h('div', { class:'card-title' }, '라이선스 현황'),
+    h('dl', { class:'info-row' },
+      h('dt',{},'라이선스 유형'), h('dd',{},DUMMY.licenses[0].type),
+      h('dt',{},'OS 종류'), h('dd',{},`${DUMMY.licenses.length}종`),
+      h('dt',{},'사용 현황'), h('dd',{},`${DUMMY.licensesUsed} / ${DUMMY.licensesTotal}대 (${usePct}%)`)
+    ),
+    h('div', { class:'mt-16' },
+      h('div', { class:'progress-bar' },
+        h('div', { class:'progress-fill'+(usePct>90?' err':usePct>70?' warn':' ok'), style:{width:usePct+'%'} })
+      )
+    )
+  );
+
+  page.appendChild(h('div', { class:'grid-1 mt-20' }, licCard));
+  return page;
+}
+
 function renderDashboard() {
+  if (D.loginRole === 'direct') return renderDirectDashboard();
   const s = DUMMY.stats;
   const page = h('div', {});
 
@@ -50,7 +96,6 @@ function renderDashboard() {
   const detTable = mkTable([
     { key:'detectedAt', label:'탐지 시각', width:'160px', render: v => fmtDT(v) },
     { key:'type', label:'유형', width:'80px', render: (v) => detTypeBadge(v) },
-    { key:'groupName', label:'그룹', width:'110px' },
     { key:'deviceName', label:'단말', width:'100px' },
     { key:'status', label:'상태', width:'80px', render: v => statusBadge(v) },
   ], recentDets, (row) => navigate('detections'));
@@ -67,7 +112,11 @@ function renderDashboard() {
   // Bottom row: active pauses + group status
   const activePauses = DUMMY.pauses.filter(p => p.status === 'ACTIVE');
   const pauseTable = mkTable([
-    { key:'grade', label:'학년/반', render: (v,r) => `${r.grade}학년 ${r.cls}반` },
+    { key:'groupId', label:'학교', render: v => {
+      const grp = DUMMY.groups.find(g => g.groupId === v);
+      const sch = grp ? DUMMY.schools.find(s => s.schoolId === grp.schoolId) : null;
+      return sch ? sch.name : '—';
+    }},
     { key:'pauseType', label:'중단 유형', width:'80px' },
     { key:'requester', label:'요청자', width:'80px' },
     { key:'endAt', label:'종료 시각', render: v => fmtDT(v) },
@@ -86,19 +135,18 @@ function renderDashboard() {
   );
 
   // License status
-  const lic = DUMMY.licenses;
-  const usePct = Math.round((lic.usedDevices / lic.devices) * 100);
+  const licUsePct = Math.round((DUMMY.licensesUsed / DUMMY.licensesTotal) * 100);
   const licCard = h('div', { class: 'card' },
     h('div', { class: 'card-title' }, '라이선스 현황'),
     h('dl', { class: 'info-row' },
-      h('dt', {}, '학교명'), h('dd', {}, lic.school),
-      h('dt', {}, '라이선스 유형'), h('dd', {}, lic.type),
-      h('dt', {}, '유효 기간'), h('dd', {}, `${fmtD(lic.validFrom)} ~ ${fmtD(lic.validTo)}`),
-      h('dt', {}, '단말 사용'), h('dd', {}, `${lic.usedDevices} / ${lic.devices}대 (${usePct}%)`)
+      h('dt', {}, '학교명'), h('dd', {}, DUMMY.licenses[0].school),
+      h('dt', {}, '라이선스 유형'), h('dd', {}, DUMMY.licenses[0].type),
+      h('dt', {}, 'OS 종류'), h('dd', {}, `${DUMMY.licenses.length}종`),
+      h('dt', {}, '단말 사용'), h('dd', {}, `${DUMMY.licensesUsed} / ${DUMMY.licensesTotal}대 (${licUsePct}%)`)
     ),
     h('div', { class: 'mt-16' },
       h('div', { class: 'progress-bar' },
-        h('div', { class: 'progress-fill' + (usePct > 90 ? ' err' : usePct > 70 ? ' warn' : ' ok'), style: { width: usePct + '%' } })
+        h('div', { class: 'progress-fill' + (licUsePct > 90 ? ' err' : licUsePct > 70 ? ' warn' : ' ok'), style: { width: licUsePct + '%' } })
       )
     )
   );
@@ -125,7 +173,6 @@ function renderGroupList() {
   );
   page.appendChild(ph);
 
-  // Summary KPIs
   const active = DUMMY.groups.filter(g => g.status === 'active').length;
   const paused = DUMMY.groups.filter(g => g.pauseStatus === 'paused').length;
   const totalDevices = DUMMY.groups.reduce((a,g) => a + g.deviceCount, 0);
@@ -136,13 +183,11 @@ function renderGroupList() {
     mkKPI('총 단말', totalDevices, '등록된 총 단말 수', 'ac')
   ));
 
-  // Filter bar
   const searchInp = h('input', { class: 'inp search', placeholder: '그룹 이름 검색...', type: 'text' });
-  const gradeSelect = h('select', { class: 'inp', style: 'max-width:120px' },
-    h('option', { value: '' }, '전체 학년'),
-    h('option', { value: '1' }, '1학년'),
-    h('option', { value: '2' }, '2학년'),
-    h('option', { value: '3' }, '3학년')
+  const schoolTypeSelect = h('select', { class: 'inp', style: 'max-width:120px' },
+    h('option', { value: '' }, '전체 학교유형'),
+    h('option', { value: '중학교' }, '중학교'),
+    h('option', { value: '고등학교' }, '고등학교')
   );
   const statusSelect = h('select', { class: 'inp', style: 'max-width:120px' },
     h('option', { value: '' }, '전체 상태'),
@@ -150,15 +195,22 @@ function renderGroupList() {
     h('option', { value: 'inactive' }, '비활성')
   );
 
-  const tableWrap = h('div', {});
+  const tableWrap = h('div', { style:'overflow-y:auto;max-height:calc(100vh - 340px)' });
+  const pageWrap = h('div', { style:'display:flex;align-items:center;justify-content:center;margin-top:10px;font-size:13px;color:#64748b;flex-shrink:0' });
+
+  const GRP_PAGE_SIZE = 20;
+  let grpPage = 1;
 
   const cols = [
-    { key:'name', label:'그룹 이름', render: (v,r) => {
-      const a = h('a', { href:'#' }, v);
-      a.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); openPanel(renderGroupDetailPanel(r.groupId)); });
-      return a;
+    { key:'_no', label:'No.', width:'50px' },
+    { key:'schoolId', label:'학교', render: v => {
+      const s = DUMMY.schools.find(sc => sc.schoolId === v);
+      return s ? s.name : '—';
     }},
-    { key:'grade', label:'학년', width:'60px', render: v => `${v}학년` },
+    { key:'schoolId', label:'학교유형', width:'90px', render: v => {
+      const s = DUMMY.schools.find(sc => sc.schoolId === v);
+      return s ? mkBd('bdg-ac', s.type) : '—';
+    }},
     { key:'deviceCount', label:'단말 수', width:'80px', render: v => `${v}대` },
     { key:'policyCount', label:'적용 정책', width:'80px', render: v => `${v}개` },
     { key:'pauseStatus', label:'탐지 중단', width:'100px', render: v => v === 'paused' ? mkBd('bdg-warn','중단중') : mkBd('bdg-ok','정상') },
@@ -168,27 +220,39 @@ function renderGroupList() {
 
   function renderTable() {
     const q = searchInp.value.toLowerCase();
-    const gf = gradeSelect.value;
+    const tf = schoolTypeSelect.value;
     const sf = statusSelect.value;
 
     const filtered = DUMMY.groups.filter(gr => {
       if (q && !gr.name.toLowerCase().includes(q)) return false;
-      if (gf && String(gr.grade) !== gf) return false;
       if (sf && gr.status !== sf) return false;
+      if (tf) {
+        const s = DUMMY.schools.find(sc => sc.schoolId === gr.schoolId);
+        if (!s || s.type !== tf) return false;
+      }
       return true;
     });
 
+    const totalPages = Math.max(1, Math.ceil(filtered.length / GRP_PAGE_SIZE));
+    if (grpPage > totalPages) grpPage = 1;
+    const pageData = filtered.slice((grpPage-1)*GRP_PAGE_SIZE, grpPage*GRP_PAGE_SIZE)
+      .map((r, i) => ({ ...r, _no: (grpPage-1)*GRP_PAGE_SIZE + i + 1 }));
+
     tableWrap.innerHTML = '';
-    tableWrap.appendChild(mkTable(cols, filtered, row => openPanel(renderGroupDetailPanel(row.groupId))));
+    tableWrap.appendChild(mkTable(cols, pageData, row => openPanel(renderGroupDetailPanel(row.groupId))));
+
+    pageWrap.innerHTML = '';
+    pageWrap.appendChild(mkPagination(grpPage, totalPages, (p) => { grpPage = p; renderTable(); }));
   }
 
-  searchInp.addEventListener('input', renderTable);
-  gradeSelect.addEventListener('change', renderTable);
-  statusSelect.addEventListener('change', renderTable);
+  searchInp.addEventListener('input', () => { grpPage = 1; renderTable(); });
+  schoolTypeSelect.addEventListener('change', () => { grpPage = 1; renderTable(); });
+  statusSelect.addEventListener('change', () => { grpPage = 1; renderTable(); });
 
-  const fb = h('div', { class: 'fb' }, searchInp, gradeSelect, statusSelect);
+  const fb = h('div', { class: 'fb' }, searchInp, schoolTypeSelect, statusSelect);
   page.appendChild(fb);
   page.appendChild(tableWrap);
+  page.appendChild(pageWrap);
   renderTable();
   return page;
 }
@@ -201,43 +265,30 @@ function renderGroupNew() {
   page.appendChild(h('div', { class: 'ph' },
     h('div', { class: 'ph-left' },
       h('div', { class: 'ph-title' }, '그룹 생성'),
-      h('div', { class: 'ph-sub' }, '새로운 학급 그룹을 등록합니다')
+      h('div', { class: 'ph-sub' }, '새로운 그룹을 등록합니다')
     )
   ));
 
-  const gradeInp = h('select', { class: 'inp' },
-    h('option', { value: '' }, '학년 선택'),
-    h('option', { value: '1' }, '1학년'),
-    h('option', { value: '2' }, '2학년'),
-    h('option', { value: '3' }, '3학년')
+  const schoolSelect = h('select', { class: 'inp' },
+    h('option', { value: '' }, '학교 선택'),
+    ...DUMMY.schools.map(s => h('option', { value: s.schoolId }, `${s.name} (${s.type})`))
   );
-  const clsInp = h('select', { class: 'inp' },
-    h('option', { value: '' }, '반 선택'),
-    ...[1,2,3,4,5,6].map(i => h('option', { value: String(i) }, i + '반'))
-  );
-  const nameInp = h('input', { class: 'inp', placeholder: '예: 1학년 1반', type: 'text' });
+  const schoolTypeEl = h('div', { style: 'padding:6px 0;font-size:14px;color:#64748b' }, '—');
+  schoolSelect.addEventListener('change', () => {
+    const s = DUMMY.schools.find(sc => sc.schoolId === schoolSelect.value);
+    schoolTypeEl.textContent = s ? s.type : '—';
+  });
+  const nameInp = h('input', { class: 'inp', placeholder: '그룹 이름', type: 'text' });
   const descInp = h('textarea', { class: 'inp', placeholder: '그룹 설명 (선택)', style: { minHeight: '80px' } });
   const policySelect = h('select', { class: 'inp' },
     h('option', { value: '' }, '정책 선택 (선택)'),
     ...DUMMY.policies.filter(p => p.active).map(p => h('option', { value: p.policyId }, p.name))
   );
 
-  gradeInp.addEventListener('change', () => {
-    if (gradeInp.value && clsInp.value) {
-      nameInp.value = `${gradeInp.value}학년 ${clsInp.value}반`;
-    }
-  });
-  clsInp.addEventListener('change', () => {
-    if (gradeInp.value && clsInp.value) {
-      nameInp.value = `${gradeInp.value}학년 ${clsInp.value}반`;
-    }
-  });
-
   function submit() {
     let valid = true;
-    [gradeInp, clsInp, nameInp].forEach(inp => inp.classList.remove('error'));
-    if (!gradeInp.value) { gradeInp.classList.add('error'); valid = false; }
-    if (!clsInp.value) { clsInp.classList.add('error'); valid = false; }
+    [schoolSelect, nameInp].forEach(inp => inp.classList.remove('error'));
+    if (!schoolSelect.value) { schoolSelect.classList.add('error'); valid = false; }
     if (!nameInp.value.trim()) { nameInp.classList.add('error'); valid = false; }
     if (!valid) { toast('필수 항목을 입력해주세요.', 'err'); return; }
     toast('그룹이 생성되었습니다.');
@@ -245,7 +296,8 @@ function renderGroupNew() {
   }
 
   const card = h('div', { class: 'card', style: { maxWidth: '600px' } },
-    h('div', { class: 'form-row section-gap' }, fg('학년', gradeInp, true), fg('반', clsInp, true)),
+    h('div', { class: 'section-gap' }, fg('학교', schoolSelect, true)),
+    h('div', { class: 'section-gap' }, fg('학교유형', schoolTypeEl, false)),
     h('div', { class: 'section-gap' }, fg('그룹 이름', nameInp, true)),
     h('div', { class: 'section-gap' }, fg('그룹 설명', descInp, false)),
     h('div', { class: 'section-gap' }, fg('기본 적용 정책', policySelect, false)),
@@ -268,7 +320,7 @@ function renderGroupDetail(id) {
   page.appendChild(h('div', { class: 'ph' },
     h('div', { class: 'ph-left' },
       h('div', { class: 'ph-title' }, group.name),
-      h('div', { class: 'ph-sub' }, `${group.grade}학년 ${group.cls}반 · 단말 ${group.deviceCount}대`)
+      h('div', { class: 'ph-sub' }, `단말 ${group.deviceCount}대`)
     ),
     h('div', { class: 'ph-actions' },
       statusBadge(group.status),
@@ -288,10 +340,6 @@ function renderGroupDetail(id) {
       tabContent.appendChild(h('div', { class: 'card', style: { maxWidth: '560px' } },
         h('div', { class: 'section-gap' }, fg('그룹 이름', nameInp, true)),
         h('div', { class: 'section-gap' }, fg('설명', descInp, false)),
-        h('div', { class: 'form-row section-gap' },
-          fg('학년', h('input', { class: 'inp', value: group.grade + '학년', disabled: true, type: 'text' })),
-          fg('반',   h('input', { class: 'inp', value: group.cls + '반',    disabled: true, type: 'text' }))
-        ),
         h('dl', { class: 'info-row mt-16' },
           h('dt', {}, '상태'),       h('dd', {}, statusBadge(group.status)),
           h('dt', {}, '최근 수정'),  h('dd', {}, fmtD(group.updatedAt)),
@@ -316,7 +364,7 @@ function renderGroupDetail(id) {
       tabContent.appendChild(mkTable([
         { key:'name', label:'정책 이름' },
         { key:'desc', label:'설명' },
-        { key:'types', label:'탐지 유형', render: v => h('div', { class: 'flex gap-8' }, ...v.map(t => detTypeBadge(t))) },
+        { key:'type', label:'탐지 유형', width:'90px', render: (_,r) => policyTypeBadge(r) },
         { key:'appliedCount', label:'적용 그룹 수', width:'100px', render: v => `${v}개` },
         { key:'_action', label:'', width:'80px', render:(_,r)=>{const btn=h('button',{class:'btn btn-outline btn-xs'},'해제');btn.addEventListener('click',e=>{e.stopPropagation();toast('정책이 해제되었습니다.','warn');});return btn;}},
       ], applied));
@@ -343,7 +391,7 @@ function renderGroupDetail(id) {
   const tabs = h('div', { class: 'tabs' },
     ...[
       { id:'info', label:'기본정보' },
-      { id:'devices', label:`단말목록 (${DUMMY.devices.filter(d=>d.groupId===id).length})` },
+      { id:'devices', label:`단말목록 (${group.deviceCount})` },
       { id:'policies', label:'적용정책' },
       { id:'pauses', label:'탐지중단현황' },
     ].map(t => {
@@ -378,15 +426,72 @@ function renderDeviceList() {
     )
   ));
 
-  const online = DUMMY.devices.filter(d => d.status === 'online').length;
-  const offline = DUMMY.devices.filter(d => d.status === 'offline').length;
-  const pending = DUMMY.devices.filter(d => d.policyStatus === 'pending').length;
-  page.appendChild(h('div', { class: 'grid-4 section-gap' },
-    mkKPI('전체 단말', DUMMY.devices.length, '', ''),
-    mkKPI('온라인', online, '현재 접속 중', 'ok'),
-    mkKPI('오프라인', offline, '접속 없음', 'err'),
-    mkKPI('정책 미적용', pending, '정책 대기 중', 'warn')
-  ));
+  const active = DUMMY.devices.filter(d => d.status === 'online').length;
+  const inactive = DUMMY.devices.filter(d => d.status === 'offline').length;
+
+  function showLicensePopup() {
+    const activeByOS = {};
+    DUMMY.devices.forEach(d => { if (d.status==='online') activeByOS[d.os]=(activeByOS[d.os]||0)+1; });
+    const TH = 'padding:10px 14px;font-size:12px;font-weight:600;color:var(--t2);border-bottom:2px solid var(--bd);text-align:center;background:#f8fafc';
+    const TD = 'padding:10px 14px;font-size:13px;text-align:center;border-bottom:1px solid var(--bd)';
+    const TDF = 'padding:10px 14px;font-size:13px;font-weight:700;text-align:center;background:#eff6ff;color:#1e40af';
+    const totDevices = DUMMY.licenses.reduce((s,l)=>s+l.devices,0);
+    const totUsed = DUMMY.licenses.reduce((s,l)=>s+l.usedDevices,0);
+    const totActive = Object.values(activeByOS).reduce((s,v)=>s+v,0);
+    const tbl = h('table', { style:'width:100%;border-collapse:collapse' },
+      h('thead', {}, h('tr', {},
+        h('th', { style:TH+';text-align:left' }, 'OS'),
+        h('th', { style:TH }, '수량'),
+        h('th', { style:TH }, '사용 단말'),
+        h('th', { style:TH }, '활성 단말')
+      )),
+      h('tbody', {},
+        ...DUMMY.licenses.map(l => h('tr', {},
+          h('td', { style:TD+';text-align:left;font-weight:500;color:var(--t1)' }, l.os),
+          h('td', { style:TD }, String(l.devices)),
+          h('td', { style:TD }, `${l.usedDevices} / ${l.devices}`),
+          h('td', { style:TD+';color:#22c55e;font-weight:600' }, activeByOS[l.os]||0)
+        )),
+        h('tr', {},
+          h('td', { style:TDF+';text-align:left' }, '합계'),
+          h('td', { style:TDF }, String(totDevices)),
+          h('td', { style:TDF }, `${totUsed} / ${totDevices}`),
+          h('td', { style:TDF }, totActive)
+        )
+      )
+    );
+    const overlay = h('div', { style:'position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:1000;display:flex;align-items:center;justify-content:center' });
+    const modal = h('div', { style:'background:#fff;border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,0.18);width:560px;max-width:92vw;overflow:hidden' },
+      h('div', { style:'display:flex;align-items:center;justify-content:space-between;padding:20px 24px 16px;border-bottom:1px solid var(--bd)' },
+        h('div', { style:'font-size:16px;font-weight:700;color:var(--t1)' }, '전체 라이선스 현황'),
+        h('button', { style:'background:none;border:none;font-size:20px;color:var(--t2);cursor:pointer;line-height:1;padding:0 2px', onClick: () => overlay.remove() }, '×')
+      ),
+      h('div', { style:'padding:20px 24px' }, tbl)
+    );
+    overlay.appendChild(modal);
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+    document.body.appendChild(overlay);
+  }
+
+  // Merged KPI card: 전체 라이선스 + 활성 단말
+  const mergedKpi = h('div', { class: 'kpi', style:'display:flex;flex-direction:column;gap:0' },
+    h('div', { style:'display:flex;align-items:flex-start;justify-content:flex-start;gap:32px' },
+      h('div', {},
+        h('div', { class: 'kpi-l' }, '전체 라이선스'),
+        h('div', { class: 'kpi-v' }, String(DUMMY.licenses.totalLicenses || DUMMY.devices.length))
+      ),
+      h('div', { style:'width:1px;background:var(--bd);align-self:stretch;flex-shrink:0' }),
+      h('div', {},
+        h('div', { class: 'kpi-l' }, '활성 단말'),
+        h('div', { class: 'kpi-v ok' }, String(active))
+      )
+    ),
+    h('div', { style:'display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding-top:10px;border-top:1px solid var(--bd)' },
+      h('div', { class: 'kpi-s' }, '라이선스 한도 · 현재 접속 중'),
+      h('button', { class: 'btn btn-outline btn-sm', style:'padding:2px 10px;font-size:11px;height:auto;line-height:1.6', onClick: (e) => { e.stopPropagation(); showLicensePopup(); } }, '현황 보기')
+    )
+  );
+  page.appendChild(h('div', { class: 'section-gap' }, mergedKpi));
 
   const searchInp = h('input', { class: 'inp search', placeholder: '단말 이름 또는 식별자 검색...', type: 'text' });
   const groupSelect = h('select', { class: 'inp', style: { maxWidth: '160px' } },
@@ -395,11 +500,16 @@ function renderDeviceList() {
   );
   const statusSelect = h('select', { class: 'inp', style: { maxWidth: '120px' } },
     h('option', { value: '' }, '전체 상태'),
-    h('option', { value: 'online' }, '온라인'),
-    h('option', { value: 'offline' }, '오프라인')
+    h('option', { value: 'online' }, '활성'),
+    h('option', { value: 'offline' }, '비활성')
   );
 
-  const tableWrap = h('div', {});
+  const DEV_PAGE_SIZE = 20;
+  let devPage = 1;
+
+  const tableWrap = h('div', { style:'overflow-y:auto;max-height:calc(100vh - 340px)' });
+  const pageWrap = h('div', { style:'display:flex;align-items:center;justify-content:center;margin-top:8px;font-size:13px;color:#64748b;flex-shrink:0' });
+
   function renderTable() {
     const q = searchInp.value.toLowerCase();
     const g = groupSelect.value;
@@ -410,23 +520,31 @@ function renderDeviceList() {
       if (s && d.status !== s) return false;
       return true;
     });
+
+    const totalPages = Math.max(1, Math.ceil(filtered.length / DEV_PAGE_SIZE));
+    if (devPage > totalPages) devPage = 1;
+    const pageData = filtered.slice((devPage-1)*DEV_PAGE_SIZE, devPage*DEV_PAGE_SIZE);
+
     tableWrap.innerHTML = '';
     tableWrap.appendChild(mkTable([
       { key:'name', label:'단말 이름', render:(v,r)=>{const a=h('a',{href:'#'},v);a.addEventListener('click',e=>{e.preventDefault();openPanel(renderDeviceDetailPanel(r.deviceId))});return a;}},
       { key:'identifier', label:'식별자', render: v => h('span', { class: 'text-t3', style:{fontFamily:'monospace',fontSize:'12px'} }, v) },
-      { key:'groupName', label:'그룹', width:'120px' },
+      { key:'os', label:'OS', width:'110px' },
       { key:'model', label:'모델', width:'120px' },
-      { key:'status', label:'상태', width:'90px', render: v => statusBadge(v) },
-      { key:'policyStatus', label:'정책', width:'90px', render: v => statusBadge(v) },
+      { key:'status', label:'상태', width:'90px', render: v => v==='online' ? mkBd('bdg-ok','활성') : mkBd('bdg-err','비활성') },
       { key:'lastContact', label:'최근 접속', render: v => fmtDT(v) },
-    ], filtered, (row) => openPanel(renderDeviceDetailPanel(row.deviceId))));
+    ], pageData, (row) => openPanel(renderDeviceDetailPanel(row.deviceId))));
+
+    pageWrap.innerHTML = '';
+    pageWrap.appendChild(mkPagination(devPage, totalPages, (p) => { devPage = p; renderTable(); }));
   }
-  searchInp.addEventListener('input', renderTable);
-  groupSelect.addEventListener('change', renderTable);
-  statusSelect.addEventListener('change', renderTable);
+  searchInp.addEventListener('input', () => { devPage = 1; renderTable(); });
+  groupSelect.addEventListener('change', () => { devPage = 1; renderTable(); });
+  statusSelect.addEventListener('change', () => { devPage = 1; renderTable(); });
 
   page.appendChild(h('div', { class: 'fb' }, searchInp, groupSelect, statusSelect));
   page.appendChild(tableWrap);
+  page.appendChild(pageWrap);
   renderTable();
   return page;
 }
@@ -477,7 +595,7 @@ function renderDeviceDetail(id) {
         group ?
           h('dl', { class: 'info-row' },
             h('dt',{},'그룹 이름'), h('dd',{}, h('a',{href:'#',onClick:e=>{e.preventDefault();navigate('groups-detail',group.groupId)}},group.name)),
-            h('dt',{},'학년/반'),   h('dd',{},`${group.grade}학년 ${group.cls}반`),
+            h('dt',{},'학교'),      h('dd',{},(()=>{ const sc = DUMMY.schools.find(s=>s.schoolId===group.schoolId); return sc ? sc.name : '—'; })()),
             h('dt',{},'단말 수'),   h('dd',{},`${group.deviceCount}대`),
             h('dt',{},'상태'),      h('dd',{},statusBadge(group.status))
           ) :
@@ -538,23 +656,58 @@ function renderDeviceDetail(id) {
 }
 
 /* ----------------------------------------------------------
+   DEVICE GENERATOR
+---------------------------------------------------------- */
+const _MODELS = ['iPad 10th Gen','iPad 9th Gen','iPad Air 5','iPad mini 6','iPad Pro 11'];
+const _OS     = ['iPadOS 17.4','iPadOS 17.3','iPadOS 17.2','iPadOS 16.7','iPadOS 16.5'];
+const _DATES  = ['2026-03-17 14:','2026-03-17 13:','2026-03-17 12:','2026-03-16 17:','2026-03-16 15:','2026-03-15 09:'];
+const _MINS   = ['05','12','18','22','30','35','45','55'];
+
+function generateGroupDevices(group) {
+  const real = DUMMY.devices.filter(d => d.groupId === group.groupId);
+  const realIds = new Set(real.map(d => d.deviceId));
+  const total = group.deviceCount;
+  const result = [...real];
+  for (let i = result.length; i < total; i++) {
+    const n = i + 1;
+    const isOnline = (i % 5) !== 3;
+    const dateStr = _DATES[i % _DATES.length] + _MINS[i % _MINS.length];
+    result.push({
+      deviceId: `gen-${group.groupId}-${n}`,
+      name: `iPad-${String(n).padStart(3,'0')}`,
+      identifier: [...Array(10)].map((_,j)=>'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'[(n*7+j*13)%36]).join(''),
+      groupId: group.groupId,
+      groupName: group.name,
+      status: isOnline ? 'online' : 'offline',
+      policyStatus: (i % 7 === 0) ? 'pending' : 'applied',
+      lastContact: dateStr,
+      model: _MODELS[i % _MODELS.length],
+      os: _OS[i % _OS.length],
+    });
+  }
+  return result;
+}
+
+/* ----------------------------------------------------------
    POLICY HELPERS
 ---------------------------------------------------------- */
-const POLICY_AGES = ['초등학생','중학생','고등학생','성인'];
-const POLICY_SEVS = ['낮음','보통','높음','매우 높음'];
-function calcLevel(age, sev) {
-  const ai = POLICY_AGES.indexOf(age);
-  const si = POLICY_SEVS.indexOf(sev);
-  if (ai < 0 || si < 0) return '-';
-  return `Lv.${ai * 4 + si + 1}`;
+const DETECTION_ITEMS = ['배','여성가슴','남성가슴','엉덩이','여성성기','남성성기'];
+const GAMBLING_GRADES = ['상','중','하'];
+
+function policyTypeBadge(policy) {
+  const color = policy.type === '선정성' ? 'bdg-err' : 'bdg-warn';
+  return mkBd(color, policy.type || '—');
 }
-function catBadge(cat) {
-  const lv = calcLevel(cat.age, cat.severity);
-  const color = cat.type === '선정성' ? 'bdg-err' : 'bdg-warn';
-  return h('div', { style:'display:flex;align-items:center;gap:4px' },
-    mkBd(color, cat.type),
-    h('span', { style:'font-size:12px;color:#64748b' }, `${cat.age} / ${cat.severity} (${lv})`)
-  );
+
+function policyDetectSummary(policy) {
+  if (policy.type === '선정성') {
+    const items = policy.detectionItems || [];
+    if (items.length === 0) return '—';
+    return items.slice(0,2).join(', ') + (items.length > 2 ? ` 외 ${items.length - 2}개` : '');
+  } else if (policy.type === '도박') {
+    return policy.grade ? `탐지등급 ${policy.grade}` : '—';
+  }
+  return '—';
 }
 
 /* ----------------------------------------------------------
@@ -572,45 +725,94 @@ function renderPolicyList() {
     )
   ));
 
-  const active = DUMMY.policies.filter(p => p.active).length;
-  page.appendChild(h('div', { class: 'grid-4 section-gap' },
-    mkKPI('전체 정책', DUMMY.policies.length, '', ''),
-    mkKPI('활성 정책', active, '', 'ok'),
-    mkKPI('비활성', DUMMY.policies.length - active, '', 'err'),
-    mkKPI('적용 그룹', DUMMY.policies.reduce((a,p)=>a+p.appliedCount,0), '총 그룹 적용 수', 'ac')
-  ));
+  // 탭
+  let activeTab = '전체'; // '전체' | '선정성' | '도박'
+  const tabBar = h('div', { style:'display:flex;gap:0;border-bottom:2px solid var(--bd);margin-bottom:16px' });
+  ['전체','선정성','도박'].forEach(tab => {
+    const tabEl = h('div', {
+      style:`padding:8px 20px;font-size:14px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:color .15s,border-color .15s;color:#94a3b8`
+    }, tab);
+    if (tab === activeTab) {
+      tabEl.style.color = 'var(--ac)';
+      tabEl.style.borderBottomColor = 'var(--ac)';
+    }
+    tabEl.addEventListener('click', () => {
+      activeTab = tab;
+      polPage = 1;
+      [...tabBar.children].forEach((c,i) => {
+        const t = ['전체','선정성','도박'][i];
+        c.style.color = t === activeTab ? 'var(--ac)' : '#94a3b8';
+        c.style.borderBottomColor = t === activeTab ? 'var(--ac)' : 'transparent';
+      });
+      renderTable();
+    });
+    tabBar.appendChild(tabEl);
+  });
+  page.appendChild(tabBar);
 
+  // 검색 필터
   const searchInp = h('input', { class: 'inp search', placeholder: '정책 이름 검색...', type: 'text' });
   const activeSelect = h('select', { class: 'inp', style: { maxWidth: '120px' } },
     h('option', { value: '' }, '전체'),
     h('option', { value: 'true' }, '활성'),
     h('option', { value: 'false' }, '비활성')
   );
+  page.appendChild(h('div', { class: 'fb', style:'margin-bottom:16px' }, searchInp, activeSelect));
 
-  const tableWrap = h('div', {});
+  // KPI 카드
+  const active = DUMMY.policies.filter(p => p.active).length;
+  const kpiWrap = h('div', { class: 'grid-4 section-gap' });
+  function renderKPI() {
+    const tabPolicies = activeTab === '전체' ? DUMMY.policies : DUMMY.policies.filter(p => p.type === activeTab);
+    const act = tabPolicies.filter(p => p.active).length;
+    kpiWrap.innerHTML = '';
+    kpiWrap.appendChild(mkKPI('전체 정책', tabPolicies.length, '', ''));
+    kpiWrap.appendChild(mkKPI('활성 정책', act, '', 'ok'));
+    kpiWrap.appendChild(mkKPI('비활성', tabPolicies.length - act, '', 'err'));
+    kpiWrap.appendChild(mkKPI('적용 그룹', tabPolicies.reduce((a,p)=>a+p.appliedCount,0), '총 그룹 적용 수', 'ac'));
+  }
+  page.appendChild(kpiWrap);
+
+  const POL_PAGE_SIZE = 20;
+  let polPage = 1;
+
+  const tableWrap = h('div', { style:'overflow-y:auto;max-height:calc(100vh - 360px)' });
+  const pageWrap = h('div', { style:'display:flex;align-items:center;justify-content:space-between;margin-top:8px;font-size:13px;color:#64748b;flex-shrink:0' });
+
   function renderTable() {
+    renderKPI();
     const q = searchInp.value.toLowerCase();
     const a = activeSelect.value;
     const filtered = DUMMY.policies.filter(p => {
+      if (activeTab !== '전체' && p.type !== activeTab) return false;
       if (q && !p.name.toLowerCase().includes(q)) return false;
       if (a !== '' && String(p.active) !== a) return false;
       return true;
     });
+
+    const totalPages = Math.max(1, Math.ceil(filtered.length / POL_PAGE_SIZE));
+    if (polPage > totalPages) polPage = 1;
+    const pageData = filtered.slice((polPage-1)*POL_PAGE_SIZE, polPage*POL_PAGE_SIZE);
+
     tableWrap.innerHTML = '';
     tableWrap.appendChild(mkTable([
+      { key:'type', label:'탐지 유형', width:'90px', render:(_,r) => policyTypeBadge(r) },
       { key:'name', label:'정책 이름', render:(v,r)=>{const a=h('a',{href:'#'},v);a.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();openPanel(renderPolicyDetailPanel(r.policyId))});return a;}},
       { key:'desc', label:'설명' },
-      { key:'categories', label:'탐지 카테고리', render: v => h('div', { style:'display:flex;flex-direction:column;gap:4px' }, ...(v||[]).map(c => catBadge(c))) },
+      { key:'_detect', label:'탐지 내용', render:(_,r) => h('span',{style:'font-size:13px;color:#374151'}, policyDetectSummary(r)) },
       { key:'appliedCount', label:'적용 그룹', width:'90px', render: v => `${v}개` },
       { key:'active', label:'상태', width:'80px', render: v => v ? mkBd('bdg-ok','활성') : mkBd('bdg-err','비활성') },
       { key:'updatedAt', label:'수정일', render: v => fmtD(v) },
-    ], filtered, (row) => openPanel(renderPolicyDetailPanel(row.policyId))));
-  }
-  searchInp.addEventListener('input', renderTable);
-  activeSelect.addEventListener('change', renderTable);
+    ], pageData, (row) => openPanel(renderPolicyDetailPanel(row.policyId))));
 
-  page.appendChild(h('div', { class: 'fb' }, searchInp, activeSelect));
+    pageWrap.innerHTML = '';
+    pageWrap.appendChild(mkPagination(polPage, totalPages, (p) => { polPage = p; renderTable(); }));
+  }
+  searchInp.addEventListener('input', () => { polPage = 1; renderTable(); });
+  activeSelect.addEventListener('change', () => { polPage = 1; renderTable(); });
+
   page.appendChild(tableWrap);
+  page.appendChild(pageWrap);
   renderTable();
   return page;
 }
@@ -686,7 +888,7 @@ function renderPolicyDetail(id) {
   const descInp = h('textarea', { class: 'inp', style:{ minHeight:'80px' } }, policy.desc);
   const typeChecks = ['선정성','도박','폭력','혐오','마약','기타'].map(t => {
     const chk = h('input', { type: 'checkbox' });
-    if (policy.types.includes(t)) chk.checked = true;
+    if (policy.type === t) chk.checked = true;
     return { el: h('label', { class: 'checkbox-row' }, chk, t), input: chk, label: t };
   });
   const activeCheck = h('input', { type: 'checkbox' });
@@ -713,8 +915,16 @@ function renderPolicyDetail(id) {
   // Applied groups
   page.appendChild(h('div', { class: 'card-title mt-20 mb-16' }, `적용 그룹 (${policy.appliedCount}개)`));
   page.appendChild(mkTable([
-    { key:'name', label:'그룹 이름', render:(v,r)=>{const a=h('a',{href:'#'},v);a.addEventListener('click',e=>{e.preventDefault();navigate('groups-detail',r.groupId)});return a;}},
-    { key:'grade', label:'학년/반', render:(v,r)=>`${r.grade}학년 ${r.cls}반`},
+    { key:'_school', label:'학교', render:(_,r)=>{
+      const sch = DUMMY.schools.find(s => s.schoolId === r.schoolId) || {};
+      const a = h('a',{href:'#'}, sch.name || r.name);
+      a.addEventListener('click',e=>{e.preventDefault();navigate('groups-detail',r.groupId)});
+      return a;
+    }},
+    { key:'_type', label:'학교유형', width:'90px', render:(_,r)=>{
+      const sch = DUMMY.schools.find(s => s.schoolId === r.schoolId) || {};
+      return sch.type || '—';
+    }},
     { key:'deviceCount', label:'단말 수', width:'80px', render:v=>`${v}대`},
     { key:'status', label:'상태', width:'80px', render:v=>statusBadge(v)},
   ], appliedGroups));
@@ -734,86 +944,64 @@ function renderDetections() {
   ));
 
   const typeCounts = DUMMY.detections.reduce((acc,d) => { acc[d.type]=(acc[d.type]||0)+1; return acc; }, {});
-  page.appendChild(h('div', { class: 'grid-4 section-gap' },
+  page.appendChild(h('div', { class: 'grid-3 section-gap' },
     mkKPI('전체 탐지', DUMMY.detections.length, '', ''),
     mkKPI('선정성', typeCounts['선정성']||0, '', 'err'),
-    mkKPI('도박', typeCounts['도박']||0, '', 'warn'),
-    mkKPI('기타 유해', (typeCounts['폭력']||0)+(typeCounts['혐오']||0)+(typeCounts['마약']||0), '폭력+혐오+마약', 'ac')
+    mkKPI('도박', typeCounts['도박']||0, '', 'warn')
   ));
 
-  let activeTab = 'all';
-  const tableWrap = h('div', {});
-  const searchInp = h('input', { class: 'inp search', placeholder: '그룹 또는 단말 검색...', type: 'text' });
-  const statusSelect = h('select', { class: 'inp', style:{ maxWidth:'130px' } },
-    h('option', { value: '' }, '전체 상태'),
-    h('option', { value: 'confirmed' }, '확인됨'),
-    h('option', { value: 'reviewing' }, '검토중'),
-    h('option', { value: 'dismissed' }, '무시됨')
-  );
-  const dateInp = h('input', { class: 'inp', type: 'date', style: { maxWidth: '160px' } });
+  const DET_PAGE_SIZE = 20;
+  let detPage = 1;
 
-  function thumbEl(seed) {
-    let blurred = true;
-    const img = h('img', {
-      src: `https://picsum.photos/seed/${seed}/56/56`,
-      style: 'width:44px;height:44px;object-fit:cover;border-radius:6px;border:1px solid var(--bd);flex-shrink:0;display:block;filter:blur(8px);transition:filter .2s',
-      loading: 'lazy'
-    });
-    const eyeSvg = document.createElementNS('http://www.w3.org/2000/svg','svg');
-    eyeSvg.setAttribute('width','18'); eyeSvg.setAttribute('height','18'); eyeSvg.setAttribute('viewBox','0 0 24 24'); eyeSvg.setAttribute('fill','none'); eyeSvg.setAttribute('stroke','#fff'); eyeSvg.setAttribute('stroke-width','2'); eyeSvg.setAttribute('stroke-linecap','round'); eyeSvg.setAttribute('stroke-linejoin','round');
-    eyeSvg.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
-    const eyeBtn = h('div', {
-      style: 'position:absolute;inset:0;display:flex;align-items:center;justify-content:center;cursor:pointer;background:rgba(0,0,0,0.3);border-radius:6px;transition:opacity .2s',
-      title: '보기'
-    });
-    eyeBtn.appendChild(eyeSvg);
-    const wrap = h('div', { style:'position:relative;width:44px;height:44px;flex-shrink:0;overflow:hidden;border-radius:6px' }, img, eyeBtn);
-    wrap.addEventListener('click', (e) => {
-      e.stopPropagation();
-      blurred = !blurred;
-      img.style.filter = blurred ? 'blur(8px)' : 'none';
-      eyeBtn.style.opacity = blurred ? '1' : '0';
-    });
-    return wrap;
-  }
+  let activeTab = 'all';
+  const tableWrap = h('div', { style:'overflow-y:auto;max-height:calc(100vh - 360px)' });
+  const pageWrap = h('div', { style:'display:flex;align-items:center;justify-content:space-between;margin-top:8px;font-size:13px;color:#64748b;flex-shrink:0' });
+  const searchInp = h('input', { class: 'inp search', placeholder: '단말 검색...', type: 'text' });
+  const dateInp = h('input', { class: 'inp', type: 'date', style: { maxWidth: '160px' } });
 
   function renderTable() {
     const q = searchInp.value.toLowerCase();
-    const s = statusSelect.value;
     const d = dateInp.value;
     let data = DUMMY.detections;
     if (activeTab !== 'all') data = data.filter(e => e.type === activeTab);
     data = data.filter(e => {
-      if (q && !e.groupName.toLowerCase().includes(q) && !e.deviceName.toLowerCase().includes(q)) return false;
-      if (s && e.status !== s) return false;
+      if (q && !e.deviceName.toLowerCase().includes(q)) return false;
       if (d && !e.detectedAt.startsWith(d)) return false;
       return true;
     });
+
+    const totalPages = Math.max(1, Math.ceil(data.length / DET_PAGE_SIZE));
+    if (detPage > totalPages) detPage = 1;
+    const pageData = data.slice((detPage-1)*DET_PAGE_SIZE, detPage*DET_PAGE_SIZE);
+
     tableWrap.innerHTML = '';
     tableWrap.appendChild(mkTable([
-      { key:'thumb', label:'', width:'60px', render:(_,r) => thumbEl(r.thumb) },
       { key:'detectedAt', label:'탐지 시각', width:'150px', render: v => fmtDT(v) },
       { key:'type', label:'유형', width:'80px', render: v => detTypeBadge(v) },
-      { key:'groupName', label:'그룹', width:'110px' },
       { key:'deviceName', label:'단말', width:'100px' },
       { key:'policy', label:'탐지 정책' },
-      { key:'status', label:'상태', width:'90px', render: v => statusBadge(v) },
-    ], data, row => navigate('detections-detail', row.detId)));
+      { key:'content', label:'URL/도메인', width:'160px', render:(v,r) => {
+        if (!r || r.type !== '도박' || !v || !v.length) return h('span',{style:'color:#94a3b8'},'—');
+        return h('span', { style:'font-size:12px;color:#475569;font-family:monospace' }, v[0]);
+      }},
+    ], pageData, row => navigate('detections-detail', row.detId)));
+
+    pageWrap.innerHTML = '';
+    pageWrap.appendChild(mkPagination(detPage, totalPages, (p) => { detPage = p; renderTable(); }));
   }
-  searchInp.addEventListener('input', renderTable);
-  statusSelect.addEventListener('change', renderTable);
-  dateInp.addEventListener('change', renderTable);
+  searchInp.addEventListener('input', () => { detPage = 1; renderTable(); });
+  dateInp.addEventListener('change', () => { detPage = 1; renderTable(); });
 
   const tabs = h('div', { class: 'tabs' },
     ...[
       { id:'all', label:`전체 (${DUMMY.detections.length})` },
       { id:'선정성', label:`선정성 (${typeCounts['선정성']||0})` },
       { id:'도박', label:`도박 (${typeCounts['도박']||0})` },
-      { id:'폭력', label:`폭력 (${typeCounts['폭력']||0})` },
     ].map(t => {
       const tab = h('div', { class: 'tab' + (t.id === activeTab ? ' a' : '') }, t.label);
       tab.addEventListener('click', () => {
         activeTab = t.id;
+        detPage = 1;
         tabs.querySelectorAll('.tab').forEach(el => el.classList.remove('a'));
         tab.classList.add('a');
         renderTable();
@@ -822,8 +1010,9 @@ function renderDetections() {
     })
   );
   page.appendChild(tabs);
-  page.appendChild(h('div', { class: 'fb' }, searchInp, statusSelect, dateInp));
+  page.appendChild(h('div', { class: 'fb' }, searchInp, dateInp));
   page.appendChild(tableWrap);
+  page.appendChild(pageWrap);
   renderTable();
   return page;
 }
@@ -836,31 +1025,7 @@ function renderDetectionDetailPanel(id) {
   const statusEl = h('dd', {}, statusBadge(currentStatus));
   const noteInp = h('textarea', { class:'inp', placeholder:'처리 메모 입력...', style:'min-height:72px' });
 
-  let detailBlurred = true;
-  const img = h('img', {
-    src: `https://picsum.photos/seed/${det.thumb}/480/270`,
-    style: 'width:100%;height:200px;object-fit:cover;border-radius:var(--radius-sm);border:1px solid var(--bd);display:block;filter:blur(16px);transition:filter .2s',
-    loading: 'lazy'
-  });
-
-  const detailEyeSvg = document.createElementNS('http://www.w3.org/2000/svg','svg');
-  detailEyeSvg.setAttribute('width','28'); detailEyeSvg.setAttribute('height','28'); detailEyeSvg.setAttribute('viewBox','0 0 24 24'); detailEyeSvg.setAttribute('fill','none'); detailEyeSvg.setAttribute('stroke','#fff'); detailEyeSvg.setAttribute('stroke-width','2'); detailEyeSvg.setAttribute('stroke-linecap','round'); detailEyeSvg.setAttribute('stroke-linejoin','round');
-  detailEyeSvg.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
-  const detailEyeBtn = h('div', {
-    style: 'position:absolute;inset:0;display:flex;align-items:center;justify-content:center;cursor:pointer;background:rgba(0,0,0,0.3);border-radius:var(--radius-sm);transition:opacity .2s',
-    title: '보기'
-  });
-  detailEyeBtn.appendChild(detailEyeSvg);
-  const imgWrap = h('div', { style:'position:relative;margin-bottom:16px;overflow:hidden;border-radius:var(--radius-sm)' }, img, detailEyeBtn);
-  img.style.marginBottom = '0';
-  imgWrap.addEventListener('click', () => {
-    detailBlurred = !detailBlurred;
-    img.style.filter = detailBlurred ? 'blur(16px)' : 'none';
-    detailEyeBtn.style.opacity = detailBlurred ? '1' : '0';
-  });
-
   const body = h('div', {},
-    imgWrap,
     h('dl', { class:'info-row' },
       h('dt',{},'탐지 시각'), h('dd',{},fmtDT(det.detectedAt)),
       h('dt',{},'탐지 유형'), h('dd',{},detTypeBadge(det.type)),
@@ -939,7 +1104,12 @@ function renderUserList() {
     h('option', { value: 'inactive' }, '비활성')
   );
 
-  const tableWrap = h('div', {});
+  const USR_PAGE_SIZE = 20;
+  let usrPage = 1;
+
+  const tableWrap = h('div', { style:'overflow-y:auto;max-height:calc(100vh - 340px)' });
+  const pageWrap = h('div', { style:'display:flex;align-items:center;justify-content:space-between;margin-top:8px;font-size:13px;color:#64748b;flex-shrink:0' });
+
   function renderTable() {
     const q = searchInp.value.toLowerCase();
     const r = roleSelect.value;
@@ -950,6 +1120,10 @@ function renderUserList() {
       if (s && u.status !== s) return false;
       return true;
     });
+    const totalPages = Math.max(1, Math.ceil(filtered.length / USR_PAGE_SIZE));
+    if (usrPage > totalPages) usrPage = 1;
+    const pageData = filtered.slice((usrPage-1)*USR_PAGE_SIZE, usrPage*USR_PAGE_SIZE);
+
     const roleLabel = { admin:'관리자', staff:'운영자', teacher:'교사' };
     tableWrap.innerHTML = '';
     tableWrap.appendChild(mkTable([
@@ -961,17 +1135,27 @@ function renderUserList() {
       }},
       { key:'contact', label:'연락처', width:'130px' },
       { key:'status', label:'상태', width:'80px', render: v => statusBadge(v) },
-      { key:'assignments', label:'담당 학급', render: v => v.length > 0 ? v.map(a=>`${a.grade}학년 ${a.cls}반`).join(', ') : '—' },
+      { key:'assignments', label:'담당 학교', render: v => {
+        if (!v || v.length === 0) return '—';
+        return v.map(a => {
+          const grp = DUMMY.groups.find(g => g.groupId === a.groupId);
+          const sch = grp ? DUMMY.schools.find(s => s.schoolId === grp.schoolId) : null;
+          return sch ? sch.name : '—';
+        }).filter((n,i,arr)=>arr.indexOf(n)===i).join(', ');
+      }},
       { key:'lastLogin', label:'최근 로그인', render: v => fmtDT(v) },
-      { key:'_act', label:'', width:'60px', render:(_,r2)=>{const btn=h('button',{class:'btn btn-outline btn-xs'},'편집');btn.addEventListener('click',e=>{e.stopPropagation();navigate('users-detail',r2.userId);});return btn;}},
-    ], filtered, (row) => navigate('users-detail', row.userId)));
+    ], pageData, (row) => navigate('users-detail', row.userId)));
+
+    pageWrap.innerHTML = '';
+    pageWrap.appendChild(mkPagination(usrPage, totalPages, (p) => { usrPage = p; renderTable(); }));
   }
-  searchInp.addEventListener('input', renderTable);
-  roleSelect.addEventListener('change', renderTable);
-  statusSelect.addEventListener('change', renderTable);
+  searchInp.addEventListener('input', () => { usrPage = 1; renderTable(); });
+  roleSelect.addEventListener('change', () => { usrPage = 1; renderTable(); });
+  statusSelect.addEventListener('change', () => { usrPage = 1; renderTable(); });
 
   page.appendChild(h('div', { class: 'fb' }, searchInp, roleSelect, statusSelect));
   page.appendChild(tableWrap);
+  page.appendChild(pageWrap);
   renderTable();
   return page;
 }
@@ -1104,10 +1288,10 @@ function renderUserDetail(id) {
           h('div',{class:'empty-title'},'담당 학급이 없습니다')
         ));
       } else {
-        const groups = assignments.map(a => DUMMY.groups.find(g => g.grade===a.grade && g.cls===a.cls)).filter(Boolean);
+        const groups = assignments.map(a => DUMMY.groups.find(g => g.groupId===a.groupId)).filter(Boolean);
         tabContent.appendChild(mkTable([
           { key:'name', label:'그룹 이름', render:(v,r)=>{const a=h('a',{href:'#'},v);a.addEventListener('click',e=>{e.preventDefault();navigate('groups-detail',r.groupId)});return a;}},
-          { key:'grade', label:'학년/반', render:(v,r)=>`${r.grade}학년 ${r.cls}반`},
+          { key:'schoolId', label:'학교', render:(v)=>{ const s=DUMMY.schools.find(sc=>sc.schoolId===v); return s?s.name:'—'; }},
           { key:'deviceCount', label:'단말 수', width:'80px', render:v=>`${v}대`},
           { key:'pauseStatus', label:'탐지 중단', width:'100px', render:v=>v==='paused'?mkBd('bdg-warn','중단중'):mkBd('bdg-ok','정상')},
         ], groups));
@@ -1158,7 +1342,7 @@ function renderPauseList() {
       h('div', { class: 'ph-sub' }, '현재 진행 중인 탐지 중단 상태를 확인합니다')
     ),
     h('div', { class: 'ph-actions' },
-      h('button', { class: 'btn btn-p', onClick: () => navigate('pauses-new') }, '+ 중단 설정')
+      h('button', { class: 'btn btn-p', onClick: () => openPanel(renderPauseNewPanel()) }, '+ 중단 설정')
     )
   ));
 
@@ -1172,17 +1356,27 @@ function renderPauseList() {
     mkKPI('취소', cancelled.length, '수동 취소됨', '')
   ));
 
-  const tableWrap = h('div', {});
+  const PAUSE_PAGE_SIZE = 20;
+  let pausePage = 1;
+
+  const tableWrap = h('div', { style:'overflow-y:auto;max-height:calc(100vh - 320px)' });
+  const pageWrap = h('div', { style:'display:flex;align-items:center;justify-content:space-between;margin-top:8px;font-size:13px;color:#64748b;flex-shrink:0' });
+
   function renderTable() {
+    const data = DUMMY.pauses;
+    const totalPages = Math.max(1, Math.ceil(data.length / PAUSE_PAGE_SIZE));
+    if (pausePage > totalPages) pausePage = 1;
+    const pageData = data.slice((pausePage-1)*PAUSE_PAGE_SIZE, pausePage*PAUSE_PAGE_SIZE);
+
     tableWrap.innerHTML = '';
     tableWrap.appendChild(mkTable([
-      { key:'grade', label:'학년/반', render:(v,r)=>`${r.grade}학년 ${r.cls}반` },
+      { key:'groupId', label:'학교', width:'120px', render: v => {
+        const grp = DUMMY.groups.find(g => g.groupId === v);
+        const sch = grp ? DUMMY.schools.find(s => s.schoolId === grp.schoolId) : null;
+        return sch ? sch.name : '—';
+      }},
       { key:'pauseType', label:'중단 유형', width:'90px' },
       { key:'requester', label:'요청자', width:'90px' },
-      { key:'requesterRole', label:'요청자 역할', width:'100px', render: v => {
-        const map = { admin:'관리자', staff:'운영자', teacher:'교사' };
-        return h('span', { class: 'text-t2' }, map[v] || v);
-      }},
       { key:'startAt', label:'시작 시각', render: v => fmtDT(v) },
       { key:'endAt',   label:'종료 시각', render: v => fmtDT(v) },
       { key:'reason',  label:'사유' },
@@ -1191,36 +1385,30 @@ function renderPauseList() {
         if (v==='EXPIRED') return mkBd('bdg-muted','만료');
         return mkBd('bdg-muted','취소');
       }},
-      { key:'_act', label:'', width:'80px', render:(_,r)=>{
-        if (r.status !== 'ACTIVE') return h('span',{class:'text-t3'},'—');
-        const btn = h('button', { class: 'btn btn-xs btn-warn' }, '중단 해제');
-        btn.addEventListener('click', e => {
-          e.stopPropagation();
-          confirm(`${r.grade}학년 ${r.cls}반 탐지 중단을 해제하시겠습니까?`, () => {
-            r.status = 'CANCELLED';
-            r.cancelReason = '관리자 수동 취소';
-            toast('탐지 중단이 해제되었습니다.', 'warn');
-            renderTable();
-          });
-        });
-        return btn;
-      }},
-    ], DUMMY.pauses));
+    ], pageData, row => openPanel(renderPauseDetailPanel(row, renderTable))));
+
+    pageWrap.innerHTML = '';
+    pageWrap.appendChild(mkPagination(pausePage, totalPages, (p) => { pausePage = p; renderTable(); }));
   }
   renderTable();
   page.appendChild(tableWrap);
+  page.appendChild(pageWrap);
   return page;
 }
 
 /* ----------------------------------------------------------
    PAUSE NEW
 ---------------------------------------------------------- */
+function genPauseCode() {
+  return String(Math.floor(1000 + Math.random() * 9000));
+}
+
 function renderPauseNew() {
   const page = h('div', {});
   page.appendChild(h('div', { class: 'ph' },
     h('div', { class: 'ph-left' },
       h('div', { class: 'ph-title' }, '탐지 중단 설정'),
-      h('div', { class: 'ph-sub' }, '특정 학급의 탐지를 일시적으로 중단합니다')
+      h('div', { class: 'ph-sub' }, '단말기에서 인증 코드를 입력하면 설정한 시간까지 탐지가 중단됩니다')
     )
   ));
 
@@ -1228,52 +1416,55 @@ function renderPauseNew() {
     '⚠️ 탐지 중단 중에는 해당 그룹의 유해 콘텐츠가 탐지되지 않습니다. 반드시 사유를 명확히 기록해주세요.'
   ));
 
-  const gradeSelect = h('select', { class: 'inp' },
-    h('option',{value:''},'학년 선택'),
-    h('option',{value:'1'},'1학년'),h('option',{value:'2'},'2학년'),h('option',{value:'3'},'3학년')
+  // 4-digit code
+  let code = genPauseCode();
+  const codeDisplay = h('div', { style:'font-size:36px;font-weight:700;letter-spacing:12px;color:#1e293b;text-align:center;padding:16px 0' }, code);
+  const regenBtn = h('button', { class:'btn btn-outline btn-sm' }, '재생성');
+  regenBtn.addEventListener('click', () => { code = genPauseCode(); codeDisplay.textContent = code; });
+
+  const inputTimeSelect = h('select', { class: 'inp' },
+    h('option',{value:'1'},'1분'),
+    h('option',{value:'3'},'3분'),
+    h('option',{value:'5'},'5분'),
+    h('option',{value:'10'},'10분')
   );
-  const clsSelect = h('select', { class: 'inp' },
-    h('option',{value:''},'반 선택'),
-    ...[1,2,3,4,5].map(i=>h('option',{value:String(i)},i+'반'))
+  inputTimeSelect.value = '3';
+
+  const durHourSel = h('input', { class:'inp', type:'number', min:'0', max:'72', value:'1', style:'width:70px;text-align:center' });
+  const durMinSel  = h('input', { class:'inp', type:'number', min:'0', max:'59', value:'0',  style:'width:70px;text-align:center' });
+  const durationRow = h('div', { style:'display:flex;align-items:center;gap:6px' },
+    durHourSel, h('span', { style:'color:#374151;font-size:14px' }, '시간'),
+    durMinSel,  h('span', { style:'color:#374151;font-size:14px' }, '분 후')
   );
+
   const typeSelect = h('select', { class: 'inp' },
     h('option',{value:'전체'},'전체 탐지 중단'),
     h('option',{value:'선정성'},'선정성 탐지만'),
-    h('option',{value:'도박'},'도박 탐지만'),
-    h('option',{value:'폭력'},'폭력 탐지만')
+    h('option',{value:'도박'},'도박 탐지만')
   );
-  const startInp = h('input', { class: 'inp', type: 'datetime-local' });
-  const endInp   = h('input', { class: 'inp', type: 'datetime-local' });
-  const reasonInp= h('textarea', { class: 'inp', placeholder: '탐지 중단 사유를 입력하세요 (예: 성교육 수업, 체험학습 등)', style:{minHeight:'80px'} });
 
-  // Set default values
-  const now = new Date();
-  const pad = n => String(n).padStart(2,'0');
-  const nowStr = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
-  startInp.value = nowStr;
-  const end = new Date(now.getTime() + 4*60*60*1000);
-  endInp.value = `${end.getFullYear()}-${pad(end.getMonth()+1)}-${pad(end.getDate())}T${pad(end.getHours())}:${pad(end.getMinutes())}`;
+  const reasonInp = h('textarea', { class: 'inp', placeholder: '탐지 중단 사유를 입력하세요 (예: 성교육 수업, 체험학습 등)', style:{minHeight:'80px'} });
+  const requesterEl = h('div', { style:'padding:6px 0;font-size:14px;color:#374151' }, D.user.name);
 
   function submit() {
-    [gradeSelect, clsSelect, startInp, endInp, reasonInp].forEach(el => el.classList.remove('error'));
-    let valid = true;
-    if (!gradeSelect.value) { gradeSelect.classList.add('error'); valid = false; }
-    if (!clsSelect.value) { clsSelect.classList.add('error'); valid = false; }
-    if (!startInp.value) { startInp.classList.add('error'); valid = false; }
-    if (!endInp.value) { endInp.classList.add('error'); valid = false; }
-    if (!reasonInp.value.trim()) { reasonInp.classList.add('error'); valid = false; }
-    if (!valid) { toast('필수 항목을 입력해주세요.','err'); return; }
-    if (new Date(endInp.value) <= new Date(startInp.value)) {
-      endInp.classList.add('error'); toast('종료 시각은 시작 시각보다 이후여야 합니다.','err'); return;
-    }
-    toast('탐지 중단이 설정되었습니다.');
+    reasonInp.classList.remove('error');
+    const totalMin = (parseInt(durHourSel.value)||0)*60 + (parseInt(durMinSel.value)||0);
+    if (totalMin <= 0) { toast('해제 시간을 1분 이상 설정해주세요.','err'); return; }
+    if (!reasonInp.value.trim()) { reasonInp.classList.add('error'); toast('중단 사유를 입력해주세요.','err'); return; }
     navigate('pauses-list');
+    showPauseActiveModal(code, parseInt(inputTimeSelect.value));
   }
 
   const card = h('div', { class: 'card', style:{ maxWidth:'600px' } },
-    h('div', { class: 'form-row section-gap' }, fg('학년', gradeSelect, true), fg('반', clsSelect, true)),
+    h('div', { class:'section-gap', style:'text-align:center' },
+      h('div', { style:'font-size:13px;color:#64748b;margin-bottom:4px' }, '단말기 입력 인증 코드'),
+      codeDisplay,
+      regenBtn
+    ),
+    h('div', { class: 'section-gap' }, fg('코드 입력 시간', inputTimeSelect, true)),
     h('div', { class: 'section-gap' }, fg('중단 유형', typeSelect, true)),
-    h('div', { class: 'form-row section-gap' }, fg('시작 시각', startInp, true), fg('종료 시각', endInp, true)),
+    h('div', { class: 'section-gap' }, h('div', { class:'fg' }, h('label',{},'탐지 중단 해제 *'), durationRow)),
+    h('div', { class: 'section-gap' }, h('div', { class:'fg' }, h('label',{},'요청자'), requesterEl)),
     h('div', { class: 'section-gap' }, fg('중단 사유', reasonInp, true)),
     h('div', { class: 'flex gap-8 mt-20' },
       h('button', { class: 'btn btn-outline', onClick: () => navigate('pauses-list') }, '취소'),
@@ -1297,9 +1488,9 @@ function renderPauseHistory() {
   ));
 
   const searchInp = h('input', { class: 'inp search', placeholder: '요청자 검색...', type: 'text' });
-  const gradeSelect = h('select', { class: 'inp', style:{ maxWidth:'120px' } },
-    h('option',{value:''},'전체 학년'),
-    h('option',{value:'1'},'1학년'),h('option',{value:'2'},'2학년'),h('option',{value:'3'},'3학년')
+  const schoolTypeSelect = h('select', { class: 'inp', style:{ maxWidth:'130px' } },
+    h('option',{value:''},'전체 학교유형'),
+    ...([...new Set(DUMMY.schools.map(s=>s.type))]).map(t=>h('option',{value:t},t))
   );
   const statusSelect = h('select', { class: 'inp', style:{ maxWidth:'120px' } },
     h('option',{value:''},'전체 상태'),
@@ -1311,17 +1502,25 @@ function renderPauseHistory() {
   const tableWrap = h('div', {});
   function renderTable() {
     const q = searchInp.value.toLowerCase();
-    const g = gradeSelect.value;
+    const st = schoolTypeSelect.value;
     const s = statusSelect.value;
     const filtered = DUMMY.pauses.filter(p => {
       if (q && !p.requester.toLowerCase().includes(q)) return false;
-      if (g && String(p.grade) !== g) return false;
+      if (st) {
+        const grp = DUMMY.groups.find(g => g.groupId === p.groupId);
+        const sch = grp ? DUMMY.schools.find(sc => sc.schoolId === grp.schoolId) : null;
+        if (!sch || sch.type !== st) return false;
+      }
       if (s && p.status !== s) return false;
       return true;
     });
     tableWrap.innerHTML = '';
     tableWrap.appendChild(mkTable([
-      { key:'grade', label:'학년/반', width:'100px', render:(v,r)=>`${r.grade}학년 ${r.cls}반` },
+      { key:'groupId', label:'학교', width:'110px', render: v => {
+        const grp = DUMMY.groups.find(g => g.groupId === v);
+        const sch = grp ? DUMMY.schools.find(sc => sc.schoolId === grp.schoolId) : null;
+        return sch ? sch.name : '—';
+      }},
       { key:'pauseType', label:'유형', width:'90px' },
       { key:'requester', label:'요청자', width:'90px' },
       { key:'startAt', label:'시작', render:v=>fmtDT(v) },
@@ -1336,10 +1535,10 @@ function renderPauseHistory() {
     ], filtered));
   }
   searchInp.addEventListener('input', renderTable);
-  gradeSelect.addEventListener('change', renderTable);
+  schoolTypeSelect.addEventListener('change', renderTable);
   statusSelect.addEventListener('change', renderTable);
 
-  page.appendChild(h('div', { class: 'fb' }, searchInp, gradeSelect, statusSelect));
+  page.appendChild(h('div', { class: 'fb' }, searchInp, schoolTypeSelect, statusSelect));
   page.appendChild(tableWrap);
   renderTable();
   return page;
@@ -1349,66 +1548,115 @@ function renderPauseHistory() {
    LICENSES
 ---------------------------------------------------------- */
 function renderLicenses() {
-  const lic = DUMMY.licenses;
+  const lics = DUMMY.licenses;
   const page = h('div', {});
+
+  const totDevices = DUMMY.licensesTotal;
+  const totUsed    = DUMMY.licensesUsed;
+  const totPct     = Math.round((totUsed / totDevices) * 100);
+  const remaining  = totDevices - totUsed;
+
   page.appendChild(h('div', { class: 'ph' },
     h('div', { class: 'ph-left' },
       h('div', { class: 'ph-title' }, '라이선스'),
-      h('div', { class: 'ph-sub' }, '라이선스 정보를 확인합니다')
-    )
-  ));
-
-  const usePct = Math.round((lic.usedDevices / lic.devices) * 100);
-  const remaining = lic.devices - lic.usedDevices;
-  const wrap = h('div', { style: { maxWidth: '860px' } });
-
-  wrap.appendChild(h('div', { class: 'grid-4 section-gap' },
-    mkKPI('총 단말 수', lic.devices, '라이선스 한도', ''),
-    mkKPI('사용 단말', lic.usedDevices, `${usePct}% 사용 중`, usePct > 90 ? 'err' : usePct > 70 ? 'warn' : 'ok'),
-    mkKPI('잔여 슬롯', remaining, '추가 등록 가능', 'ac'),
-    mkKPI('유효 기간', fmtD(lic.validTo), `${fmtD(lic.validFrom)} 부터`, '')
-  ));
-
-  const statusBadgeEl = lic.status === 'active' ? mkBd('bdg-ok','활성') : mkBd('bdg-err','만료');
-
-  wrap.appendChild(h('div', { class: 'grid-2 mt-20' },
-    h('div', { class: 'card' },
-      h('div', { class: 'card-title' }, '라이선스 상세'),
-      h('dl', { class: 'info-row' },
-        h('dt',{},'학교명'),       h('dd',{},lic.school),
-        h('dt',{},'라이선스 유형'), h('dd',{},lic.type),
-        h('dt',{},'시리얼 키'),    h('dd',{ style:{fontFamily:'monospace',fontSize:'12px',color:'var(--t2)'} }, lic.serialKey),
-        h('dt',{},'상태'),         h('dd',{},statusBadgeEl),
-        h('dt',{},'유효 시작'),    h('dd',{},fmtD(lic.validFrom)),
-        h('dt',{},'유효 종료'),    h('dd',{},fmtD(lic.validTo)),
-        h('dt',{},'최근 동기화'),  h('dd',{},fmtDT(lic.lastSync))
-      )
+      h('div', { class: 'ph-sub' }, `총 ${lics.length}개 라이선스 등록`)
     ),
-    h('div', { class: 'card' },
-      h('div', { class: 'card-title' }, '단말 사용 현황'),
-      h('div', { class: 'flex-between mb-16' },
-        h('span', { class: 'text-t2' }, `${lic.usedDevices}대 / ${lic.devices}대`),
-        h('span', { class: 'text-t2' }, `${usePct}%`)
-      ),
-      h('div', { class: 'progress-bar', style:{height:'10px'} },
-        h('div', { class: 'progress-fill' + (usePct > 90 ? ' err' : usePct > 70 ? ' warn' : ' ok'),
-          style: { width: usePct + '%' } })
-      ),
-      h('div', { class: 'mt-20' },
-        h('div', { class: 'card-title' }, '지원 정보'),
-        h('dl', { class: 'info-row' },
-          h('dt',{},'담당자'),   h('dd',{},lic.manager),
-          h('dt',{},'이메일'),   h('dd',{},h('a',{href:'mailto:'+lic.supportContact},lic.supportContact)),
-          h('dt',{},'전화번호'), h('dd',{},lic.supportTel)
-        )
-      ),
-      h('div', { class: 'mt-16' },
-        h('button', { class: 'btn btn-p btn-sm', onClick: () => toast('라이선스 갱신 문의를 접수했습니다.','info') }, '갱신 문의'),
-        h('button', { class: 'btn btn-outline btn-sm', style:{marginLeft:'8px'}, onClick: () => toast('동기화 중...','info') }, '🔄 동기화')
-      )
+    h('div', { class: 'ph-actions' },
+      h('button', { class: 'btn btn-p', onClick: () => toast('라이선스 등록은 관리자에게 문의하세요.', 'info') }, '+ 라이선스 등록')
     )
   ));
-  page.appendChild(wrap);
+
+  page.appendChild(h('div', { class: 'grid-4 section-gap' },
+    mkKPI('총 수량', totDevices, '등록된 전체 라이선스', ''),
+    mkKPI('사용 중', totUsed, `${totPct}% 사용`, totPct > 90 ? 'err' : totPct > 70 ? 'warn' : 'ok'),
+    mkKPI('잔여', remaining, '추가 등록 가능', 'ac'),
+    mkKPI('등록 수', lics.length, '라이선스 항목', '')
+  ));
+
+  const searchInp = h('input', { class: 'inp search', placeholder: 'OS 또는 탐지 항목 검색...', type: 'text' });
+  const osSelect  = h('select', { class: 'inp', style: { maxWidth: '140px' } },
+    h('option', { value: '' }, '전체 OS'),
+    ...['Android','iOS','Windows','ChromeBook','WhaleBook'].map(o => h('option', { value: o }, o))
+  );
+  const tableWrap = h('div', {});
+
+  function openLicDetail(lic) {
+    const pct = Math.round((lic.usedDevices / lic.devices) * 100);
+    const pnl = h('div', {},
+      h('div', { style:'padding:24px 24px 16px;border-bottom:1px solid var(--bd)' },
+        h('div', { style:'font-size:16px;font-weight:700;color:var(--t1);margin-bottom:6px' }, `${lic.os} · ${lic.detectionType}`),
+        lic.status === 'active' ? mkBd('bdg-ok','활성') : mkBd('bdg-err','만료')
+      ),
+      h('div', { style:'padding:20px 24px' },
+        h('dl', { class:'info-row' },
+          h('dt',{},'학교명'),       h('dd',{},lic.school),
+          h('dt',{},'라이선스 유형'), h('dd',{},lic.type),
+          h('dt',{},'OS'),           h('dd',{},lic.os),
+          h('dt',{},'탐지 항목'),    h('dd',{},lic.detectionType),
+          h('dt',{},'시리얼 키'),    h('dd',{ style:{fontFamily:'monospace',fontSize:'12px',color:'var(--t2)'} }, lic.serialKey),
+          h('dt',{},'수량'),         h('dd',{},`${lic.devices}대`),
+          h('dt',{},'사용 단말'),    h('dd',{},`${lic.usedDevices} / ${lic.devices}대 (${pct}%)`),
+          h('dt',{},'유효 시작'),    h('dd',{},fmtD(lic.validFrom)),
+          h('dt',{},'유효 종료'),    h('dd',{},fmtD(lic.validTo)),
+          h('dt',{},'최근 동기화'),  h('dd',{},fmtDT(lic.lastSync))
+        ),
+        h('div', { class:'mt-12' },
+          h('div', { class:'progress-bar', style:{height:'8px'} },
+            h('div', { class:`progress-fill${pct>90?' err':pct>70?' warn':' ok'}`, style:{width:pct+'%'} })
+          )
+        ),
+        h('div', { style:'margin-top:20px;padding-top:16px;border-top:1px solid var(--bd)' },
+          h('div', { class:'card-title' }, '지원 정보'),
+          h('dl', { class:'info-row' },
+            h('dt',{},'담당자'),   h('dd',{},lic.manager),
+            h('dt',{},'이메일'),   h('dd',{},h('a',{href:'mailto:'+lic.supportContact},lic.supportContact)),
+            h('dt',{},'전화번호'), h('dd',{},lic.supportTel)
+          )
+        ),
+        h('div', { class:'mt-16' },
+          h('button', { class:'btn btn-p btn-sm', onClick:()=>toast('라이선스 갱신 문의를 접수했습니다.','info') }, '갱신 문의'),
+          h('button', { class:'btn btn-outline btn-sm', style:{marginLeft:'8px'}, onClick:()=>toast('동기화 중...','info') }, '🔄 동기화')
+        )
+      )
+    );
+    openPanel(pnl);
+  }
+
+  function renderTable() {
+    const q  = searchInp.value.toLowerCase();
+    const os = osSelect.value;
+    const filtered = lics.filter(l => {
+      if (os && l.os !== os) return false;
+      if (q && !l.os.toLowerCase().includes(q) && !l.serialKey.toLowerCase().includes(q)) return false;
+      return true;
+    });
+    tableWrap.innerHTML = '';
+    tableWrap.appendChild(mkTable([
+      { key:'os',            label:'OS',       width:'120px', render: v => h('span', { style:'font-weight:600;color:var(--t1)' }, v) },
+      { key:'detectionType', label:'탐지 항목', width:'120px', render: v => {
+        const color = v==='선정성'?'#ef4444':v==='도박'?'#f59e0b':'#3b82f6';
+        return h('span', { style:`display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600;background:${color}18;color:${color}` }, v);
+      }},
+      { key:'devices',       label:'수량',      width:'80px',  render: v => `${v}대` },
+      { key:'usedDevices',   label:'사용 단말',  width:'100px', render: (v,r) => `${v} / ${r.devices}대` },
+      { key:'validFrom',     label:'유효 기간',             render: (v,r) => `${fmtD(v)} ~ ${fmtD(r.validTo)}` },
+      { key:'status',        label:'상태',      width:'80px',  render: v => v==='active' ? mkBd('bdg-ok','활성') : mkBd('bdg-err','만료') },
+    ], filtered, row => openLicDetail(row)));
+  }
+
+  searchInp.addEventListener('input', renderTable);
+  osSelect.addEventListener('change', renderTable);
+
+  page.appendChild(h('div', { class:'fb' }, searchInp, osSelect));
+  page.appendChild(tableWrap);
+  renderTable();
+
+  if (D._autoOpenLicense) {
+    const target = D._autoOpenLicense;
+    D._autoOpenLicense = null;
+    requestAnimationFrame(() => openLicDetail(target));
+  }
+
   return page;
 }
 
@@ -1708,26 +1956,34 @@ function showSelectModal(title, items, labelFn, onConfirm, opts) {
 
   // 검색 필터 영역
   const filterBar = h('div', { style:'display:flex;gap:8px;margin-bottom:10px' });
-  const searchInp = options.gradeFilter ? null : h('input', { class: 'inp', type: 'text', placeholder: '검색...', style:'flex:1' });
+  const searchInp = options.schoolFilter ? null : h('input', { class: 'inp', type: 'text', placeholder: '검색...', style:'flex:1' });
   if (searchInp) filterBar.appendChild(searchInp);
 
-  // 그룹용 학년/반 셀렉트
-  let gradeSelect = null, clsSelect = null;
-  if (options.gradeFilter) {
-    const grades = [...new Set(items.map(i => i.grade))].sort();
-    gradeSelect = h('select', { class:'inp', style:'min-width:100px' },
-      h('option', { value:'' }, '전체 학년'),
-      ...grades.map(g => h('option', { value: String(g) }, g+'학년'))
+  // 그룹용 학교유형/학교 셀렉트
+  let schoolTypeSelect = null, schoolNameSelect = null;
+  if (options.schoolFilter) {
+    const schools = DUMMY.schools;
+    const types = [...new Set(schools.map(s => s.type))];
+    schoolTypeSelect = h('select', { class:'inp', style:'min-width:110px' },
+      h('option', { value:'' }, '전체 학교유형'),
+      ...types.map(t => h('option', { value: t }, t))
     );
-    const clsList = [...new Set(items.map(i => i.cls))].sort((a,b) => a-b);
-    clsSelect = h('select', { class:'inp', style:'min-width:90px' },
-      h('option', { value:'' }, '전체 반'),
-      ...clsList.map(c => h('option', { value: String(c) }, c+'반'))
+    schoolNameSelect = h('select', { class:'inp', style:'min-width:120px' },
+      h('option', { value:'' }, '전체 학교'),
+      ...schools.map(s => h('option', { value: s.schoolId }, s.name))
     );
-    gradeSelect.addEventListener('change', renderList);
-    clsSelect.addEventListener('change', renderList);
-    filterBar.appendChild(gradeSelect);
-    filterBar.appendChild(clsSelect);
+    schoolTypeSelect.addEventListener('change', () => {
+      const tv = schoolTypeSelect.value;
+      schoolNameSelect.innerHTML = '';
+      schoolNameSelect.appendChild(h('option', { value:'' }, '전체 학교'));
+      schools.filter(s => !tv || s.type === tv).forEach(s => {
+        schoolNameSelect.appendChild(h('option', { value: s.schoolId }, s.name));
+      });
+      renderList();
+    });
+    schoolNameSelect.addEventListener('change', renderList);
+    filterBar.appendChild(schoolTypeSelect);
+    filterBar.appendChild(schoolNameSelect);
   }
 
   const listEl = h('div', {});
@@ -1735,21 +1991,24 @@ function showSelectModal(title, items, labelFn, onConfirm, opts) {
   function renderList() {
     listEl.innerHTML = '';
     const q = searchInp ? searchInp.value.toLowerCase() : '';
-    const gv = gradeSelect ? gradeSelect.value : '';
-    const cv = clsSelect ? clsSelect.value : '';
+    const stv = schoolTypeSelect ? schoolTypeSelect.value : '';
+    const snv = schoolNameSelect ? schoolNameSelect.value : '';
     const filtered = items.filter(item => {
       if (q) {
         const lbl = labelFn(item);
         if (!lbl.name.toLowerCase().includes(q) && !(lbl.sub && lbl.sub.toLowerCase().includes(q))) return false;
       }
-      if (gv && String(item.grade) !== gv) return false;
-      if (cv && String(item.cls) !== cv) return false;
+      if (stv) {
+        const school = DUMMY.schools.find(s => s.schoolId === item.schoolId);
+        if (!school || school.type !== stv) return false;
+      }
+      if (snv && item.schoolId !== snv) return false;
       return true;
     });
     if (filtered.length === 0) {
       listEl.appendChild(h('div', { class: 'empty' },
         h('div', { class: 'empty-icon' }, '—'),
-        h('div', { class: 'empty-title' }, q || gv || cv ? '검색 결과가 없습니다.' : '추가 가능한 항목이 없습니다.')
+        h('div', { class: 'empty-title' }, q || stv || snv ? '검색 결과가 없습니다.' : '추가 가능한 항목이 없습니다.')
       ));
     } else {
       filtered.forEach((item, idx) => {
@@ -1810,42 +2069,34 @@ function showSelectModal(title, items, labelFn, onConfirm, opts) {
 function renderGroupNewPanel() {
   const schoolSelect = h('select', { class:'inp' },
     h('option', { value:'' }, '학교 선택'),
-    ...DUMMY.schools.map(s => h('option', { value:s.schoolId }, s.name))
+    ...DUMMY.schools.map(s => h('option', { value:s.schoolId }, `${s.name} (${s.type})`))
   );
-  const gradeInp = h('select', { class: 'inp' },
-    h('option', { value:'' }, '학년 선택'),
-    ...[1,2,3].map(i => h('option', { value:String(i) }, i+'학년'))
-  );
-  const clsInp = h('select', { class: 'inp' },
-    h('option', { value:'' }, '반 선택'),
-    ...[1,2,3,4,5,6].map(i => h('option', { value:String(i) }, i+'반'))
-  );
-  const nameInp = h('input', { class:'inp', placeholder:'예: 1학년 1반', type:'text' });
+  const nameInp = h('input', { class:'inp', placeholder:'그룹 이름', type:'text' });
   const descInp = h('textarea', { class:'inp', placeholder:'그룹 설명 (선택)', style:'min-height:80px' });
   const policySelect = h('select', { class:'inp' },
     h('option', { value:'' }, '정책 선택 (선택)'),
     ...DUMMY.policies.filter(p=>p.active).map(p => h('option', { value:p.policyId }, p.name))
   );
-  const autoName = () => {
-    if (gradeInp.value && clsInp.value) nameInp.value = `${gradeInp.value}학년 ${clsInp.value}반`;
-  };
-  gradeInp.addEventListener('change', autoName);
-  clsInp.addEventListener('change', autoName);
+
+  // 학교 선택 시 학교유형 자동 표시
+  const schoolTypeEl = h('div', { style:'padding:6px 0;font-size:14px;color:#64748b' }, '—');
+  schoolSelect.addEventListener('change', () => {
+    const s = DUMMY.schools.find(sc => sc.schoolId === schoolSelect.value);
+    schoolTypeEl.textContent = s ? s.type : '—';
+  });
 
   const body = h('div', {},
     fg('학교', schoolSelect, true),
-    h('div', { class:'form-row section-gap' }, fg('학년', gradeInp, true), fg('반', clsInp, true)),
+    h('div', { class:'fg' }, h('label',{},'학교유형'), schoolTypeEl),
     fg('그룹 이름', nameInp, true),
     fg('그룹 설명', descInp, false),
     fg('기본 적용 정책', policySelect, false)
   );
 
   function onSave() {
-    [schoolSelect, gradeInp, clsInp, nameInp].forEach(el => el.classList.remove('error'));
+    [schoolSelect, nameInp].forEach(el => el.classList.remove('error'));
     let ok = true;
     if (!schoolSelect.value) { schoolSelect.classList.add('error'); ok = false; }
-    if (!gradeInp.value) { gradeInp.classList.add('error'); ok = false; }
-    if (!clsInp.value) { clsInp.classList.add('error'); ok = false; }
     if (!nameInp.value.trim()) { nameInp.classList.add('error'); ok = false; }
     if (!ok) { toast('필수 항목을 입력해주세요.', 'err'); return; }
     toast('그룹이 생성되었습니다.');
@@ -1875,10 +2126,6 @@ function renderGroupDetailPanel(id) {
       const descInp = h('textarea', { class:'inp', style:'min-height:80px', disabled:!isEditing }, '학급 그룹입니다.');
       if (!isEditing) { nameInp.style.background = '#f8fafc'; descInp.style.background = '#f8fafc'; }
 
-      const gradeInp = h('input', { class:'inp', value:group.grade, type:'number', min:'1', max:'6', disabled:!isEditing });
-      const clsInp   = h('input', { class:'inp', value:group.cls,   type:'number', min:'1', max:'20', disabled:!isEditing });
-      if (!isEditing) { gradeInp.style.background = '#f8fafc'; clsInp.style.background = '#f8fafc'; }
-
       const schoolRow = isEditing
         ? fg('학교', (function(){
             const sel = h('select', { class:'inp' },
@@ -1905,21 +2152,23 @@ function renderGroupDetailPanel(id) {
             h('div', { style:'padding:6px 0' }, statusBadge(group.status))
           );
 
+      const schoolTypeVal = school ? school.type : '—';
+      const schoolTypeRow = h('div', { class:'fg' },
+        h('label',{},'학교유형'),
+        h('div', { style:'padding:6px 0;font-size:14px;color:#64748b' }, schoolTypeVal)
+      );
       tabContent.appendChild(h('div', {},
         schoolRow,
+        schoolTypeRow,
         fg('그룹 이름', nameInp, true),
         fg('설명', descInp, false),
-        h('div', { class:'form-row section-gap' },
-          fg('학년', gradeInp),
-          fg('반',   clsInp)
-        ),
         statusRow,
         h('dl', { class:'info-row mt-16' },
           h('dt',{},'최근 수정'), h('dd',{},fmtD(group.updatedAt))
         )
       ));
     } else if (activeTab === 'devices') {
-      const allDevs = DUMMY.devices.filter(d => d.groupId === id);
+      const allDevs = generateGroupDevices(group);
       const searchInp = h('input', { class:'inp search', placeholder:'단말 이름 또는 식별자 검색...', type:'text', style:'margin-bottom:12px;width:100%' });
       const statusSel = h('select', { class:'inp', style:'margin-bottom:12px;max-width:120px' },
         h('option', { value:'' }, '전체 상태'),
@@ -1927,7 +2176,11 @@ function renderGroupDetailPanel(id) {
         h('option', { value:'offline' }, '오프라인')
       );
       const filterBar = h('div', { style:'display:flex;gap:8px;margin-bottom:12px' }, searchInp, statusSel);
+      const PAGE_SIZE = 20;
+      let currentPage = 1;
       const tableWrap = h('div', {});
+      const pageWrap = h('div', { style:'display:flex;align-items:center;justify-content:space-between;margin-top:10px;font-size:13px;color:#64748b' });
+
       function renderDevTable() {
         const q = searchInp.value.toLowerCase();
         const s = statusSel.value;
@@ -1936,18 +2189,36 @@ function renderGroupDetailPanel(id) {
           if (s && d.status !== s) return false;
           return true;
         });
+        const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+        if (currentPage > totalPages) currentPage = 1;
+        const pageData = filtered.slice((currentPage-1)*PAGE_SIZE, currentPage*PAGE_SIZE)
+          .map((r, i) => ({ ...r, _no: (currentPage-1)*PAGE_SIZE + i + 1 }));
+
         tableWrap.innerHTML = '';
         tableWrap.appendChild(mkTable([
+          { key:'_no', label:'No.', width:'48px' },
           { key:'name', label:'단말 이름' },
           { key:'identifier', label:'식별자' },
-          { key:'status', label:'상태', width:'90px', render: v => statusBadge(v) },
+          { key:'status', label:'상태', width:'80px', render: v => statusBadge(v) },
           { key:'lastContact', label:'최근 접속', render: v => fmtDT(v) },
-        ], filtered, row => showDeviceModal(row.deviceId)));
+        ], pageData, row => showDeviceModal(row.deviceId)));
+
+        pageWrap.innerHTML = '';
+        const prevBtn = h('button', { class:'btn btn-outline btn-sm' }, '← 이전');
+        const nextBtn = h('button', { class:'btn btn-outline btn-sm' }, '다음 →');
+        prevBtn.disabled = currentPage === 1;
+        nextBtn.disabled = currentPage === totalPages;
+        prevBtn.addEventListener('click', () => { currentPage--; renderDevTable(); });
+        nextBtn.addEventListener('click', () => { currentPage++; renderDevTable(); });
+        pageWrap.appendChild(prevBtn);
+        pageWrap.appendChild(h('span', {}, `${currentPage} / ${totalPages} 페이지 (${filtered.length}대)`));
+        pageWrap.appendChild(nextBtn);
       }
-      searchInp.addEventListener('input', renderDevTable);
-      statusSel.addEventListener('change', renderDevTable);
+      searchInp.addEventListener('input', () => { currentPage = 1; renderDevTable(); });
+      statusSel.addEventListener('change', () => { currentPage = 1; renderDevTable(); });
       tabContent.appendChild(filterBar);
       tabContent.appendChild(tableWrap);
+      tabContent.appendChild(pageWrap);
       renderDevTable();
     } else if (activeTab === 'policies') {
       let isPolicyEditing = tabContent._isPolicyEditing || false;
@@ -2032,7 +2303,7 @@ function renderGroupDetailPanel(id) {
         renderSearchResults();
       }
     } else if (activeTab === 'pauses') {
-      const allPauses = DUMMY.pauses.filter(p => p.grade === group.grade && p.cls === group.cls);
+      const allPauses = DUMMY.pauses.filter(p => p.groupId === group.groupId);
       const fromInp = h('input', { class:'inp', type:'date', style:'flex:1' });
       const toInp = h('input', { class:'inp', type:'date', style:'flex:1' });
       const statusSel = h('select', { class:'inp', style:'max-width:100px' },
@@ -2115,7 +2386,7 @@ function renderGroupDetailPanel(id) {
   const tabs = h('div', { class:'tabs' },
     ...[
       { id:'info', label:'기본정보' },
-      { id:'devices', label:`단말목록 (${DUMMY.devices.filter(d=>d.groupId===id).length})` },
+      { id:'devices', label:`단말목록 (${group.deviceCount})` },
       { id:'policies', label:'적용정책' },
       { id:'pauses', label:'탐지중단현황' },
     ].map(t => {
@@ -2138,7 +2409,7 @@ function renderGroupDetailPanel(id) {
   return h('div', { style:'display:flex;flex-direction:column;height:100%' },
     h('div', { class:'mod-h' },
       h('button', { class:'cx', onClick: () => closePanel() }, '✕'),
-      h('h2', {}, group.name)
+      h('h2', {}, (DUMMY.schools.find(s => s.schoolId === group.schoolId) || {}).name || group.name)
     ),
     h('div', { class:'mod-b', style:'flex:1;overflow-y:auto' }, body),
     footerEl
@@ -2168,8 +2439,11 @@ function renderDeviceDetailPanel(id) {
         ? h('div', { class:'card' },
             h('div',{class:'card-title'},policy.name),
             h('div',{style:'color:var(--t2);font-size:13px;margin-top:4px'},policy.desc),
-            h('div',{class:'mt-16'},h('div',{class:'sub-label'},'탐지 유형'),
-              h('div',{class:'flex gap-8 mt-8'},...policy.types.map(t=>detTypeBadge(t)))
+            h('div',{class:'mt-16'},h('div',{class:'sub-label'},'탐지 설정'),
+              h('div',{style:'display:flex;align-items:center;gap:8px;margin-top:8px'},
+                policyTypeBadge(policy),
+                h('span',{style:'font-size:13px;color:#374151'}, policyDetectSummary(policy))
+              )
             )
           )
         : h('div',{class:'empty'},h('div',{class:'empty-title'},'적용된 정책 없음'))
@@ -2241,36 +2515,111 @@ function renderDeviceDetailPanel(id) {
 /* -- Policy New Panel -- */
 function renderPolicyNewPanel() {
   const nameInp = h('input', { class:'inp', placeholder:'정책 이름', type:'text' });
-  const descInp = h('textarea', { class:'inp', placeholder:'설명' });
-  const typeOpts = ['선정성','도박','폭력','기타'];
-  const selectedTypes = new Set();
-  const typeRow = h('div', { class:'flex gap-8' },
-    ...typeOpts.map(t => {
-      const chip = h('div', { class:'chip' }, t);
-      chip.addEventListener('click', () => {
-        if (selectedTypes.has(t)) { selectedTypes.delete(t); chip.classList.remove('sel-wl'); }
-        else { selectedTypes.add(t); chip.classList.add('sel-wl'); }
+  const descInp = h('textarea', { class:'inp', placeholder:'설명', rows:3 });
+
+  // 탐지 유형 상태
+  let selectedType = ''; // '선정성' | '도박'
+  const detState = {
+    '선정성': { detectionItems:[...DETECTION_ITEMS] },
+    '도박': { grade:'하', detectedUrls:[] },
+  };
+
+  const optionsArea = h('div', { style:'margin-top:12px' });
+
+  // 선정성 옵션
+  function renderAdultOptions() {
+    const state = detState['선정성'];
+    const allChk = h('input',{type:'checkbox'});
+    const itemChks = [];
+    function syncAllChk() {
+      const checked = itemChks.filter(c=>c.checked).length;
+      allChk.indeterminate = checked > 0 && checked < itemChks.length;
+      allChk.checked = checked === itemChks.length;
+    }
+    const checks = DETECTION_ITEMS.map(item => {
+      const chk = h('input',{type:'checkbox'});
+      itemChks.push(chk);
+      chk.checked = (state.detectionItems||[]).includes(item);
+      chk.addEventListener('change', () => {
+        if (!state.detectionItems) state.detectionItems = [];
+        if (chk.checked) { if (!state.detectionItems.includes(item)) state.detectionItems.push(item); }
+        else { state.detectionItems = state.detectionItems.filter(i=>i!==item); }
+        syncAllChk();
       });
-      return chip;
-    })
-  );
-  const activeToggle = h('input', { type:'checkbox', checked:true });
-  const body = h('div', {},
+      return h('label',{style:'display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer'},chk,item);
+    });
+    allChk.checked = itemChks.every(c=>c.checked);
+    allChk.addEventListener('change', () => {
+      itemChks.forEach(c => { c.checked = allChk.checked; c.dispatchEvent(new Event('change')); });
+    });
+    const allLabel = h('label',{style:'display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;cursor:pointer;color:#374151'},allChk,'전체 선택');
+    optionsArea.innerHTML = '';
+    optionsArea.appendChild(h('div', { style:'border:1px solid var(--bd);border-radius:8px;padding:14px' },
+      h('div',{style:'font-size:12px;font-weight:600;color:#64748b;margin-bottom:8px'},'탐지 항목'),
+      h('div',{style:'display:flex;flex-wrap:wrap;gap:8px 16px'},allLabel,...checks)
+    ));
+  }
+
+  // 도박 옵션
+  function renderGamblingOptions() {
+    const state = detState['도박'];
+    const gradeSelect = h('select',{class:'inp',style:'max-width:120px'},
+      ...GAMBLING_GRADES.map(g=>h('option',{value:g,selected:state.grade===g},g))
+    );
+    gradeSelect.addEventListener('change',()=>{ state.grade=gradeSelect.value; });
+
+    optionsArea.innerHTML = '';
+    optionsArea.appendChild(h('div',{style:'border:1px solid var(--bd);border-radius:8px;padding:14px'},
+      h('div',{style:'font-size:12px;font-weight:600;color:#64748b;margin-bottom:4px'},'탐지 등급'),
+      gradeSelect
+    ));
+  }
+
+  // 유형 선택 라디오
+  const typeArea = h('div',{style:'display:flex;gap:12px;margin-top:6px'});
+  ['선정성','도박'].forEach(type => {
+    const color = type==='선정성'?'#ef4444':'#f59e0b';
+    const btn = h('div',{
+      style:'padding:10px 20px;border:2px solid var(--bd);border-radius:8px;cursor:pointer;font-weight:700;font-size:14px;color:#64748b;transition:all 0.15s'
+    }, type);
+    btn.addEventListener('click',()=>{
+      selectedType = type;
+      typeArea.querySelectorAll('div').forEach(b=>{ b.style.borderColor='var(--bd)'; b.style.color='#64748b'; b.style.background=''; });
+      btn.style.borderColor = color;
+      btn.style.color = color;
+      btn.style.background = type==='선정성'?'#fef2f2':'#fffbeb';
+      if (type==='선정성') renderAdultOptions();
+      else renderGamblingOptions();
+    });
+    typeArea.appendChild(btn);
+  });
+
+  const activeToggle = h('input',{type:'checkbox',checked:true});
+  const body = h('div',{style:'display:flex;flex-direction:column;gap:12px'},
     fg('정책 이름', nameInp, true),
     fg('설명', descInp, false),
-    h('div', { class:'fg' }, h('label',{},'탐지 유형'), typeRow),
-    h('div', { class:'fg' }, h('label',{},'활성화'), h('label',{class:'tog'},
-      h('div', { class:'tog-track on', onClick: function(){ this.classList.toggle('on'); activeToggle.checked = this.classList.contains('on'); }},
-        h('div',{class:'tog-thumb'})
-      ),
-      h('span',{style:'font-size:13px;color:var(--t1)'},'활성')
-    ))
+    h('div',{class:'fg'},
+      h('label',{},'탐지 유형'),
+      typeArea
+    ),
+    optionsArea,
+    h('div',{class:'fg'},h('label',{},'활성화'),
+      h('label',{class:'tog'},
+        h('div',{class:'tog-track on',onClick:function(){this.classList.toggle('on');activeToggle.checked=this.classList.contains('on');}},
+          h('div',{class:'tog-thumb'})
+        ),
+        h('span',{style:'font-size:13px;color:var(--t1);margin-left:6px'},'활성')
+      )
+    )
   );
 
   function onSave() {
     nameInp.classList.remove('error');
-    if (!nameInp.value.trim()) { nameInp.classList.add('error'); toast('정책 이름을 입력하세요.', 'err'); return; }
-    if (selectedTypes.size === 0) { toast('탐지 유형을 선택하세요.', 'err'); return; }
+    if (!nameInp.value.trim()) { nameInp.classList.add('error'); toast('정책 이름을 입력하세요.','err'); return; }
+    if (!selectedType) { toast('탐지 유형을 선택하세요.','err'); return; }
+    if (selectedType==='선정성' && (detState['선정성'].detectionItems||[]).length===0) {
+      toast('탐지 항목을 하나 이상 선택하세요.','err'); return;
+    }
     toast('정책이 생성되었습니다.');
     closePanel();
   }
@@ -2283,8 +2632,6 @@ function renderPolicyDetailPanel(id) {
   const policy = DUMMY.policies.find(p => p.policyId === id) || DUMMY.policies[0];
   let isEditing = false;
   const appliedGroups = DUMMY.groups.slice(0, policy.appliedCount);
-  const selectedTypes = new Set(policy.types);
-  const allTypes = ['선정성','도박','폭력','혐오','마약','자해','사이버불링','약물','음주','흡연','기타'];
 
   const contentEl = h('div', {});
   const footerEl = h('div', { class:'mod-f' });
@@ -2296,7 +2643,8 @@ function renderPolicyDetailPanel(id) {
       contentEl.appendChild(h('dl', { class:'info-row' },
         h('dt',{},'정책 이름'), h('dd',{},policy.name),
         h('dt',{},'설명'), h('dd',{},policy.desc || '—'),
-        h('dt',{},'탐지 유형'), h('dd',{},h('div',{class:'flex gap-8',style:'flex-wrap:wrap'},...Array.from(selectedTypes).map(t=>detTypeBadge(t)))),
+        h('dt',{},'탐지 유형'), h('dd',{}, policyTypeBadge(policy)),
+        h('dt',{},'탐지 내용'), h('dd',{style:'font-size:13px'}, policyDetectSummary(policy)),
         h('dt',{},'상태'), h('dd',{},statusBadge(policy.active ? 'active':'inactive')),
         h('dt',{},'수정일'), h('dd',{},fmtD(policy.updatedAt))
       ));
@@ -2306,9 +2654,14 @@ function renderPolicyDetailPanel(id) {
       );
       groupSec.appendChild(appliedGroups.length
         ? mkTable([
-            { key:'name', label:'그룹' },
-            { key:'grade', label:'학년', width:'70px', render: v => v+'학년' },
-            { key:'cls', label:'반', width:'50px', render: v => v+'반' },
+            { key:'_school', label:'학교', render:(_,r) => {
+              const sch = DUMMY.schools.find(s => s.schoolId === r.schoolId) || {};
+              return sch.name || '—';
+            }},
+            { key:'_type', label:'학교유형', width:'90px', render:(_,r) => {
+              const sch = DUMMY.schools.find(s => s.schoolId === r.schoolId) || {};
+              return sch.type || '—';
+            }},
             { key:'deviceCount', label:'단말 수', width:'80px', render: v => v+'대' },
           ], appliedGroups)
         : h('div',{style:'font-size:13px;color:#94a3b8;padding:12px 0'},'적용된 그룹 없음')
@@ -2326,37 +2679,53 @@ function renderPolicyDetailPanel(id) {
         fg('활성 상태', h('label', { style:'display:flex;align-items:center;gap:8px;font-size:14px' }, activeToggle, '활성'), false)
       ));
 
-      // 탐지 유형
-      const typeSec = h('div', { style:'margin-top:24px;padding-top:16px;border-top:1px solid var(--bd)' });
-      typeSec.appendChild(h('div', { style:'font-size:14px;font-weight:700;color:var(--t1);margin-bottom:12px' }, '탐지 유형'));
+      const detSec = h('div',{style:'margin-top:20px;padding-top:16px;border-top:1px solid var(--bd)'});
+      detSec.appendChild(h('div',{style:'font-size:14px;font-weight:700;color:var(--t1);margin-bottom:12px'}, '탐지 설정'));
 
-      const typeChips = h('div', { class:'flex gap-8', style:'flex-wrap:wrap;margin-bottom:16px' });
-      if (selectedTypes.size > 0) {
-        selectedTypes.forEach(t => {
-          const removeBtn = h('span', { style:'margin-left:4px;cursor:pointer;font-size:11px;color:#ef4444' }, '✕');
-          const chip = h('div', { class:'chip sel-wl' }, t, removeBtn);
-          removeBtn.addEventListener('click', () => { selectedTypes.delete(t); renderContent(); renderFooter(); });
-          typeChips.appendChild(chip);
+      const editPolicy = JSON.parse(JSON.stringify(policy)); // deep copy for editing
+
+      if (policy.type === '선정성') {
+        // detectionItems 체크박스
+        const allChkE = h('input',{type:'checkbox'});
+        const itemChksE = [];
+        function syncAllChkE() {
+          const checked = itemChksE.filter(c=>c.checked).length;
+          allChkE.indeterminate = checked > 0 && checked < itemChksE.length;
+          allChkE.checked = checked === itemChksE.length;
+        }
+        const itemChecks = DETECTION_ITEMS.map(item => {
+          const chk = h('input',{type:'checkbox'});
+          itemChksE.push(chk);
+          chk.checked = (editPolicy.detectionItems||[]).includes(item);
+          chk.addEventListener('change',()=>{
+            if (!editPolicy.detectionItems) editPolicy.detectionItems=[];
+            if (chk.checked){if(!editPolicy.detectionItems.includes(item))editPolicy.detectionItems.push(item);}
+            else{editPolicy.detectionItems=editPolicy.detectionItems.filter(i=>i!==item);}
+            syncAllChkE();
+          });
+          return h('label',{style:'display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer'},chk,item);
         });
-      } else {
-        typeChips.appendChild(h('div', { style:'font-size:13px;color:#94a3b8' }, '적용된 유형이 없습니다.'));
-      }
-      const addTypeBtn = h('button', { class:'btn btn-p btn-sm' }, '유형 추가');
-      addTypeBtn.addEventListener('click', () => {
-        const candidates = allTypes.filter(t => !selectedTypes.has(t)).sort((a, b) => a.localeCompare(b, 'ko')).map(t => ({ id: t, name: t }));
-        showSelectModal('탐지 유형 추가', candidates,
-          item => ({ name: item.name }),
-          selected => { selected.forEach(s => selectedTypes.add(s.name)); renderContent(); renderFooter(); }
+        allChkE.checked = itemChksE.every(c=>c.checked);
+        allChkE.addEventListener('change', () => {
+          itemChksE.forEach(c => { c.checked = allChkE.checked; c.dispatchEvent(new Event('change')); });
+        });
+        const allLabelE = h('label',{style:'display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;cursor:pointer;color:#374151'},allChkE,'전체 선택');
+        detSec.appendChild(h('div',{},
+          h('div',{style:'font-size:12px;font-weight:600;color:#64748b;margin-bottom:6px'},'탐지 항목'),
+          h('div',{style:'display:flex;flex-wrap:wrap;gap:8px 16px;margin-bottom:12px'},allLabelE,...itemChecks)
+        ));
+      } else if (policy.type === '도박') {
+        // grade select
+        const gradeSelect = h('select',{class:'inp',style:'max-width:120px'},
+          ...GAMBLING_GRADES.map(g=>h('option',{value:g,selected:editPolicy.grade===g},g))
         );
-      });
-      const typeHeaderRow = h('div', { style:'display:flex;justify-content:space-between;align-items:center;margin-bottom:12px' },
-        h('div', { style:'font-size:14px;font-weight:700;color:var(--t1)' }, `탐지 유형 (${selectedTypes.size}개)`),
-        addTypeBtn
-      );
-      typeSec.innerHTML = '';
-      typeSec.appendChild(typeHeaderRow);
-      typeSec.appendChild(typeChips);
-      contentEl.appendChild(typeSec);
+        gradeSelect.addEventListener('change',()=>{editPolicy.grade=gradeSelect.value;});
+        detSec.appendChild(h('div',{},
+          h('div',{style:'font-size:12px;font-weight:600;color:#64748b;margin-bottom:4px'},'탐지 등급'), gradeSelect
+        ));
+      }
+
+      contentEl.appendChild(detSec);
 
       // 적용 그룹
       const groupSec = h('div', { style:'margin-top:24px;padding-top:16px;border-top:1px solid var(--bd)' });
@@ -2368,16 +2737,25 @@ function renderPolicyDetailPanel(id) {
         const appliedIds = new Set(appliedGroups.map(g => g.groupId));
         const candidates = DUMMY.groups.filter(g => !appliedIds.has(g.groupId));
         showSelectModal('그룹 추가', candidates,
-          g => ({ name: g.name, sub: `${g.grade}학년 ${g.cls}반 · 단말 ${g.deviceCount}대` }),
+          g => {
+            const school = DUMMY.schools.find(s => s.schoolId === g.schoolId) || {};
+            return { name: school.name || g.name, sub: `${school.type || ''} · 단말 ${g.deviceCount}대` };
+          },
           selected => { selected.forEach(g => appliedGroups.push(g)); renderContent(); renderFooter(); },
-          { gradeFilter: true }
+          { schoolFilter: true }
         );
       });
       groupSec.appendChild(groupHeader);
       if (appliedGroups.length) {
         groupSec.appendChild(mkTable([
-          { key:'name', label:'그룹' },
-          { key:'grade', label:'학년', width:'70px', render: v => v+'학년' },
+          { key:'_school', label:'학교', render:(_,r) => {
+            const school = DUMMY.schools.find(s => s.schoolId === r.schoolId) || {};
+            return school.name || '—';
+          }},
+          { key:'_type', label:'학교유형', width:'90px', render:(_,r) => {
+            const school = DUMMY.schools.find(s => s.schoolId === r.schoolId) || {};
+            return school.type || '—';
+          }},
           { key:'deviceCount', label:'단말 수', width:'80px', render: v => v+'대' },
           { key:'_act', label:'', width:'60px', render:(_,r) => {
             const btn = h('button', { class:'btn btn-d btn-xs' }, '해제');
@@ -2522,11 +2900,16 @@ function renderUserDetailPanel(id) {
         actionBar.appendChild(editBtn);
         tabContent.appendChild(actionBar);
 
-        tabContent.appendChild(assignments.length
+        const assignGroups = assignments.map(a => {
+          const grp = DUMMY.groups.find(g => g.groupId === a.groupId);
+          const sch = grp ? DUMMY.schools.find(s => s.schoolId === grp.schoolId) : null;
+          return { groupId: a.groupId, groupName: grp ? grp.name : '—', schoolName: sch ? sch.name : '—' };
+        });
+        tabContent.appendChild(assignGroups.length
           ? mkTable([
-              { key:'grade', label:'학년', render: v => v+'학년' },
-              { key:'cls',   label:'반',   render: v => v === 0 ? '전체' : v+'반' },
-            ], assignments)
+              { key:'schoolName', label:'학교' },
+              { key:'groupName',  label:'그룹 이름' },
+            ], assignGroups)
           : h('div', { class:'empty' }, h('div', { class:'empty-title' }, '담당 범위 없음'))
         );
       } else {
@@ -2687,45 +3070,259 @@ function renderUserDetailPanel(id) {
 }
 
 /* -- Pause New Panel -- */
+function showPauseActiveModal(code, inputMinutes) {
+  let totalSec = inputMinutes * 60;
+  let connected = [];   // { dev, timeStr }
+  let timerIv = null;
+  let devIv = null;
+  let devPage = 1;
+  const DEV_PAGE_SIZE = 10;
+
+  const overlay = h('div', { class:'mov', style:'z-index:1200' });
+  const modal = h('div', { class:'mod', style:'width:580px;max-width:96vw;height:680px;max-height:96vh;display:flex;flex-direction:column;position:relative' });
+
+  // Header
+  const closeBtn = h('button', { class:'mod-close', style:'position:absolute;top:12px;right:12px;z-index:1' }, '✕');
+  const header = h('div', { class:'mod-h' },
+    h('div', { class:'mod-h-title' }, '탐지 중단 진행 중')
+  );
+
+  // Code
+  const codeEl = h('div', {
+    style:'font-size:44px;font-weight:800;letter-spacing:14px;text-align:center;padding:16px 0;background:#f0f9ff;border-radius:10px;border:2px dashed #3b82f6;color:#1e293b;margin-bottom:4px'
+  }, code);
+
+  // Timer
+  const timerLabel = h('div', { style:'text-align:center;font-size:12px;color:#64748b;margin-bottom:2px' }, '코드 입력 시간');
+  const timerEl = h('div', { style:'text-align:center;font-size:28px;font-weight:700;color:#ef4444;margin-bottom:12px' }, '');
+
+  function fmtTime(s) {
+    return `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+  }
+  function tick() {
+    if (totalSec <= 0) {
+      timerEl.textContent = '00:00';
+      timerEl.style.color = '#94a3b8';
+      timerLabel.textContent = '코드 입력 시간 종료';
+      clearInterval(timerIv);
+      clearInterval(devIv);
+      return;
+    }
+    timerEl.textContent = fmtTime(totalSec);
+    totalSec--;
+  }
+  tick();
+  timerIv = setInterval(tick, 1000);
+
+  // Count badge
+  const countBadge = h('span', { style:'background:#3b82f6;color:#fff;border-radius:20px;padding:2px 10px;font-size:13px' }, '0대');
+  const countRow = h('div', { style:'font-size:14px;font-weight:600;color:#1e293b;margin-bottom:8px;display:flex;align-items:center;gap:8px' },
+    h('span', {}, '연결된 단말'), countBadge
+  );
+
+  // Search
+  const searchInp = h('input', { class:'inp search', type:'text', placeholder:'단말 이름 또는 식별자 검색...', style:'margin-bottom:8px;width:100%' });
+
+  // Device list + pagination
+  const devListEl = h('div', { style:'border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;flex:1' });
+  const pageWrap = h('div', { style:'display:flex;align-items:center;justify-content:space-between;margin-top:6px;font-size:12px;color:#64748b' });
+
+  function renderDevList() {
+    const q = searchInp.value.toLowerCase();
+    const filtered = connected.filter(e => !q || e.dev.name.toLowerCase().includes(q) || e.dev.identifier.toLowerCase().includes(q));
+    const totalPages = Math.max(1, Math.ceil(filtered.length / DEV_PAGE_SIZE));
+    if (devPage > totalPages) devPage = 1;
+    const slice = filtered.slice((devPage-1)*DEV_PAGE_SIZE, devPage*DEV_PAGE_SIZE);
+
+    devListEl.innerHTML = '';
+    if (slice.length === 0) {
+      devListEl.appendChild(h('div', { style:'padding:24px;text-align:center;color:#94a3b8;font-size:13px' },
+        connected.length === 0 ? '단말기 연결 대기 중...' : '검색 결과 없음'));
+    } else {
+      slice.forEach(e => {
+        const row = h('div', { style:'display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid #f1f5f9;font-size:13px' },
+          h('span', { style:'font-weight:500;color:#1e293b;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap' }, e.dev.name),
+          h('span', { style:'color:#94a3b8;font-size:12px;width:100px;flex-shrink:0' }, e.dev.identifier),
+          h('span', { style:'color:#64748b;font-size:12px;width:72px;flex-shrink:0' }, e.timeStr),
+          h('span', { style:'background:#dcfce7;color:#16a34a;border-radius:4px;padding:2px 8px;font-size:11px;font-weight:600;flex-shrink:0' }, '연결됨')
+        );
+        devListEl.appendChild(row);
+      });
+    }
+
+    pageWrap.innerHTML = '';
+    const btnS = 'padding:3px 8px;border:1px solid #e2e8f0;border-radius:4px;background:#fff;cursor:pointer;font-size:12px;';
+    const prev = h('button', { style: btnS }, '← 이전');
+    const next = h('button', { style: btnS }, '다음 →');
+    prev.disabled = devPage === 1;
+    next.disabled = devPage >= totalPages;
+    prev.addEventListener('click', () => { devPage--; renderDevList(); });
+    next.addEventListener('click', () => { devPage++; renderDevList(); });
+    pageWrap.appendChild(prev);
+    pageWrap.appendChild(h('span', {}, `${devPage} / ${totalPages || 1} 페이지 (${filtered.length}대)`));
+    pageWrap.appendChild(next);
+  }
+  renderDevList();
+  searchInp.addEventListener('input', () => { devPage = 1; renderDevList(); });
+
+  function addDevice(dev) {
+    const now = new Date();
+    const pad = n => String(n).padStart(2,'0');
+    connected.push({ dev, timeStr: `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}` });
+    countBadge.textContent = `${connected.length}대`;
+    renderDevList();
+  }
+
+  // Simulate
+  const pool = [...DUMMY.devices];
+  let pidx = 0;
+  function simConnect() {
+    if (totalSec <= 0 || pidx >= pool.length) { clearInterval(devIv); return; }
+    if (Math.random() < 0.7) addDevice(pool[pidx++]);
+  }
+  setTimeout(() => { if (pool[pidx]) addDevice(pool[pidx++]); }, 800);
+  setTimeout(() => { if (pool[pidx]) addDevice(pool[pidx++]); }, 2200);
+  devIv = setInterval(simConnect, 2500);
+
+  function closeModal() {
+    clearInterval(timerIv);
+    clearInterval(devIv);
+    if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+  }
+  closeBtn.addEventListener('click', closeModal);
+
+  const body = h('div', { class:'mod-b', style:'flex:1;overflow-y:auto;display:flex;flex-direction:column' },
+    codeEl, timerLabel, timerEl,
+    countRow, searchInp, devListEl, pageWrap
+  );
+
+  modal.appendChild(closeBtn);
+  modal.appendChild(header);
+  modal.appendChild(body);
+  overlay.appendChild(modal);
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+  document.body.appendChild(overlay);
+}
+
 function renderPauseNewPanel() {
-  const gradeInp = h('select', { class:'inp' },
-    h('option',{value:''},'학년 선택'),
-    ...[1,2,3].map(i => h('option',{value:String(i)},i+'학년'))
+  let code = genPauseCode();
+  const codeDisplay = h('div', { style:'font-size:32px;font-weight:700;letter-spacing:10px;color:#1e293b;text-align:center;padding:12px 0;background:#f8fafc;border-radius:8px;border:1px dashed #cbd5e1;margin-bottom:4px' }, code);
+  const regenBtn = h('button', { class:'btn btn-outline btn-sm', style:'width:100%;margin-bottom:4px' }, '코드 재생성');
+  regenBtn.addEventListener('click', () => { code = genPauseCode(); codeDisplay.textContent = code; });
+
+  const inputTimeInp = h('select', { class:'inp' },
+    h('option',{value:'1'},'1분'),
+    h('option',{value:'3'},'3분'),
+    h('option',{value:'5'},'5분'),
+    h('option',{value:'10'},'10분')
   );
-  const clsInp = h('select', { class:'inp' },
-    h('option',{value:''},'반 선택'),
-    ...[1,2,3,4,5,6].map(i => h('option',{value:String(i)},i+'반'))
+  inputTimeInp.value = '3';
+
+  const durHourInp = h('input', { class:'inp', type:'number', min:'0', max:'72', value:'1', style:'width:70px;text-align:center' });
+  const durMinInp  = h('input', { class:'inp', type:'number', min:'0', max:'59', value:'0',  style:'width:70px;text-align:center' });
+  const durationRow = h('div', { style:'display:flex;align-items:center;gap:6px' },
+    durHourInp, h('span', { style:'color:#374151;font-size:14px' }, '시간'),
+    durMinInp,  h('span', { style:'color:#374151;font-size:14px' }, '분 후')
   );
+
   const typeInp = h('select', { class:'inp' },
-    h('option',{value:''},'중단 유형'),
-    h('option',{value:'전체'},'전체'),
-    h('option',{value:'선정성'},'선정성'),
-    h('option',{value:'도박'},'도박'),
-    h('option',{value:'폭력'},'폭력')
+    h('option',{value:'전체'},'전체 탐지 중단'),
+    h('option',{value:'선정성'},'선정성 탐지만'),
+    h('option',{value:'도박'},'도박 탐지만')
   );
-  const startInp = h('input', { class:'inp', type:'datetime-local' });
-  const endInp   = h('input', { class:'inp', type:'datetime-local' });
+
+  const requesterEl = h('div', { style:'padding:6px 0;font-size:14px;color:#374151' }, D.user.name);
   const reasonInp = h('textarea', { class:'inp', placeholder:'중단 사유를 입력하세요', style:'min-height:80px' });
 
   const body = h('div', {},
-    h('div', { class:'form-row' }, fg('학년', gradeInp, true), fg('반', clsInp, true)),
+    h('div', { class:'section-gap' },
+      h('div', { style:'font-size:12px;color:#64748b;margin-bottom:6px;font-weight:500' }, '단말기 입력 인증 코드'),
+      codeDisplay,
+      regenBtn
+    ),
+    h('div', { class:'section-gap' }, fg('코드 입력 시간', inputTimeInp, true)),
     h('div', { class:'section-gap' }, fg('중단 유형', typeInp, true)),
-    h('div', { class:'form-row section-gap' }, fg('시작 일시', startInp, true), fg('종료 일시', endInp, true)),
+    h('div', { class:'section-gap' }, h('div', { class:'fg' }, h('label',{},'탐지 중단 해제 *'), durationRow)),
+    h('div', { class:'section-gap' }, h('div', { class:'fg' }, h('label', {}, '요청자'), requesterEl)),
     fg('중단 사유', reasonInp, true)
   );
 
   function onSave() {
-    [gradeInp, clsInp, typeInp, startInp, reasonInp].forEach(el => el.classList.remove('error'));
-    let ok = true;
-    if (!gradeInp.value)  { gradeInp.classList.add('error');  ok = false; }
-    if (!clsInp.value)    { clsInp.classList.add('error');    ok = false; }
-    if (!typeInp.value)   { typeInp.classList.add('error');   ok = false; }
-    if (!startInp.value)  { startInp.classList.add('error');  ok = false; }
-    if (!reasonInp.value.trim()) { reasonInp.classList.add('error'); ok = false; }
-    if (!ok) { toast('필수 항목을 입력해주세요.', 'err'); return; }
-    toast('탐지 중단이 설정되었습니다.');
+    reasonInp.classList.remove('error');
+    const totalMin = (parseInt(durHourInp.value)||0)*60 + (parseInt(durMinInp.value)||0);
+    if (totalMin <= 0) { toast('해제 시간을 1분 이상 설정해주세요.', 'err'); return; }
+    if (!reasonInp.value.trim()) { reasonInp.classList.add('error'); toast('필수 항목을 입력해주세요.', 'err'); return; }
     closePanel();
+    showPauseActiveModal(code, parseInt(inputTimeInp.value));
   }
 
-  return mkPanel('탐지 중단 설정', body, onSave, '중단 설정');
+  return mkPanel('탐지 중단 설정', body, onSave, '중단 시작');
+}
+
+/* -- Pause Detail Panel -- */
+function renderPauseDetailPanel(pause, onUpdate) {
+  const grp = DUMMY.groups.find(g => g.groupId === pause.groupId);
+  const sch = grp ? DUMMY.schools.find(s => s.schoolId === grp.schoolId) : null;
+  const schoolName = sch ? sch.name : '—';
+
+  const ROW_S = 'display:flex;gap:0;border-bottom:1px solid var(--bd);padding:12px 0;align-items:flex-start';
+  const LBL_S = 'min-width:110px;font-size:13px;color:var(--t3);flex-shrink:0';
+  const VAL_S = 'font-size:13px;color:var(--t1);flex:1';
+
+  function row(label, valueEl) {
+    const valWrap = h('div', { style: VAL_S });
+    if (valueEl instanceof Node) valWrap.appendChild(valueEl);
+    else valWrap.textContent = valueEl ?? '—';
+    return h('div', { style: ROW_S },
+      h('div', { style: LBL_S }, label),
+      valWrap
+    );
+  }
+
+  const roleMap = { teacher:'교사', staff:'운영자', admin:'관리자' };
+
+  const body = h('div', { style:'padding:4px 0' },
+    row('학교', schoolName),
+    row('중단 유형', pause.pauseType),
+    row('요청자', pause.requester),
+    row('요청자 역할', roleMap[pause.requesterRole] || pause.requesterRole || '—'),
+    row('시작 시각', fmtDT(pause.startAt)),
+    row('종료 시각', fmtDT(pause.endAt)),
+    row('상태', statusBadge(pause.status)),
+    row('사유', pause.reason || '—'),
+    pause.cancelReason ? row('취소 사유', pause.cancelReason) : null,
+  );
+
+  // Remove null children
+  [...body.children].forEach(c => { if (!c) body.removeChild(c); });
+
+  // 해당 그룹의 단말 목록
+  const pausedDevices = DUMMY.devices.filter(d => d.groupId === pause.groupId);
+  if (pausedDevices.length > 0) {
+    const devSection = h('div', { style:'margin-top:16px;padding-top:16px;border-top:1px solid var(--bd)' },
+      h('div', { style:'font-size:13px;font-weight:600;color:var(--t1);margin-bottom:10px' },
+        `중단 적용 단말 (${pausedDevices.length}대)`),
+      mkTable([
+        { key:'name', label:'단말 이름', width:'120px' },
+        { key:'os', label:'OS', width:'100px' },
+        { key:'status', label:'상태', width:'80px', render: v => v==='online' ? mkBd('bdg-ok','활성') : mkBd('bdg-err','비활성') },
+      ], pausedDevices)
+    );
+    body.appendChild(devSection);
+  }
+
+  const extraBtns = [];
+  if (pause.status === 'ACTIVE') {
+    const releaseBtn = h('button', { class: 'btn btn-outline', style: 'color:#ef4444;border-color:#ef4444' }, '중단 해제');
+    releaseBtn.addEventListener('click', () => {
+      pause.status = 'CANCELLED';
+      pause.cancelReason = '관리자 해제';
+      if (onUpdate) onUpdate();
+      closePanel();
+      toast('탐지 중단이 해제되었습니다.', 'ok');
+    });
+    extraBtns.push(releaseBtn);
+  }
+
+  return mkPanel('탐지 중단 상세', body, null, null, extraBtns);
 }

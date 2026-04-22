@@ -35,9 +35,8 @@ const MENU = [
   { id:'pauses-list', iconKey:'pauses',    label:'탐지중단' },
   { section: '모니터링' },
   { id:'detections',    iconKey:'detections',  label:'탐지 현황' },
-  { id:'pauses-history',iconKey:'history',     label:'중단 이력' },
-  { section: '사용자 관리' },
-  { id:'users',       iconKey:'users',     label:'사용자 관리' },
+  { section: '직원 관리' },
+  { id:'users',       iconKey:'users',     label:'직원 관리' },
   { section: '설정' },
   { id:'licenses',      iconKey:'licenses',      label:'라이선스' },
   { id:'notifications', iconKey:'notifications', label:'알림 설정' },
@@ -61,7 +60,7 @@ function buildApp() {
         (function(){
           const dropdown = h('div', { style:'display:none;position:absolute;top:100%;right:0;margin-top:6px;background:#fff;border:1px solid var(--bd);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.1);min-width:140px;z-index:200;overflow:hidden' },
             h('div', { style:'padding:10px 14px;font-size:13px;cursor:pointer;transition:background .1s', onMouseEnter:function(){this.style.background='#f1f5f9'}, onMouseLeave:function(){this.style.background='transparent'}, onClick: () => { dropdown.style.display='none'; navigate('account'); } }, '마이페이지'),
-            h('div', { style:'padding:10px 14px;font-size:13px;cursor:pointer;color:#ef4444;border-top:1px solid var(--bd);transition:background .1s', onMouseEnter:function(){this.style.background='#fef2f2'}, onMouseLeave:function(){this.style.background='transparent'}, onClick: () => { dropdown.style.display='none'; toast('로그아웃되었습니다.','info'); } }, '로그아웃')
+            h('div', { style:'padding:10px 14px;font-size:13px;cursor:pointer;color:#ef4444;border-top:1px solid var(--bd);transition:background .1s', onMouseEnter:function(){this.style.background='#fef2f2'}, onMouseLeave:function(){this.style.background='transparent'}, onClick: () => { dropdown.style.display='none'; showLoginPage(); } }, '로그아웃')
           );
           const userBtn = h('div', { class: 'mh-user', style:'position:relative;cursor:pointer', onClick: (e) => { e.stopPropagation(); dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none'; } },
             h('div', { class: 'mh-user-avatar' }, D.user.name.charAt(0)),
@@ -79,6 +78,32 @@ function buildApp() {
   const app = h('div', { class: 'app' }, sb, mn);
   document.getElementById('app').innerHTML = '';
   document.getElementById('app').appendChild(app);
+
+  // Expiry banner — show if any license expires within 14 days
+  (function() {
+    const today = new Date(); today.setHours(0,0,0,0);
+    const deadline = new Date(today.getTime() + 14 * 24 * 60 * 60 * 1000);
+    const expiring = (DUMMY.licenses || []).filter(l => {
+      const d = new Date(l.validTo); d.setHours(0,0,0,0);
+      return d >= today && d <= deadline;
+    }).sort((a,b) => new Date(a.validTo) - new Date(b.validTo));
+    if (!expiring.length) return;
+    const top = expiring[0];
+    const days = Math.ceil((new Date(top.validTo) - today) / 86400000);
+    const banner = h('div', { id:'expiry-banner', style:'background:#fef3c7;border-bottom:1px solid #f59e0b;padding:10px 20px;display:flex;align-items:center;gap:10px;font-size:13px;color:#92400e;flex-shrink:0' },
+      h('span', { style:'font-size:15px;flex-shrink:0' }, '⚠️'),
+      h('span', { style:'flex:1' },
+        `라이선스 만료 임박: ${expiring.length}개 라이선스가 14일 이내에 만료됩니다. (가장 빠른 만료: `,
+        h('strong', {}, top.os),
+        ` — ${days}일 후)`
+      ),
+      h('button', { style:'background:none;border:none;cursor:pointer;color:#b45309;font-size:12px;font-weight:600;padding:4px 10px;border:1px solid #f59e0b;border-radius:6px;white-space:nowrap', onClick: () => { D._autoOpenLicense = top; render('licenses', null); } }, '라이선스 보기'),
+      h('button', { style:'background:none;border:none;cursor:pointer;color:#92400e;font-size:18px;padding:0 2px 0 8px;line-height:1', onClick: function(){ this.closest('#expiry-banner').remove(); } }, '×')
+    );
+    const mn = document.querySelector('.mn');
+    const mb = document.getElementById('page-body');
+    if (mn && mb) mn.insertBefore(banner, mb);
+  })();
 
   // Mobile sidebar overlay
   document.getElementById('sb-overlay').addEventListener('click', toggleMobileSidebar);
@@ -115,8 +140,13 @@ function buildSidebar() {
   return sb;
 }
 
+const DIRECT_MENU_IDS = new Set(['dashboard', 'devices', 'detections', 'users', 'licenses']);
+
 function buildMenuItems(container) {
+  const isDirect = D.loginRole === 'direct';
   MENU.forEach(item => {
+    if (isDirect && item.id && !DIRECT_MENU_IDS.has(item.id)) return;
+    if (isDirect && item.section && !['메인', '운영 관리', '모니터링', '직원 관리', '설정'].includes(item.section)) return;
     if (item.section) {
       container.appendChild(h('div', { class: 'ns' }, item.section));
       return;
@@ -241,9 +271,9 @@ function getPageTitle(pageId) {
     'policies-new':     '정책 생성',
     'policies-detail':  '정책 상세',
     'detections':       '탐지 현황',
-    'users-list':       '사용자 목록',
-    'users-new':        '사용자 등록',
-    'users-detail':     '사용자 상세',
+    'users-list':       '직원 목록',
+    'users-new':        '직원 등록',
+    'users-detail':     '직원 상세',
     'pauses-list':      '탐지 중단 현황',
     'pauses-new':       '중단 설정',
     'pauses-history':   '중단 이력',
