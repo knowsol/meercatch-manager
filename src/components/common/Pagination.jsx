@@ -24,7 +24,6 @@ function navStyle(disabled) {
 
 export default function Pagination({ page, total, pageSize = PAGE_SIZE, onChange }) {
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
-  if (totalPages <= 1) return null;
 
   const getPages = () => {
     let start = Math.max(1, page - 2);
