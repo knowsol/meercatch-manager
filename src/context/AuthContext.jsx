@@ -1,5 +1,5 @@
 'use client'
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthCtx = createContext(null);
 
@@ -23,7 +23,14 @@ function clearAuth() {
 const DEFAULT = { loggedIn: false, role: null, userName: '', userRole: null, userId: null };
 
 export function AuthProvider({ children }) {
-  const [auth, setAuth] = useState(() => loadAuth() || DEFAULT);
+  const [auth, setAuth] = useState(DEFAULT);
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    const saved = loadAuth();
+    if (saved) setAuth(saved);
+    setHydrated(true);
+  }, []);
 
   const login = (role, name, userRole, userId) => {
     const next = { loggedIn: true, role, userName: name, userRole, userId };
@@ -37,7 +44,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthCtx.Provider value={{ ...auth, login, logout }}>
+    <AuthCtx.Provider value={{ ...auth, hydrated, login, logout }}>
       {children}
     </AuthCtx.Provider>
   );

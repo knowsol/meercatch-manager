@@ -11,8 +11,8 @@ import DetectionDetailPanel from './DetectionDetailPanel';
 export default function DetectionList() {
   const { openPanel } = usePanel();
   const [activeTab, setActiveTab] = useState('all');
-  const [search, setSearch] = useState('');
-  const [dateFilter, setDateFilter] = useState('');
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
 
   const typeCounts = DUMMY.detections.reduce((acc, d) => {
     acc[d.type] = (acc[d.type] || 0) + 1;
@@ -20,17 +20,16 @@ export default function DetectionList() {
   }, {});
 
   const TABS = [
-    { id: 'all',   label: `전체 (${DUMMY.detections.length})` },
-    { id: '선정성', label: `선정성 (${typeCounts['선정성'] || 0})` },
-    { id: '도박',   label: `도박 (${typeCounts['도박'] || 0})` },
+    { id: 'all',   label: '전체' },
+    { id: '선정성', label: '선정성' },
+    { id: '도박',   label: '도박' },
   ];
 
   let data = DUMMY.detections;
   if (activeTab !== 'all') data = data.filter(d => d.type === activeTab);
   data = data.filter(d => {
-    const q = search.toLowerCase();
-    if (q && !d.deviceName.toLowerCase().includes(q)) return false;
-    if (dateFilter && !d.detectedAt.startsWith(dateFilter)) return false;
+    if (fromDate && d.detectedAt < fromDate) return false;
+    if (toDate && d.detectedAt > toDate + ' 23:59:59') return false;
     return true;
   });
 
@@ -51,7 +50,6 @@ export default function DetectionList() {
       <div className="ph">
         <div className="ph-left">
           <div className="ph-title">탐지 현황</div>
-          <div className="ph-sub">총 {DUMMY.detections.length}건</div>
         </div>
       </div>
 
@@ -73,10 +71,11 @@ export default function DetectionList() {
 
       {/* 필터 */}
       <div className="fb">
-        <input className="inp search" placeholder="단말 검색..." type="text"
-          value={search} onChange={e => setSearch(e.target.value)} />
         <input className="inp" type="date" style={{ maxWidth: 160 }}
-          value={dateFilter} onChange={e => setDateFilter(e.target.value)} />
+          value={fromDate} onChange={e => setFromDate(e.target.value)} />
+        <span style={{ color: '#94a3b8', fontSize: 13 }}>~</span>
+        <input className="inp" type="date" style={{ maxWidth: 160 }}
+          value={toDate} onChange={e => setToDate(e.target.value)} />
       </div>
 
       <Table
