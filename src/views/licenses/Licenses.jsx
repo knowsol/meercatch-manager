@@ -54,9 +54,16 @@ function LicenseDetailPanel({ lic, onClose }) {
         </div>
         <div className="mt-16" style={{ paddingTop: 16, borderTop: '1px solid var(--bd)' }}>
           <div className="card-title" style={{ marginBottom: 6 }}>갱신 문의</div>
-          <a href="mailto:partners@knowwheresoft.com" style={{ fontSize: 13, color: 'var(--ac)' }}>
-            partners@knowwheresoft.com
-          </a>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <a href="mailto:partners@knowwheresoft.com" style={{ fontSize: 13, color: 'var(--ac)' }}>
+              partners@knowwheresoft.com
+            </a>
+            <button
+              className="btn btn-outline btn-sm"
+              style={{ padding: '1px 8px', fontSize: 11, height: 'auto', lineHeight: 1.6 }}
+              onClick={() => { navigator.clipboard.writeText('partners@knowwheresoft.com'); toast('이메일이 복사되었습니다.', 'info'); }}
+            >복사</button>
+          </div>
         </div>
       </div>
       <div className="mod-f">
