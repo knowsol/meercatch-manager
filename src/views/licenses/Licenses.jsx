@@ -1,5 +1,6 @@
 'use client'
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import Pagination from '../../components/common/Pagination';
 import { usePanel } from '../../context/PanelContext';
 import { useToastCtx } from '../../components/layout/Layout';
 import KPI from '../../components/common/KPI';
@@ -81,6 +82,8 @@ export default function Licenses() {
   const toast = useToastCtx();
   const [search, setSearch] = useState('');
   const [osFilter, setOsFilter] = useState('');
+  const [page, setPage] = useState(1);
+  useEffect(() => setPage(1), [search, osFilter]);
 
   const lics = DUMMY.licenses;
   const totDevices = DUMMY.licensesTotal;
@@ -160,11 +163,12 @@ export default function Licenses() {
 
       <Table
         cols={cols}
-        rows={filtered}
+        rows={filtered.slice((page - 1) * 15, page * 15)}
         onRowClick={row => openPanel(
           <LicenseDetailPanel lic={row} onClose={closePanel} />
         )}
       />
+      <Pagination page={page} total={filtered.length} pageSize={15} onChange={setPage} />
     </div>
   );
 }

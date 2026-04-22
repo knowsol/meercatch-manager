@@ -1,6 +1,7 @@
 'use client'
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { usePanel } from '../../context/PanelContext';
+import Pagination from '../../components/common/Pagination';
 import KPI from '../../components/common/KPI';
 import Table from '../../components/common/Table';
 import { DetTypeBadge } from '../../components/common/Badge';
@@ -13,6 +14,8 @@ export default function DetectionList() {
   const [activeTab, setActiveTab] = useState('all');
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
+  const [page, setPage] = useState(1);
+  useEffect(() => setPage(1), [activeTab, fromDate, toDate]);
 
   const typeCounts = DUMMY.detections.reduce((acc, d) => {
     acc[d.type] = (acc[d.type] || 0) + 1;
@@ -80,9 +83,10 @@ export default function DetectionList() {
 
       <Table
         cols={cols}
-        rows={data}
+        rows={data.slice((page - 1) * 15, page * 15)}
         onRowClick={row => openPanel(<DetectionDetailPanel detId={row.detId} />)}
       />
+      <Pagination page={page} total={data.length} pageSize={15} onChange={setPage} />
     </div>
   );
 }

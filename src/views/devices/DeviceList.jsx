@@ -1,6 +1,7 @@
 'use client'
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { usePanel } from '../../context/PanelContext';
+import Pagination from '../../components/common/Pagination';
 import Table from '../../components/common/Table';
 import { fmtDT } from '../../components/common/helpers';
 import { DUMMY } from '../../data/dummy';
@@ -11,6 +12,8 @@ export default function DeviceList() {
   const [search, setSearch] = useState('');
   const [groupId, setGroupId] = useState('');
   const [status, setStatus] = useState('');
+  const [page, setPage] = useState(1);
+  useEffect(() => setPage(1), [search, groupId, status]);
 
   const active = DUMMY.devices.filter(d => d.status === 'online').length;
 
@@ -68,7 +71,8 @@ export default function DeviceList() {
         </select>
       </div>
 
-      <Table cols={cols} rows={filtered} onRowClick={row => openPanel(<DeviceDetailPanel deviceId={row.deviceId} />)} />
+      <Table cols={cols} rows={filtered.slice((page - 1) * 15, page * 15)} onRowClick={row => openPanel(<DeviceDetailPanel deviceId={row.deviceId} />)} />
+      <Pagination page={page} total={filtered.length} pageSize={15} onChange={setPage} />
     </div>
   );
 }

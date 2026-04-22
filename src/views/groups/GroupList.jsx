@@ -1,6 +1,7 @@
 'use client'
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { usePanel } from '../../context/PanelContext';
+import Pagination from '../../components/common/Pagination';
 import KPI from '../../components/common/KPI';
 import Table from '../../components/common/Table';
 import { StatusBadge, Badge } from '../../components/common/Badge';
@@ -14,6 +15,8 @@ export default function GroupList() {
   const [search, setSearch] = useState('');
   const [schoolType, setSchoolType] = useState('');
   const [status, setStatus] = useState('');
+  const [page, setPage] = useState(1);
+  useEffect(() => setPage(1), [search, schoolType, status]);
 
   const active = DUMMY.groups.filter(g => g.status === 'active').length;
   const paused = DUMMY.groups.filter(g => g.pauseStatus === 'paused').length;
@@ -77,7 +80,8 @@ export default function GroupList() {
         </select>
       </div>
 
-      <Table cols={cols} rows={rows} onRowClick={row => openPanel(<GroupDetailPanel groupId={row.groupId} />)} />
+      <Table cols={cols} rows={rows.slice((page - 1) * 15, page * 15)} onRowClick={row => openPanel(<GroupDetailPanel groupId={row.groupId} />)} />
+      <Pagination page={page} total={rows.length} pageSize={15} onChange={setPage} />
     </div>
   );
 }

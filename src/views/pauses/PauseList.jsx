@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react';
+import Pagination from '../../components/common/Pagination';
 import { usePanel } from '../../context/PanelContext';
 import { useToastCtx } from '../../components/layout/Layout';
 import KPI from '../../components/common/KPI';
@@ -59,6 +60,7 @@ export default function PauseList() {
   const { openPanel, closePanel } = usePanel();
   const toast = useToastCtx();
   const [pauses, setPauses] = useState(DUMMY.pauses);
+  const [page, setPage] = useState(1);
 
   const active = pauses.filter(p => p.status === 'ACTIVE').length;
   const expired = pauses.filter(p => p.status === 'EXPIRED').length;
@@ -117,7 +119,7 @@ export default function PauseList() {
 
       <Table
         cols={cols}
-        rows={pauses}
+        rows={pauses.slice((page - 1) * 15, page * 15)}
         onRowClick={row => openPanel(
           <PauseDetailPanel
             pauseId={row.pauseId}
@@ -126,6 +128,7 @@ export default function PauseList() {
           />
         )}
       />
+      <Pagination page={page} total={pauses.length} pageSize={15} onChange={setPage} />
     </div>
   );
 

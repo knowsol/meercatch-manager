@@ -1,6 +1,7 @@
 'use client'
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { usePanel } from '../../context/PanelContext';
+import Pagination from '../../components/common/Pagination';
 import KPI from '../../components/common/KPI';
 import Table from '../../components/common/Table';
 import { Badge } from '../../components/common/Badge';
@@ -30,6 +31,8 @@ export default function PolicyList() {
   const [tab, setTab] = useState('전체');
   const [search, setSearch] = useState('');
   const [activeFilter, setActiveFilter] = useState('');
+  const [page, setPage] = useState(1);
+  useEffect(() => setPage(1), [tab, search, activeFilter]);
 
   const tabPolicies = tab === '전체' ? DUMMY.policies : DUMMY.policies.filter(p => p.type === tab);
   const filtered = tabPolicies.filter(p => {
@@ -91,7 +94,8 @@ export default function PolicyList() {
         <KPI label="적용 그룹" value={tabPolicies.reduce((a, p) => a + p.appliedCount, 0)} sub="총 그룹 적용 수" color="ac" />
       </div>
 
-      <Table cols={cols} rows={filtered} onRowClick={row => openPanel(<PolicyDetailPanel policyId={row.policyId} />)} />
+      <Table cols={cols} rows={filtered.slice((page - 1) * 15, page * 15)} onRowClick={row => openPanel(<PolicyDetailPanel policyId={row.policyId} />)} />
+      <Pagination page={page} total={filtered.length} pageSize={15} onChange={setPage} />
     </div>
   );
 }

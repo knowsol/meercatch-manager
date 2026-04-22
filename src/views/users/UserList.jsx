@@ -1,6 +1,7 @@
 'use client'
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { usePanel } from '../../context/PanelContext';
+import Pagination from '../../components/common/Pagination';
 import Table from '../../components/common/Table';
 import { StatusBadge } from '../../components/common/Badge';
 import { fmtDT } from '../../components/common/helpers';
@@ -11,6 +12,8 @@ import UserDetailPanel from './UserDetailPanel';
 export default function UserList() {
   const { openPanel } = usePanel();
   const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  useEffect(() => setPage(1), [search]);
 
   const filtered = DUMMY.users.filter(u => {
     const q = search.toLowerCase();
@@ -71,9 +74,10 @@ export default function UserList() {
 
       <Table
         cols={cols}
-        rows={filtered}
+        rows={filtered.slice((page - 1) * 15, page * 15)}
         onRowClick={row => openPanel(<UserDetailPanel userId={row.userId} />)}
       />
+      <Pagination page={page} total={filtered.length} pageSize={15} onChange={setPage} />
     </div>
   );
 }
