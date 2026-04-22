@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react';
 import { usePanel } from '../../context/PanelContext';
+import { useAuth } from '../../context/AuthContext';
 import Table from '../../components/common/Table';
 import { DetTypeBadge, StatusBadge } from '../../components/common/Badge';
 import { fmtDT } from '../../components/common/helpers';
@@ -8,6 +9,8 @@ import { DUMMY } from '../../data/dummy';
 
 export default function DeviceDetailPanel({ deviceId }) {
   const { closePanel } = usePanel();
+  const { role } = useAuth();
+  const isDirect = role === 'direct';
   const [activeTab, setActiveTab] = useState('info');
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
@@ -50,7 +53,7 @@ export default function DeviceDetailPanel({ deviceId }) {
         {activeTab === 'info' && (
           <div style={{ marginTop: 16 }}>
             <dl className="info-row">
-              <dt>단말명</dt>     <dd>{device.name}</dd>
+              {!isDirect && <><dt>단말명</dt><dd>{device.name}</dd></>}
               <dt>식별자</dt>     <dd><span style={{ fontFamily: 'monospace', fontSize: 12 }}>{device.identifier}</span></dd>
               <dt>OS</dt>         <dd>{device.os || '—'}</dd>
               <dt>최근 접속</dt>  <dd>{fmtDT(device.lastContact)}</dd>
