@@ -94,6 +94,7 @@ export default function PolicyList() {
         <KPI label="적용 그룹" value={tabPolicies.reduce((a, p) => a + p.appliedCount, 0)} sub="총 그룹 적용 수" color="ac" />
       </div>
 
+      <div style={{ fontSize: 13, color: 'var(--t2)', marginBottom: 8 }}>총 {filtered.length}개</div>
       <Table cols={cols} rows={filtered.slice((page - 1) * 15, page * 15)} onRowClick={row => openPanel(<PolicyDetailPanel policyId={row.policyId} />)} />
       <Pagination page={page} total={filtered.length} pageSize={15} onChange={setPage} />
     </div>

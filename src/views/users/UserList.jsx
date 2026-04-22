@@ -72,6 +72,7 @@ export default function UserList() {
           value={search} onChange={e => setSearch(e.target.value)} />
       </div>
 
+      <div style={{ fontSize: 13, color: 'var(--t2)', marginBottom: 8 }}>총 {filtered.length}명</div>
       <Table
         cols={cols}
         rows={filtered.slice((page - 1) * 15, page * 15)}

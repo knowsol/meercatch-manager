@@ -117,6 +117,7 @@ export default function PauseList() {
         <KPI label="취소" value={cancelled} />
       </div>
 
+      <div style={{ fontSize: 13, color: 'var(--t2)', marginBottom: 8 }}>총 {pauses.length}건</div>
       <Table
         cols={cols}
         rows={pauses.slice((page - 1) * 15, page * 15)}

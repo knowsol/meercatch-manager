@@ -80,6 +80,7 @@ export default function GroupList() {
         </select>
       </div>
 
+      <div style={{ fontSize: 13, color: 'var(--t2)', marginBottom: 8 }}>총 {rows.length}개</div>
       <Table cols={cols} rows={rows.slice((page - 1) * 15, page * 15)} onRowClick={row => openPanel(<GroupDetailPanel groupId={row.groupId} />)} />
       <Pagination page={page} total={rows.length} pageSize={15} onChange={setPage} />
     </div>

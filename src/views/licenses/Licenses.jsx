@@ -161,6 +161,7 @@ export default function Licenses() {
         </select>
       </div>
 
+      <div style={{ fontSize: 13, color: 'var(--t2)', marginBottom: 8 }}>총 {filtered.length}개</div>
       <Table
         cols={cols}
         rows={filtered.slice((page - 1) * 15, page * 15)}

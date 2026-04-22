@@ -71,6 +71,7 @@ export default function DeviceList() {
         </select>
       </div>
 
+      <div style={{ fontSize: 13, color: 'var(--t2)', marginBottom: 8 }}>총 {filtered.length}대</div>
       <Table cols={cols} rows={filtered.slice((page - 1) * 15, page * 15)} onRowClick={row => openPanel(<DeviceDetailPanel deviceId={row.deviceId} />)} />
       <Pagination page={page} total={filtered.length} pageSize={15} onChange={setPage} />
     </div>
