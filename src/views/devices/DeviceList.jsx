@@ -2,7 +2,6 @@
 import { useState } from 'react';
 import { usePanel } from '../../context/PanelContext';
 import Table from '../../components/common/Table';
-import { Badge } from '../../components/common/Badge';
 import { fmtDT } from '../../components/common/helpers';
 import { DUMMY } from '../../data/dummy';
 import DeviceDetailPanel from './DeviceDetailPanel';
@@ -27,7 +26,6 @@ export default function DeviceList() {
     { key: 'identifier',  label: '식별자', render: v => <span style={{ fontFamily: 'monospace', fontSize: 12, color: '#64748b' }}>{v}</span> },
     { key: 'os',          label: 'OS',     width: '110px' },
     { key: 'model',       label: '모델',   width: '120px' },
-    { key: 'status',      label: '상태',   width: '90px', render: v => v === 'online' ? <Badge cls="bdg-ok">활성</Badge> : <Badge cls="bdg-err">비활성</Badge> },
     { key: 'lastContact', label: '최근 접속', render: v => fmtDT(v) },
   ];
 

@@ -21,6 +21,19 @@ export default function Dashboard() {
 
   const isDirect = role === 'direct';
 
+  // 이번 주 탐지: 월요일 기준
+  const today = new Date();
+  const dayOfWeek = today.getDay();
+  const daysFromMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - daysFromMonday);
+  monday.setHours(0, 0, 0, 0);
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+  const fmtMD = d => `${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`;
+  const weekLabel = `${fmtMD(monday)} ~ ${fmtMD(sunday)}`;
+  const weeklyCount = DUMMY.detections.filter(d => new Date(d.detectedAt) >= monday).length;
+
   const detCols = [
     { key: 'detectedAt', label: '탐지 시각', width: '160px', render: v => fmtDT(v) },
     { key: 'type',       label: '유형',       width: '80px',  render: v => <DetTypeBadge type={v} /> },
@@ -46,7 +59,7 @@ export default function Dashboard() {
         <KPI label="전체 라이선스" value={DUMMY.licensesTotal} sub="총 발급 수량"       color="ac" />
         <KPI label="활성 라이선스" value={DUMMY.licensesUsed}  sub="현재 사용 중"       color="ok" />
         <KPI label="오늘 탐지"     value={s.todayDetections}   sub="금일 유해 콘텐츠"   color="err" />
-        <KPI label="이번 주 탐지"  value={s.weeklyDetections}  sub="지난 7일"           color="warn" />
+        <KPI label="이번 주 탐지"  value={weeklyCount}  sub={weekLabel}  color="warn" />
       </div>
 
       {/* Row 2: 매니저관리 전용 */}
