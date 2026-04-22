@@ -150,6 +150,13 @@ export default function Licenses() {
         <KPI label="등록 수"  value={lics.length} sub="라이선스 항목" />
       </div>
 
+      {/* 구분선 */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '20px 0 16px' }}>
+        <div style={{ flex: 1, height: 1, background: 'var(--bd)' }} />
+        <span style={{ fontSize: 11, color: 'var(--t3)', whiteSpace: 'nowrap' }}>※ 위 수치는 전체 기준이며 아래 필터와 연동되지 않습니다</span>
+        <div style={{ flex: 1, height: 1, background: 'var(--bd)' }} />
+      </div>
+
       <div className="fb">
         <input className="inp search" placeholder="OS 또는 시리얼 키 검색..." type="text"
           value={search} onChange={e => setSearch(e.target.value)} />

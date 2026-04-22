@@ -63,8 +63,15 @@ export default function DetectionList() {
         <KPI label="도박"      value={typeCounts['도박'] || 0}   color="warn" />
       </div>
 
+      {/* 구분선 */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '20px 0 16px' }}>
+        <div style={{ flex: 1, height: 1, background: 'var(--bd)' }} />
+        <span style={{ fontSize: 11, color: 'var(--t3)', whiteSpace: 'nowrap' }}>※ 위 수치는 전체 기준이며 아래 필터와 연동되지 않습니다</span>
+        <div style={{ flex: 1, height: 1, background: 'var(--bd)' }} />
+      </div>
+
       {/* 탭 */}
-      <div className="tabs" style={{ margin: '16px 0' }}>
+      <div className="tabs" style={{ margin: '0 0 16px' }}>
         {TABS.map(t => (
           <div key={t.id} className={`tab${activeTab === t.id ? ' a' : ''}`} onClick={() => setActiveTab(t.id)}>
             {t.label}
