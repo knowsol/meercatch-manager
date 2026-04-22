@@ -13,22 +13,12 @@ export default function UserDetailPanel({ userId }) {
   const toast = useToastCtx();
   const user = DUMMY.users.find(u => u.userId === userId) || DUMMY.users[0];
 
-  const [tab, setTab] = useState('info');
   const [isEditing, setIsEditing] = useState(false);
 
   const [name,    setName]    = useState(user.name);
   const [contact, setContact] = useState(user.contact);
 
-  const TABS = [
-    { id:'info', label:'기본정보' },
-  ];
-
-  const handleTabChange = (id) => {
-    setTab(id);
-    setIsEditing(false);
-  };
-
-  // ── info tab ──
+  // ── info ──
   function renderInfo() {
     if (!isEditing) {
       return (
@@ -62,33 +52,6 @@ export default function UserDetailPanel({ userId }) {
     );
   }
 
-  // ── footer ──
-  function renderFooter() {
-    if (tab === 'info') {
-      if (isEditing) {
-        return (
-          <div className="mod-f">
-            <div />
-            <div className="mod-f-right">
-              <button className="btn btn-outline" onClick={() => setIsEditing(false)}>취소</button>
-              <button className="btn btn-p" onClick={() => { toast('저장되었습니다.'); setIsEditing(false); }}>저장</button>
-            </div>
-          </div>
-        );
-      }
-      return (
-        <div className="mod-f">
-          <div />
-          <div className="mod-f-right">
-            <button className="btn btn-outline" onClick={() => setIsEditing(true)}>수정</button>
-            <button className="btn btn-d" onClick={() => { toast('사용자가 삭제되었습니다.', 'warn'); closePanel(); }}>삭제</button>
-          </div>
-        </div>
-      );
-    }
-    return null;
-  }
-
   return (
     <div style={{display:'flex', flexDirection:'column', height:'100%'}}>
       <div className="mod-h">
@@ -96,16 +59,25 @@ export default function UserDetailPanel({ userId }) {
         <h2>{user.name}</h2>
       </div>
       <div className="mod-b" style={{flex:1, overflowY:'auto'}}>
-        <div className="tabs">
-          {TABS.map(t => (
-            <div key={t.id} className={`tab${tab === t.id ? ' a' : ''}`} onClick={() => handleTabChange(t.id)}>{t.label}</div>
-          ))}
-        </div>
-        <div style={{marginTop:'16px'}}>
-          {tab === 'info' && renderInfo()}
-        </div>
+        {renderInfo()}
       </div>
-      {renderFooter()}
+      {isEditing ? (
+        <div className="mod-f">
+          <div />
+          <div className="mod-f-right">
+            <button className="btn btn-outline" onClick={() => setIsEditing(false)}>취소</button>
+            <button className="btn btn-p" onClick={() => { toast('저장되었습니다.'); setIsEditing(false); }}>저장</button>
+          </div>
+        </div>
+      ) : (
+        <div className="mod-f">
+          <div />
+          <div className="mod-f-right">
+            <button className="btn btn-outline" onClick={() => setIsEditing(true)}>수정</button>
+            <button className="btn btn-d" onClick={() => { toast('사용자가 삭제되었습니다.', 'warn'); closePanel(); }}>삭제</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
