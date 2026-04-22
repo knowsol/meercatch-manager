@@ -151,11 +151,7 @@ export default function Licenses() {
       </div>
 
       {/* 구분선 */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '20px 0 16px' }}>
-        <div style={{ flex: 1, height: 1, background: 'var(--bd)' }} />
-        <span style={{ fontSize: 11, color: 'var(--t3)', whiteSpace: 'nowrap' }}>※ 위 수치는 전체 기준이며 아래 필터와 연동되지 않습니다</span>
-        <div style={{ flex: 1, height: 1, background: 'var(--bd)' }} />
-      </div>
+      <div style={{ height: 1, background: 'var(--bd)', margin: '20px 0 16px' }} />
 
       <div className="fb">
         <input className="inp search" placeholder="OS 또는 시리얼 키 검색..." type="text"
