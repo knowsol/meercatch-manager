@@ -2,18 +2,18 @@
 import { useState, useMemo } from "react";
 import { usePanel } from "../../context/PanelContext";
 import { useToastCtx } from "../../components/layout/Layout";
-import KPI from "../../components/common/KPI";
+import Kpi from "../../components/common/KPI";
 import DataTable, { Column } from "../../components/common/DataTable";
 import { Badge } from "../../components/common/Badge";
 import { fmtD } from "../../components/common/helpers";
 import { useLicenseSearch } from "../../lib/api/hooks/useLicenses";
-import { OS_TYPE_MAP, parseDetectType } from "@/types";
-import type { License, LicenseSearchParams } from "@/types";
+import { OS_TYPE_MAP, parseDetectType, parseDetectTypeFlags } from "@/types";
+import type { LicenseApi, LicenseSearchParams } from "@/types/license";
 
 const PAGE_SIZE = 10;
 
 interface LicenseDetailPanelProps {
-  lic: License;
+  lic: LicenseApi;
   onClose: () => void;
 }
 
@@ -23,6 +23,11 @@ function LicenseDetailPanel({ lic, onClose }: LicenseDetailPanelProps) {
     lic.maxCount > 0 ? Math.round((lic.usedCount / lic.maxCount) * 100) : 0;
   const osName = OS_TYPE_MAP[lic.osType] || `OS ${lic.osType}`;
   const detectName = parseDetectType(lic.detectType);
+
+  const handleCopyEmail = (email: string) => {
+    navigator.clipboard.writeText(email);
+    toast("이메일이 복사되었습니다.", "success");
+  };
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
@@ -74,20 +79,51 @@ function LicenseDetailPanel({ lic, onClose }: LicenseDetailPanelProps) {
             />
           </div>
         </div>
-        <div className="mt-16">
-          <button
-            className="btn btn-p btn-sm"
-            onClick={() => toast("라이선스 갱신 문의를 접수했습니다.", "info")}
-          >
+
+        {/* 지원 정보 */}
+        <div style={{ marginTop: 32, paddingTop: 20, borderTop: '1px solid var(--bd)' }}>
+          <h3 style={{ fontSize: 15, fontWeight: 600, color: 'var(--t1)', marginBottom: 16 }}>
+            지원 정보
+          </h3>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <div style={{ paddingBottom: 16, borderBottom: '1px solid var(--bd)' }}>
+              <div style={{ fontSize: 13, color: 'var(--t3)', marginBottom: 4 }}>담당자</div>
+              <div style={{ fontSize: 15, color: 'var(--t1)' }}>정운영</div>
+            </div>
+            <div style={{ paddingTop: 16, paddingBottom: 16, borderBottom: '1px solid var(--bd)' }}>
+              <div style={{ fontSize: 13, color: 'var(--t3)', marginBottom: 4 }}>이메일</div>
+              <div style={{ fontSize: 15, color: 'var(--ac)' }}>support@meercatch.com</div>
+            </div>
+            <div style={{ paddingTop: 16 }}>
+              <div style={{ fontSize: 13, color: 'var(--t3)', marginBottom: 4 }}>전화번호</div>
+              <div style={{ fontSize: 15, color: 'var(--t1)' }}>1588-0000</div>
+            </div>
+          </div>
+        </div>
+
+        {/* 갱신 문의 */}
+        <div style={{ marginTop: 32, paddingTop: 20, borderTop: '1px solid var(--bd)' }}>
+          <h3 style={{ fontSize: 15, fontWeight: 600, color: 'var(--t1)', marginBottom: 16 }}>
             갱신 문의
-          </button>
-          <button
-            className="btn btn-outline btn-sm"
-            style={{ marginLeft: 8 }}
-            onClick={() => toast("동기화 중...", "info")}
-          >
-            🔄 동기화
-          </button>
+          </h3>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: 15, color: 'var(--ac)' }}>partners@knowwheresoft.com</span>
+            <button
+              type="button"
+              onClick={() => handleCopyEmail("partners@knowwheresoft.com")}
+              style={{
+                padding: '4px 10px',
+                fontSize: 12,
+                background: 'var(--bg3)',
+                border: '1px solid var(--bd)',
+                borderRadius: 4,
+                color: 'var(--t2)',
+                cursor: 'pointer',
+              }}
+            >
+              복사
+            </button>
+          </div>
         </div>
       </div>
       <div className="mod-f">
@@ -133,10 +169,15 @@ export default function Licenses() {
 
   const filtered = licenses.filter((l) => {
     const osName = OS_TYPE_MAP[l.osType] || "";
-    const detectName = parseDetectType(l.detectType);
 
     if (osFilter && osName !== osFilter) return false;
-    if (detectFilter && detectName !== detectFilter) return false;
+    if (detectFilter) {
+      const f = parseDetectTypeFlags(l.detectType);
+      if (detectFilter === "선정성" && !f.adult) return false;
+      if (detectFilter === "도박" && !f.gambling) return false;
+      if (detectFilter === "선정성, 도박" && !(f.adult && f.gambling))
+        return false;
+    }
 
     const q = search.toLowerCase();
     if (
@@ -149,7 +190,7 @@ export default function Licenses() {
     return true;
   });
 
-  const cols: Column<License & Record<string, unknown>>[] = useMemo(
+  const cols: Column<LicenseApi & Record<string, unknown>>[] = useMemo(
     () => [
       {
         key: "osType",
@@ -164,15 +205,10 @@ export default function Licenses() {
         key: "detectType",
         label: "탐지 항목",
         render: (v) => {
-          const detectName = parseDetectType(v as string);
-          const color =
-            detectName === "선정성"
-              ? "#ef4444"
-              : detectName === "도박"
-                ? "#f59e0b"
-                : "#3b82f6";
-          return (
+          const f = parseDetectTypeFlags(v as string);
+          const pill = (label: string, color: string) => (
             <span
+              key={label}
               style={{
                 display: "inline-block",
                 padding: "2px 8px",
@@ -183,7 +219,18 @@ export default function Licenses() {
                 color,
               }}
             >
-              {detectName}
+              {label}
+            </span>
+          );
+          if (!f.adult && !f.gambling) {
+            return pill("알 수 없음", "#64748b");
+          }
+          return (
+            <span
+              style={{ display: "inline-flex", gap: 6, flexWrap: "wrap" }}
+            >
+              {f.adult ? pill("선정성", "#ef4444") : null}
+              {f.gambling ? pill("도박", "#f59e0b") : null}
             </span>
           );
         },
@@ -243,15 +290,15 @@ export default function Licenses() {
       </div>
 
       <div className="grid-4 section-gap">
-        <KPI label="총 수량" value={totalCount} sub="등록된 전체 라이선스" />
-        <KPI
+        <Kpi label="총 수량" value={totalCount} sub="등록된 전체 라이선스" />
+        <Kpi
           label="단말기 사용 중"
           value={usedCount}
           sub={`${usedPct}% 사용`}
           color={usedPct > 90 ? "err" : usedPct > 70 ? "warn" : "ok"}
         />
-        <KPI label="잔여" value={remaining} sub="추가 등록 가능" color="ac" />
-        <KPI
+        <Kpi label="잔여" value={remaining} sub="추가 등록 가능" color="ac" />
+        <Kpi
           label="라이선스 등록 수"
           value={meta?.totalCount ?? 0}
           sub="라이선스 항목"
@@ -293,9 +340,9 @@ export default function Licenses() {
           }}
         >
           <option value="">전체 탐지</option>
-          <option value="선정성">선정성</option>
-          <option value="도박">도박</option>
-          <option value="All-in-One">All-in-One</option>
+          <option value="선정성">선정성 포함</option>
+          <option value="도박">도박 포함</option>
+          <option value="선정성, 도박">선정성+도박</option>
         </select>
         <button className="btn btn-outline" onClick={handleSearch}>
           검색
@@ -304,12 +351,12 @@ export default function Licenses() {
 
       <DataTable
         cols={cols}
-        rows={filtered as (License & Record<string, unknown>)[]}
+        rows={filtered as (LicenseApi & Record<string, unknown>)[]}
         loading={isLoading}
         rowKey="licenseId"
         onRowClick={(row) =>
           openPanel(
-            <LicenseDetailPanel lic={row as License} onClose={closePanel} />,
+            <LicenseDetailPanel lic={row as LicenseApi} onClose={closePanel} />,
           )
         }
         pagination={{

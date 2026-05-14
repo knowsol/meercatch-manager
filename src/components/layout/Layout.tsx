@@ -26,6 +26,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/account':       '내 계정',
   '/components':    '컴포넌트',
   '/menu-admin':    '메뉴 관리',
+  '/validurl':      '유효 URL 관리',
 };
 
 function BellIcon() {
@@ -95,7 +96,7 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   const { toasts, toast } = useToast();
-  const { userName, logout, role } = useAuth();
+  const { userName, logout, role, userRole } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
   const [showDropdown, setShowDropdown] = useState(false);
@@ -121,22 +122,24 @@ export default function Layout({ children }: LayoutProps) {
             </button>
             <div className="mh-title">{title}</div>
             <div className="mh-actions">
-              <button 
-                className="mh-icon-btn" 
-                title="메뉴 관리" 
-                onClick={() => router.push('/menu-admin')} 
-                style={{ 
-                  position: 'relative',
-                  width: 32,
-                  height: 32,
-                  borderRadius: 6,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <SettingsIcon />
-              </button>
+              {userRole === 'SUPER_ADMIN' && (
+                <button 
+                  className="mh-icon-btn" 
+                  title="메뉴 관리" 
+                  onClick={() => router.push('/menu-admin')} 
+                  style={{ 
+                    position: 'relative',
+                    width: 32,
+                    height: 32,
+                    borderRadius: 6,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <SettingsIcon />
+                </button>
+              )}
               {role !== 'direct' && (
                 <button className="mh-icon-btn" title="알림" onClick={() => router.push('/notifications')} style={{ position: 'relative' }}>
                   <BellIcon />

@@ -1,12 +1,14 @@
 // Detection API 타입 정의
 
 export interface Detection {
+  detectId: number;
   deviceUuid: string;
   osType: number;
   hardwareName: string | null;
   eventType: number;
   eventUrl: string;
   eventTime: string;
+  memo: string | null;
 }
 
 export interface EventTypeCount {
@@ -55,4 +57,35 @@ export const DETECT_OS_TYPE_MAP: Record<number, string> = {
 export function truncateUrl(url: string, maxLength: number = 40): string {
   if (!url || url.length <= maxLength) return url;
   return url.slice(0, maxLength) + '...';
+}
+
+// 단말기별 탐지 이력 API 타입
+export interface DeviceDetectionParams {
+  deviceUuid: string;
+  eventType?: number;
+  startDate?: string;
+  endDate?: string;
+  page: number;
+  size: number;
+}
+
+export interface DeviceDetection {
+  deviceUuid: string;
+  osType: number;
+  hardwareName: string;
+  eventType: number;
+  eventUrl: string;
+  eventTime: string;
+  [key: string]: unknown;
+}
+
+export interface DeviceDetectionResponse {
+  meta: {
+    createAt: string;
+    totalCount: number;
+    page: number;
+    totalPage: number;
+  };
+  data: DeviceDetection[];
+  eventTypeCounts: EventTypeCount[];
 }

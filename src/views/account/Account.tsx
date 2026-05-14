@@ -1,32 +1,105 @@
 'use client'
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useToastCtx } from '../../components/layout/Layout';
 import { useTheme } from '../../context/ThemeContext';
-import { DUMMY } from '../../data/dummy';
+import { useAuth } from '../../context/AuthContext';
+import { useMyPageInfo, useMyPageUpdate, useMyPageChangePassword } from '../../lib/api/hooks/useMyPage';
+import { fmtDT } from '../../components/common/helpers';
+
+const ROLE_LABEL: Record<string, string> = {
+  SUPER_ADMIN: '슈퍼관리자',
+  ADMIN: '관리자',
+  MANAGER: '매니저',
+  USER: '사용자',
+};
+
+function formatPhoneNumber(value: string): string {
+  const digits = value.replace(/\D/g, '').slice(0, 11);
+  
+  if (digits.length <= 3) {
+    return digits;
+  } else if (digits.length <= 7) {
+    return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+  } else {
+    return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
+  }
+}
 
 export default function Account() {
   const toast = useToastCtx();
   const { theme, setTheme } = useTheme();
-  const user = DUMMY.users.find(u => u.role === 'admin') || DUMMY.users[0];
+  const { userId } = useAuth();
 
-  const [name,    setName]    = useState(user.name);
-  const [contact, setContact] = useState(user.contact);
+  const accountId = userId ? Number(userId) : null;
+  const { data: myInfo, isLoading } = useMyPageInfo(accountId);
+  const updateMutation = useMyPageUpdate();
+  const changePasswordMutation = useMyPageChangePassword();
 
-  const [curPw,  setCurPw]  = useState('');
-  const [newPw,  setNewPw]  = useState('');
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phoneNo, setPhoneNo] = useState('');
+
+  const [newPw, setNewPw] = useState('');
   const [newPw2, setNewPw2] = useState('');
+
+  useEffect(() => {
+    if (myInfo) {
+      setName(myInfo.name || '');
+      setEmail(myInfo.email || '');
+      setPhoneNo(formatPhoneNumber(myInfo.phoneNo || ''));
+    }
+  }, [myInfo]);
 
   function saveInfo() {
     if (!name.trim()) { toast('이름을 입력해주세요.', 'err'); return; }
-    toast('계정 정보가 저장되었습니다.');
+    if (!myInfo) return;
+
+    updateMutation.mutate({
+      accountId: myInfo.accountId,
+      name: name.trim(),
+      email: email.trim(),
+      phoneNo: phoneNo.trim(),
+    }, {
+      onSuccess: () => {
+        toast('계정 정보가 저장되었습니다.');
+      },
+      onError: () => {
+        toast('저장에 실패했습니다.', 'err');
+      },
+    });
   }
 
   function changePw() {
-    if (!curPw)              { toast('현재 비밀번호를 입력해주세요.', 'err'); return; }
-    if (newPw.length < 8)    { toast('새 비밀번호는 8자 이상이어야 합니다.', 'err'); return; }
-    if (newPw !== newPw2)    { toast('비밀번호가 일치하지 않습니다.', 'err'); return; }
-    toast('비밀번호가 변경되었습니다.');
-    setCurPw(''); setNewPw(''); setNewPw2('');
+    if (newPw.length < 8) { toast('새 비밀번호는 8자 이상이어야 합니다.', 'err'); return; }
+    if (newPw !== newPw2) { toast('비밀번호가 일치하지 않습니다.', 'err'); return; }
+    if (!myInfo) return;
+
+    changePasswordMutation.mutate({
+      accountId: myInfo.accountId,
+      newPassword: newPw,
+    }, {
+      onSuccess: () => {
+        toast('비밀번호가 변경되었습니다.');
+        setNewPw(''); setNewPw2('');
+      },
+      onError: () => {
+        toast('비밀번호 변경에 실패했습니다.', 'err');
+      },
+    });
+  }
+
+  if (isLoading) {
+    return (
+      <div>
+        <div className="ph">
+          <div className="ph-left">
+            <div className="ph-title">내 계정</div>
+            <div className="ph-sub">계정 정보를 확인하고 수정합니다</div>
+          </div>
+        </div>
+        <div style={{ textAlign: 'center', padding: '40px 0', color: '#64748b' }}>로딩 중...</div>
+      </div>
+    );
   }
 
   return (
@@ -48,10 +121,17 @@ export default function Account() {
                 width:'56px', height:'56px', background:'var(--ac)', borderRadius:'50%',
                 display:'flex', alignItems:'center', justifyContent:'center',
                 fontSize:'22px', fontWeight:'700', flexShrink:0, color:'#fff'
-              }}>{user.name.charAt(0)}</div>
+              }}>{myInfo?.name?.charAt(0) || '?'}</div>
               <div>
-                <div style={{fontSize:'16px', fontWeight:'600', color:'var(--t1)'}}>{user.name}</div>
-                <div style={{fontSize:'12px', color:'var(--t3)'}}>관리자 · {user.username}</div>
+                <div style={{fontSize:'16px', fontWeight:'600', color:'var(--t1)'}}>{myInfo?.name || '-'}</div>
+                <div style={{fontSize:'12px', color:'var(--t3)'}}>{ROLE_LABEL[myInfo?.role || ''] || myInfo?.role} · {myInfo?.username}</div>
+              </div>
+            </div>
+            
+            <div className="section-gap">
+              <div className="fg">
+                <label>아이디</label>
+                <input className="inp" type="text" value={myInfo?.username || ''} disabled />
               </div>
             </div>
             <div className="section-gap">
@@ -62,31 +142,39 @@ export default function Account() {
             </div>
             <div className="section-gap">
               <div className="fg">
-                <label>아이디 (이메일)</label>
-                <input className="inp" type="text" value={user.username} disabled />
+                <label>이메일</label>
+                <input className="inp" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="이메일 주소" />
               </div>
             </div>
             <div className="section-gap">
               <div className="fg">
                 <label>연락처</label>
-                <input className="inp" type="text" value={contact} onChange={e => setContact(e.target.value)} />
+                <input 
+                  className="inp" 
+                  type="tel" 
+                  value={phoneNo} 
+                  onChange={e => setPhoneNo(formatPhoneNumber(e.target.value))} 
+                  placeholder="010-0000-0000"
+                  maxLength={13}
+                />
+              </div>
+            </div>
+            <div className="section-gap">
+              <div className="fg">
+                <label>최근 로그인</label>
+                <input className="inp" type="text" value={myInfo?.lastLoginAt ? fmtDT(myInfo.lastLoginAt) : '-'} disabled />
               </div>
             </div>
             <div className="mt-16">
-              <button className="btn btn-p" onClick={saveInfo}>저장</button>
+              <button className="btn btn-p" onClick={saveInfo} disabled={updateMutation.isPending}>
+                {updateMutation.isPending ? '저장 중...' : '저장'}
+              </button>
             </div>
           </div>
 
           {/* 비밀번호 변경 카드 */}
-          <div className="card">
+          <div className="card" style={{alignSelf:'start'}}>
             <div className="card-title">비밀번호 변경</div>
-            <div className="section-gap">
-              <div className="fg">
-                <label>현재 비밀번호<span className="req"> *</span></label>
-                <input className="inp" type="password" placeholder="현재 비밀번호"
-                  value={curPw} onChange={e => setCurPw(e.target.value)} />
-              </div>
-            </div>
             <div className="section-gap">
               <div className="fg">
                 <label>새 비밀번호<span className="req"> *</span></label>
@@ -104,7 +192,9 @@ export default function Account() {
             <div className="text-t3" style={{fontSize:'11.5px', marginBottom:'16px'}}>
               비밀번호는 8자 이상, 영문+숫자+특수문자 조합을 권장합니다.
             </div>
-            <button className="btn btn-p" onClick={changePw}>비밀번호 변경</button>
+            <button className="btn btn-p" onClick={changePw} disabled={changePasswordMutation.isPending}>
+              {changePasswordMutation.isPending ? '변경 중...' : '비밀번호 변경'}
+            </button>
           </div>
         </div>
 

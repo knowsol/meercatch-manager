@@ -5,6 +5,7 @@ import { useToastCtx } from '../../components/layout/Layout';
 import { DetTypeBadge } from '../../components/common/Badge';
 import { fmtDT } from '../../components/common/helpers';
 import { EVENT_TYPE_MAP, DETECT_OS_TYPE_MAP } from '@/types';
+import { useUpdateDetectionMemo } from '@/lib/api/hooks';
 import type { Detection } from '@/types';
 
 interface DetectionDetailPanelProps {
@@ -14,15 +15,28 @@ interface DetectionDetailPanelProps {
 export default function DetectionDetailPanel({ detection }: DetectionDetailPanelProps) {
   const { closePanel } = usePanel();
   const toast = useToastCtx();
+  const updateMemo = useUpdateDetectionMemo();
 
-  const [memo, setMemo] = useState('');
+  const [memo, setMemo] = useState(detection.memo || '');
+  const [isSaving, setIsSaving] = useState(false);
 
   const eventTypeName = EVENT_TYPE_MAP[detection.eventType] || '기타';
   const osTypeName = DETECT_OS_TYPE_MAP[detection.osType] || `OS ${detection.osType}`;
 
-  const handleAction = (label: string) => {
-    toast(`${label} 처리되었습니다.`);
-    closePanel();
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      await updateMemo.mutateAsync({
+        detectId: detection.detectId,
+        memo: memo,
+      });
+      toast('저장되었습니다.');
+      closePanel();
+    } catch {
+      toast('저장에 실패했습니다.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -86,9 +100,11 @@ export default function DetectionDetailPanel({ detection }: DetectionDetailPanel
         <div />
         <div className="mod-f-right">
           <button className="btn btn-outline" onClick={closePanel}>닫기</button>
-          <button className="btn btn-p" onClick={() => handleAction('확인')}>확인</button>
-          <button className="btn btn-warn" onClick={() => handleAction('검토')}>검토</button>
-          <button className="btn btn-outline" onClick={() => handleAction('무시')}>무시</button>
+          <button className="btn btn-p" onClick={handleSave} disabled={isSaving}>
+            {isSaving ? '저장 중...' : '저장'}
+          </button>
+          {/* <button className="btn btn-warn" onClick={() => handleAction('검토')}>검토</button> */}
+          {/* <button className="btn btn-outline" onClick={() => handleAction('무시')}>무시</button> */}
         </div>
       </div>
     </div>

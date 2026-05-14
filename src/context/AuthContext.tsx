@@ -1,8 +1,9 @@
 'use client';
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import type { UserRole } from '@/types';
+import type { UserRole, Menu } from '@/types';
 
 const STORAGE_KEY = 'meercatch_auth';
+const MENU_STORAGE_KEY = 'meercatch_menus';
 
 interface AuthState {
   loggedIn: boolean;
@@ -11,12 +12,13 @@ interface AuthState {
   userRole: UserRole | null;
   userId: string | null;
   permissionId: number | null;
+  menus: Menu[];
 }
 
 interface AuthContextValue extends AuthState {
   /** sessionStorage 복원 전까지 false — 서버/클라 첫 페인트 일치용 */
   hydrated: boolean;
-  login: (role: 'manager' | 'direct', name: string, userRole: UserRole, userId: string, permissionId: number) => void;
+  login: (role: 'manager' | 'direct', name: string, userRole: UserRole, userId: string, permissionId: number, menus: Menu[]) => void;
   logout: () => void;
 }
 
@@ -24,18 +26,25 @@ function loadAuth(): AuthState | null {
   try {
     if (typeof window === 'undefined') return null;
     const raw = sessionStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : null;
+    if (!raw) return null;
+    const auth = JSON.parse(raw);
+    const menusRaw = sessionStorage.getItem(MENU_STORAGE_KEY);
+    auth.menus = menusRaw ? JSON.parse(menusRaw) : [];
+    return auth;
   } catch {
     return null;
   }
 }
 
 function saveAuth(auth: AuthState): void {
-  sessionStorage.setItem(STORAGE_KEY, JSON.stringify(auth));
+  const { menus, ...authWithoutMenus } = auth;
+  sessionStorage.setItem(STORAGE_KEY, JSON.stringify(authWithoutMenus));
+  sessionStorage.setItem(MENU_STORAGE_KEY, JSON.stringify(menus));
 }
 
 function clearAuth(): void {
   sessionStorage.removeItem(STORAGE_KEY);
+  sessionStorage.removeItem(MENU_STORAGE_KEY);
 }
 
 const DEFAULT: AuthState = {
@@ -45,6 +54,7 @@ const DEFAULT: AuthState = {
   userRole: null,
   userId: null,
   permissionId: null,
+  menus: [],
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -64,8 +74,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setHydrated(true);
   }, []);
 
-  const login = (role: 'manager' | 'direct', name: string, userRole: UserRole, userId: string, permissionId: number) => {
-    const next: AuthState = { loggedIn: true, role, userName: name, userRole, userId, permissionId };
+  const login = (role: 'manager' | 'direct', name: string, userRole: UserRole, userId: string, permissionId: number, menus: Menu[]) => {
+    const next: AuthState = { loggedIn: true, role, userName: name, userRole, userId, permissionId, menus };
     setAuth(next);
     saveAuth(next);
   };

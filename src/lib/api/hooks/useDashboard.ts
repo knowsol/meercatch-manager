@@ -53,7 +53,7 @@ interface LicenseSummary {
 
 export function useLicenseSummary(options?: Omit<UseQueryOptions<LicenseSummary>, 'queryKey' | 'queryFn'>) {
   return useQuery({
-    queryKey: dashboardKeys.licenseSummary(),
+    queryKey: dashboardKeys.licenseSummary(), 
     queryFn: async (): Promise<LicenseSummary> => {
       const { data } = await apiClient.get(ENDPOINTS.DASHBOARD.LICENSE_SUMMARY);
       return data;

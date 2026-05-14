@@ -35,8 +35,8 @@ export default function Pagination({
   // 이전 그룹으로 이동
   const handlePrevGroup = () => {
     if (currentGroup > 0) {
-      const prevGroupLastPage = currentGroup * visiblePages - 1;
-      onPageChange(prevGroupLastPage);
+      const prevGroupFirstPage = (currentGroup - 1) * visiblePages;
+      onPageChange(prevGroupFirstPage);
     }
   };
 

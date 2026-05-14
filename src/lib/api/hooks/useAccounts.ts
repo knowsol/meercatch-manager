@@ -43,13 +43,12 @@ export function useAccount(
   });
 }
 
-interface CreateAccountRequest {
-  username: string;
+export interface CreateAccountRequest {
+  userId: string;
   password: string;
-  name: string;
   email: string;
-  phoneNo: string;
-  role: string;
+  name?: string;
+  phoneNo?: string;
 }
 
 export function useCreateAccount() {

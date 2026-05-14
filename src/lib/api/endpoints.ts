@@ -87,6 +87,12 @@ export const ENDPOINTS = {
     CHANGE_PASSWORD: '/account/password',
   },
 
+  MY_PAGE: {
+    INFO: '/my-page',
+    UPDATE: '/my-page',
+    CHANGE_PASSWORD: '/my-page/password',
+  },
+
   MENU: {
     REGISTER: '/menu/register',
     UPDATE: '/menu/update',

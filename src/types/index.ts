@@ -35,9 +35,20 @@ export interface Group {
   schoolId: string;
 }
 
+// Device API Response (GET /devices)
+export interface DeviceApiResponse {
+  deviceUuid: string;
+  osType: number; // 1: Android, 2: iOS, 3: ChromeOS, 4: WhaleOS, 5: Windows
+  hardwareName?: string;
+  deviceStatus: number; // 0: 비활성, 1: 활성
+  lastLoginAt: string;
+  [key: string]: unknown;
+}
+
+// Device for UI display
 export interface Device {
   deviceId: string;
-  name: string;
+  // name: string; // 주석처리 - 사용하지 않음
   identifier: string;
   groupId: string;
   groupName: string;
@@ -164,6 +175,18 @@ export interface PaginatedResponse<T> {
   pageSize: number;
 }
 
+// Device API Paginated Response
+export interface DevicePaginatedResponse {
+  meta: {
+    createdAt: string;
+    size: number;
+    totalCount: number;
+    page: number;
+    totalPage: number;
+  };
+  data: DeviceApiResponse[];
+}
+
 export interface LoginResponse {
   token: string;
   user: User;
@@ -252,9 +275,11 @@ export interface CancelPauseRequest {
 // ============================================
 
 export interface DeviceFilters {
-  search?: string;
-  groupId?: string;
-  status?: 'online' | 'offline';
+  deviceStatus?: string; // 0: 활성, 1: 비활성
+  osType?: string; // 1: Android, 2: iOS, 3: ChromeOS, 4: WhaleOS, 5: Windows
+  searchKeyword?: string; // OS 타입 또는 단말기 UUID
+  page?: string;
+  size?: string;
 }
 
 export interface DetectionFilters {

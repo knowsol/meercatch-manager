@@ -1,7 +1,7 @@
 'use client';
 import { useState, useMemo } from 'react';
 import { usePanel } from '../../context/PanelContext';
-import KPI from '../../components/common/KPI';
+// import KPI from '../../components/common/KPI';
 import DataTable, { Column } from '../../components/common/DataTable';
 import { StatusBadge, Badge } from '../../components/common/Badge';
 import { fmtDT } from '../../components/common/helpers';
@@ -26,6 +26,30 @@ const ROLE_CLS: Record<AccountRole, string> = {
 
 const PAGE_SIZE = 10;
 
+// 이메일 마스킹: 앞 2자리 이후 @ 전까지 마스킹
+function maskEmail(email: string | null | undefined): string {
+  if (!email) return '—';
+  const atIndex = email.indexOf('@');
+  if (atIndex <= 2) return email;
+  const visible = email.slice(0, 2);
+  const masked = '*'.repeat(atIndex - 2);
+  const domain = email.slice(atIndex);
+  return `${visible}${masked}${domain}`;
+}
+
+// 연락처 마스킹: 가운데 자리 마스킹 (010-****-1234)
+function maskPhone(phone: string | null | undefined): string {
+  if (!phone) return '—';
+  const cleaned = phone.replaceAll(/\D/g, '');
+  if (cleaned.length === 11) {
+    return `${cleaned.slice(0, 3)}-****-${cleaned.slice(7)}`;
+  }
+  if (cleaned.length === 10) {
+    return `${cleaned.slice(0, 3)}-***-${cleaned.slice(6)}`;
+  }
+  return phone;
+}
+
 export default function UserList() {
   const { openPanel } = usePanel();
 
@@ -49,10 +73,10 @@ export default function UserList() {
   const totalCount = meta?.totalCount ?? 0;
   const totalPages = meta?.totalPage ?? 0;
 
-  const roleCount = accounts.reduce((acc, a) => {
-    acc[a.role] = (acc[a.role] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  // const roleCount = accounts.reduce((acc, a) => {
+  //   acc[a.role] = (acc[a.role] || 0) + 1;
+  //   return acc;
+  // }, {} as Record<string, number>);
 
   const handleOpenDetail = (account: Account) => {
     openPanel(<UserDetailPanel account={account} />);
@@ -93,10 +117,12 @@ export default function UserList() {
     {
       key: 'email',
       label: '이메일',
+      render: (v) => maskEmail(v as string | null | undefined),
     },
     {
       key: 'phoneNo',
       label: '연락처',
+      render: (v) => maskPhone(v as string | null | undefined),
     },
     {
       key: 'activeYn',
@@ -132,12 +158,12 @@ export default function UserList() {
         </div>
       </div>
 
-      <div className="grid-4" style={{ marginBottom: 16 }}>
+      {/* <div className="grid-4" style={{ marginBottom: 16 }}>
         <KPI label="전체 직원" value={totalCount} />
         <KPI label="슈퍼관리자" value={roleCount['SUPER_ADMIN'] || 0} color="err" />
         <KPI label="관리자" value={roleCount['ADMIN'] || 0} color="ac" />
         <KPI label="매니저" value={roleCount['MANAGER'] || 0} color="ok" />
-      </div>
+      </div> */}
 
       <div className="fb">
         <input
@@ -148,7 +174,7 @@ export default function UserList() {
           onChange={(e) => setSearch(e.target.value)}
           onKeyDown={handleKeyDown}
         />
-        <select
+        {/* <select
           className="inp"
           style={{ maxWidth: 140 }}
           value={roleFilter}
@@ -175,7 +201,7 @@ export default function UserList() {
           <option value="">전체 상태</option>
           <option value="Y">활성</option>
           <option value="N">비활성</option>
-        </select>
+        </select> */}
         <button className="btn btn-outline" onClick={handleSearch}>
           검색
         </button>

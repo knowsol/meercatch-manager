@@ -7,13 +7,18 @@ export interface Menu {
   title: string;
   path: string;
   icon: string | null;
+  parentId: number | null;
+  depth: number;
   sortingOrder: number;
+  children?: Menu[];
 }
 
 export interface MenuRegisterRequest {
   title: string;
-  path: string;
+  path?: string;
   icon?: string;
+  parentId?: number | null;
+  depth: number;
   sortingOrder: number;
 }
 
@@ -22,11 +27,9 @@ export interface MenuUpdateRequest {
   title?: string;
   path?: string;
   icon?: string;
+  parentId?: number | null;
+  depth?: number;
   sortingOrder?: number;
-}
-
-export interface MyMenuRequest {
-  permissionId: number;
 }
 
 export interface MenuDeleteRequest {
