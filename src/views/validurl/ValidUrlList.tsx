@@ -137,7 +137,7 @@ function ClickableText({ text, displayText, modalTitle, style }: ClickableTextPr
         }}
         onClick={(e) => {
           e.stopPropagation();
-          setShowModal(true);
+          setShowModal(true); 
         }}
         title="클릭하여 전체 보기"
       >

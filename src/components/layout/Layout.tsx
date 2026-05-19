@@ -22,11 +22,13 @@ const PAGE_TITLES: Record<string, string> = {
   '/detections':    '탐지 현황',
   '/users':         '직원 관리',
   '/licenses':      '라이선스',
+  '/license2':      '라이선스',
   '/notifications': '알림 설정',
   '/account':       '내 계정',
   '/components':    '컴포넌트',
   '/menu-admin':    '메뉴 관리',
   '/validurl':      '유효 URL 관리',
+  '/urlvalid2':     '유효 URL 관리 v2',
 };
 
 function BellIcon() {

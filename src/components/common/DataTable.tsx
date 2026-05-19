@@ -9,6 +9,8 @@ export interface Column<T> {
   key: string;
   label: string;
   width?: string | number;
+  /** 셀·헤더 정렬 (기본: left) */
+  align?: 'left' | 'center' | 'right';
   render?: (value: unknown, row: T) => ReactNode;
 }
 
@@ -128,7 +130,13 @@ export default function DataTable<T extends Record<string, unknown>>({
           <thead>
             <tr>
               {cols.map((c) => (
-                <th key={c.key} style={c.width ? { width: c.width } : {}}>
+                <th
+                  key={c.key}
+                  style={{
+                    ...(c.width ? { width: c.width } : {}),
+                    ...(c.align ? { textAlign: c.align } : {}),
+                  }}
+                >
                   {c.label}
                 </th>
               ))}
@@ -149,7 +157,33 @@ export default function DataTable<T extends Record<string, unknown>>({
                       : row[c.key] != null
                       ? String(row[c.key])
                       : '—';
-                    return <td key={c.key}>{val}</td>;
+                    return (
+                      <td
+                        key={c.key}
+                        style={{
+                          ...(c.align ? { textAlign: c.align } : {}),
+                          verticalAlign: 'middle',
+                        }}
+                      >
+                        {c.align === 'center' ? (
+                          <div
+                            style={{
+                              display: 'flex',
+                              justifyContent: 'center',
+                              alignItems: 'center',
+                              width: '100%',
+                              minHeight: 28,
+                              flexWrap: 'wrap',
+                              gap: 4,
+                            }}
+                          >
+                            {val}
+                          </div>
+                        ) : (
+                          val
+                        )}
+                      </td>
+                    );
                   })}
                 </tr>
               );
