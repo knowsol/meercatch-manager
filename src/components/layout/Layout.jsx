@@ -20,6 +20,7 @@ const PAGE_TITLES = {
   '/pauses':        '탐지중단',
   '/pauses-history':'탐지 중단 이력',
   '/detections':    '탐지 현황',
+  '/reports':       '보고서',
   '/users':         '직원 관리',
   '/licenses':      '라이선스',
   '/notifications': '알림 설정',
