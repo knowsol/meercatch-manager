@@ -4,7 +4,6 @@ import { usePanel } from '../../context/PanelContext';
 import Pagination from '../../components/common/Pagination';
 import KPI from '../../components/common/KPI';
 import Table from '../../components/common/Table';
-import { DetTypeBadge } from '../../components/common/Badge';
 import { fmtDT } from '../../components/common/helpers';
 import { DUMMY } from '../../data/dummy';
 import DetectionDetailPanel from './DetectionDetailPanel';
@@ -45,11 +44,6 @@ function ThumbCell({ thumb }) {
   );
 }
 
-const GRADE_STYLE = {
-  '상': { bg: '#fee2e2', color: '#ef4444' },
-  '중': { bg: '#fef3c7', color: '#f59e0b' },
-  '하': { bg: '#dbeafe', color: '#3b82f6' },
-};
 
 export default function DetectionList() {
   const { openPanel } = usePanel();
@@ -87,19 +81,8 @@ export default function DetectionList() {
     { key: 'userName',  label: '탐지 사용자',   width: '100px' },
     { key: 'deviceName',label: '단말',          width: '100px' },
     { key: 'os',        label: '탐지 OS',       width: '80px' },
-    { key: 'type',      label: '탐지 유형',     width: '80px',  render: v => <DetTypeBadge type={v} /> },
-    {
-      key: 'grade', label: '탐지 등급', width: '80px',
-      render: v => {
-        const s = GRADE_STYLE[v] || { bg: '#f1f5f9', color: '#64748b' };
-        return (
-          <span style={{
-            display: 'inline-block', padding: '2px 8px', borderRadius: 4,
-            fontSize: 12, fontWeight: 600, background: s.bg, color: s.color,
-          }}>{v}</span>
-        );
-      }
-    },
+    { key: 'type',  label: '탐지 유형', width: '80px' },
+    { key: 'grade', label: '탐지 등급', width: '80px' },
     {
       key: 'content', label: 'URL/도메인',
       render: v => v && v.length > 0
