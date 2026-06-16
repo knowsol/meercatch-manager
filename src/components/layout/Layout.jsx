@@ -19,6 +19,7 @@ const PAGE_TITLES = {
   '/policies':      '정책 관리',
   '/pauses':        '탐지중단',
   '/pauses-history':'탐지 중단 이력',
+  '/students':      '학생 관리',
   '/detections':    '탐지 현황',
   '/reports':       '보고서',
   '/users':         '직원 관리',

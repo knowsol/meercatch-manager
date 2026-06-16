@@ -164,6 +164,23 @@ export const DUMMY = {
     alertThreshold: 3,
     notiType: 'basic',
   },
+  students: [
+    { studentId:'st1',  name:'김민준', schoolId:'s1', groupId:'g1', grade:'1학년', classNum:'2반', deviceId:'d1',  status:'active' },
+    { studentId:'st2',  name:'이서연', schoolId:'s1', groupId:'g1', grade:'2학년', classNum:'1반', deviceId:'d2',  status:'active' },
+    { studentId:'st3',  name:'박지훈', schoolId:'s2', groupId:'g2', grade:'1학년', classNum:'3반', deviceId:'d3',  status:'active' },
+    { studentId:'st4',  name:'최유진', schoolId:'s2', groupId:'g2', grade:'3학년', classNum:'2반', deviceId:'d4',  status:'active' },
+    { studentId:'st5',  name:'정다은', schoolId:'s3', groupId:'g3', grade:'2학년', classNum:'1반', deviceId:'d5',  status:'inactive' },
+    { studentId:'st6',  name:'강현우', schoolId:'s4', groupId:'g4', grade:'5학년', classNum:'3반', deviceId:'d6',  status:'active' },
+    { studentId:'st7',  name:'윤소희', schoolId:'s4', groupId:'g4', grade:'6학년', classNum:'1반', deviceId:'d7',  status:'active' },
+    { studentId:'st8',  name:'임태양', schoolId:'s5', groupId:'g5', grade:'1학년', classNum:'4반', deviceId:'d8',  status:'active' },
+    { studentId:'st9',  name:'한채원', schoolId:'s5', groupId:'g5', grade:'2학년', classNum:'2반', deviceId:'d9',  status:'active' },
+    { studentId:'st10', name:'오준혁', schoolId:'s6', groupId:'g6', grade:'1학년', classNum:'1반', deviceId:'d10', status:'active' },
+    { studentId:'st11', name:'배수진', schoolId:'s6', groupId:'g6', grade:'3학년', classNum:'3반', deviceId:'d11', status:'inactive' },
+    { studentId:'st12', name:'신동현', schoolId:'s7', groupId:'g7', grade:'4학년', classNum:'2반', deviceId:'d12', status:'active' },
+    { studentId:'st13', name:'류아영', schoolId:'s8', groupId:'g8', grade:'2학년', classNum:'1반', deviceId:'d13', status:'active' },
+    { studentId:'st14', name:'홍길동', schoolId:'s1', groupId:'g1', grade:'3학년', classNum:'4반', deviceId:'d14', status:'active' },
+    { studentId:'st15', name:'김철수', schoolId:'s2', groupId:'g2', grade:'2학년', classNum:'3반', deviceId:'d15', status:'active' },
+  ],
 };
 
 // Computed totals
