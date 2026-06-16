@@ -5,7 +5,6 @@ import { usePanel } from '../../context/PanelContext';
 import { useToastCtx } from '../../components/layout/Layout';
 import KPI from '../../components/common/KPI';
 import Table from '../../components/common/Table';
-import { Badge } from '../../components/common/Badge';
 import { fmtDT } from '../../components/common/helpers';
 import { DUMMY } from '../../data/dummy';
 import PauseNewPanel from './PauseNewPanel';
@@ -92,9 +91,9 @@ export default function PauseList() {
     { key: 'reason', label: '사유' },
     {
       key: 'status', label: '상태', width: 90, render: v => {
-        if (v === 'ACTIVE') return <Badge cls="bdg-warn">진행중</Badge>;
-        if (v === 'EXPIRED') return <Badge cls="bdg-muted">만료</Badge>;
-        return <Badge cls="bdg-muted">취소</Badge>;
+        if (v === 'ACTIVE') return '진행중';
+        if (v === 'EXPIRED') return '만료';
+        return '취소';
       }
     },
   ];

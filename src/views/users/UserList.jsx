@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import { usePanel } from '../../context/PanelContext';
 import Pagination from '../../components/common/Pagination';
 import Table from '../../components/common/Table';
-import { StatusBadge } from '../../components/common/Badge';
 import { fmtDT } from '../../components/common/helpers';
 import { DUMMY } from '../../data/dummy';
 import UserNewPanel from './UserNewPanel';
@@ -38,7 +37,7 @@ export default function UserList() {
       const masked = local.length <= 2 ? local + '****' : local.slice(0, 2) + '****';
       return masked + '@' + domain;
     }},
-    { key: 'status', label: '상태', width: 80, render: v => <StatusBadge status={v} /> },
+    { key: 'status', label: '상태', width: 80, render: v => v === 'active' ? '활성' : '비활성' },
     {
       key: 'assignments', label: '담당학교', render: (v) => {
         if (!v || v.length === 0) return '—';

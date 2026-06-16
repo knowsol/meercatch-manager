@@ -4,7 +4,6 @@ import { usePanel } from '../../context/PanelContext';
 import Pagination from '../../components/common/Pagination';
 import KPI from '../../components/common/KPI';
 import Table from '../../components/common/Table';
-import { StatusBadge, Badge } from '../../components/common/Badge';
 import { fmtD } from '../../components/common/helpers';
 import { DUMMY } from '../../data/dummy';
 import GroupNewPanel from './GroupNewPanel';
@@ -37,11 +36,11 @@ export default function GroupList() {
   const cols = [
     { key: '_no',        label: 'No.',      width: '50px' },
     { key: '_schoolName', label: '학교',      render: (_, r) => { const s = DUMMY.schools.find(sc => sc.schoolId === r.schoolId); return s ? s.name : '—'; } },
-    { key: '_schoolType', label: '학교유형',  width: '90px', render: (_, r) => { const s = DUMMY.schools.find(sc => sc.schoolId === r.schoolId); return s ? <Badge cls="bdg-ac">{s.type}</Badge> : '—'; } },
+    { key: '_schoolType', label: '학교유형',  width: '90px', render: (_, r) => { const s = DUMMY.schools.find(sc => sc.schoolId === r.schoolId); return s ? s.type : '—'; } },
     { key: 'deviceCount',label: '단말 수',   width: '80px',  render: v => v + '대' },
     { key: 'policyCount',label: '적용 정책', width: '80px',  render: v => v + '개' },
-    { key: 'pauseStatus',label: '탐지 중단', width: '100px', render: v => v === 'paused' ? <Badge cls="bdg-warn">중단중</Badge> : <Badge cls="bdg-ok">정상</Badge> },
-    { key: 'status',     label: '상태',      width: '80px',  render: v => <StatusBadge status={v} /> },
+    { key: 'pauseStatus',label: '탐지 중단', width: '100px', render: v => v === 'paused' ? '중단중' : '정상' },
+    { key: 'status',     label: '상태',      width: '80px',  render: v => v === 'active' ? '활성' : '비활성' },
     { key: 'updatedAt',  label: '최근 수정', render: v => fmtD(v) },
   ];
 

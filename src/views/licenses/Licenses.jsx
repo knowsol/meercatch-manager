@@ -5,7 +5,6 @@ import { usePanel } from '../../context/PanelContext';
 import { useToastCtx } from '../../components/layout/Layout';
 import KPI from '../../components/common/KPI';
 import Table from '../../components/common/Table';
-import { Badge } from '../../components/common/Badge';
 import { fmtD, fmtDT } from '../../components/common/helpers';
 import { DUMMY } from '../../data/dummy';
 
@@ -103,28 +102,11 @@ export default function Licenses() {
       key: 'os', label: 'OS', width: '120px',
       render: v => <span style={{ fontWeight: 600, color: 'var(--t1)' }}>{v}</span>
     },
-    {
-      key: 'detectionType', label: '탐지 항목', width: '120px',
-      render: v => {
-        const color = v === '선정성' ? '#ef4444' : v === '도박' ? '#f59e0b' : '#3b82f6';
-        return (
-          <span style={{
-            display: 'inline-block', padding: '2px 8px', borderRadius: 4,
-            fontSize: 12, fontWeight: 600,
-            background: color + '18', color
-          }}>{v}</span>
-        );
-      }
-    },
+    { key: 'detectionType', label: '탐지 항목', width: '120px' },
     { key: 'devices',     label: '수량',     width: '80px',  render: v => `${v}대` },
     { key: 'usedDevices', label: '사용 단말', width: '100px', render: (v, r) => `${v} / ${r.devices}대` },
     { key: 'validFrom',   label: '유효 기간',               render: (v, r) => `${fmtD(v)} ~ ${fmtD(r.validTo)}` },
-    {
-      key: 'status', label: '상태', width: '80px',
-      render: v => v === 'active'
-        ? <Badge cls="bdg-ok">활성</Badge>
-        : <Badge cls="bdg-err">만료</Badge>
-    },
+    { key: 'status', label: '상태', width: '80px', render: v => v === 'active' ? '활성' : '만료' },
   ];
 
   return (

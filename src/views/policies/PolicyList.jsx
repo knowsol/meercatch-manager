@@ -4,17 +4,10 @@ import { usePanel } from '../../context/PanelContext';
 import Pagination from '../../components/common/Pagination';
 import KPI from '../../components/common/KPI';
 import Table from '../../components/common/Table';
-import { Badge } from '../../components/common/Badge';
 import { fmtD } from '../../components/common/helpers';
 import { DUMMY } from '../../data/dummy';
 import PolicyNewPanel from './PolicyNewPanel';
 import PolicyDetailPanel from './PolicyDetailPanel';
-
-function policyTypeBadge(policy) {
-  return policy.type === '선정성'
-    ? <Badge cls="bdg-err">{policy.type}</Badge>
-    : <Badge cls="bdg-warn">{policy.type}</Badge>;
-}
 
 function policyDetectSummary(policy) {
   if (policy.type === '선정성') {
@@ -44,14 +37,14 @@ export default function PolicyList() {
   const activeCount = tabPolicies.filter(p => p.active).length;
 
   const cols = [
-    { key: 'type',        label: '탐지 유형',  width: '90px',  render: (_, r) => policyTypeBadge(r) },
+    { key: 'type',        label: '탐지 유형',  width: '90px' },
     { key: 'name',        label: '정책 이름',  render: (v, r) => (
       <a href="#" onClick={e => { e.preventDefault(); e.stopPropagation(); openPanel(<PolicyDetailPanel policyId={r.policyId} />); }}>{v}</a>
     )},
     { key: 'desc',        label: '설명' },
     { key: '_detect',     label: '탐지 내용',  render: (_, r) => <span style={{ fontSize: 13, color: '#374151' }}>{policyDetectSummary(r)}</span> },
     { key: 'appliedCount',label: '적용 그룹',  width: '90px',  render: v => v + '개' },
-    { key: 'active',      label: '상태',       width: '80px',  render: v => v ? <Badge cls="bdg-ok">활성</Badge> : <Badge cls="bdg-err">비활성</Badge> },
+    { key: 'active',      label: '상태',       width: '80px',  render: v => v ? '활성' : '비활성' },
     { key: 'updatedAt',   label: '수정일',     render: v => fmtD(v) },
   ];
 
