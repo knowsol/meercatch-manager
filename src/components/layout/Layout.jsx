@@ -78,7 +78,7 @@ function ExpiryBanner({ onDismiss }) {
 
 export default function Layout({ children }) {
   const { toasts, toast } = useToast();
-  const { userName, logout, role } = useAuth();
+  const { userName, logout, role, switchRole } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
   const [showDropdown, setShowDropdown] = useState(false);
@@ -101,6 +101,22 @@ export default function Layout({ children }) {
             </button>
             <div className="mh-title">{title}</div>
             <div className="mh-actions">
+              {/* 개발 편의용 역할 전환 버튼 */}
+              <div style={{ display: 'flex', gap: 4 }}>
+                {[
+                  { label: '교육청 관리자', value: 'manager' },
+                  { label: '학교 관리자',   value: 'direct'  },
+                ].map(({ label, value }) => (
+                  <button key={value} onClick={() => switchRole(value)} style={{
+                    padding: '4px 10px', fontSize: 11, fontWeight: 600, borderRadius: 6, cursor: 'pointer',
+                    border: '1px solid',
+                    borderColor: role === value ? 'var(--ac)' : 'var(--bd)',
+                    background: role === value ? 'var(--ac)' : 'var(--bg)',
+                    color: role === value ? '#fff' : 'var(--t2)',
+                    transition: 'all 0.15s',
+                  }}>{label}</button>
+                ))}
+              </div>
               {role !== 'direct' && (
                 <button className="mh-icon-btn" title="알림" onClick={() => router.push('/notifications')} style={{ position: 'relative' }}>
                   <BellIcon />

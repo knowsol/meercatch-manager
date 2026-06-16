@@ -43,8 +43,14 @@ export function AuthProvider({ children }) {
     clearAuth();
   };
 
+  const switchRole = (role) => {
+    const next = { ...auth, role };
+    setAuth(next);
+    saveAuth(next);
+  };
+
   return (
-    <AuthCtx.Provider value={{ ...auth, hydrated, login, logout }}>
+    <AuthCtx.Provider value={{ ...auth, hydrated, login, logout, switchRole }}>
       {children}
     </AuthCtx.Provider>
   );
