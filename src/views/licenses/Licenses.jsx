@@ -20,8 +20,8 @@ function LicenseDetailPanel({ lic, onClose }) {
       <div className="mod-b" style={{ flex: 1, overflowY: 'auto' }}>
         <div style={{ marginBottom: 16 }}>
           {lic.status === 'active'
-            ? <Badge cls="bdg-ok">활성</Badge>
-            : <Badge cls="bdg-err">만료</Badge>
+            ? '활성'
+            : '만료'
           }
         </div>
         <dl className="info-row">

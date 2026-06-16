@@ -34,9 +34,9 @@ function PauseDetailPanel({ pauseId, onClose, onRelease }) {
           <dt>종료</dt><dd>{fmtDT(p.endAt)}</dd>
           <dt>상태</dt>
           <dd>
-            {p.status === 'ACTIVE' && <Badge cls="bdg-warn">진행중</Badge>}
-            {p.status === 'EXPIRED' && <Badge cls="bdg-muted">만료</Badge>}
-            {p.status === 'CANCELLED' && <Badge cls="bdg-muted">취소</Badge>}
+            {p.status === 'ACTIVE' && '진행중'}
+            {p.status === 'EXPIRED' && '만료'}
+            {p.status === 'CANCELLED' && '취소'}
           </dd>
           <dt>사유</dt><dd>{p.reason}</dd>
           <dt>취소사유</dt><dd>{p.cancelReason || '—'}</dd>
