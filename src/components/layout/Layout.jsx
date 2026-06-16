@@ -14,7 +14,7 @@ export const useToastCtx = () => useContext(ToastCtx);
 
 const PAGE_TITLES = {
   '/':              '대시보드',
-  '/groups':        '그룹 관리',
+  '/groups':        '기관 관리',
   '/devices':       '단말기 관리',
   '/policies':      '정책 관리',
   '/pauses':        '탐지중단',

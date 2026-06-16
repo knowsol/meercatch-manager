@@ -33,7 +33,7 @@ const MENU = [
   { section: '메인' },
   { id: 'dashboard',     icon: 'dashboard',     label: '대시보드',    path: '/',              roles: ['m', 'd'] },
   { section: '운영 관리' },
-  { id: 'groups',        icon: 'groups',        label: '그룹 관리',   path: '/groups',        roles: ['m'] },
+  { id: 'groups',        icon: 'groups',        label: '기관 관리',   path: '/groups',        roles: ['m'] },
   { id: 'devices',       icon: 'devices',       label: '단말기 관리', path: '/devices',       roles: ['m', 'd'] },
   { id: 'students',      icon: 'students',      label: '학생 관리',   path: '/students',      roles: ['m', 'd'] },
   { id: 'policies',      icon: 'policies',      label: '정책 관리',   path: '/policies',      roles: ['m'] },

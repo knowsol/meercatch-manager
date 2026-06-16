@@ -50,7 +50,7 @@ export default function GroupList() {
     <div>
       <div className="ph">
         <div className="ph-left">
-          <div className="ph-title">그룹 목록</div>
+          <div className="ph-title">기관 목록</div>
           <div className="ph-sub">총 {DUMMY.groups.length}개 그룹</div>
         </div>
         <div className="ph-actions">
