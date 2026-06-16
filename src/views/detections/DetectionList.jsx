@@ -9,28 +9,32 @@ import { fmtDT } from '../../components/common/helpers';
 import { DUMMY } from '../../data/dummy';
 import DetectionDetailPanel from './DetectionDetailPanel';
 
-const THUMB_COLORS = ['#f87171', '#fb923c', '#a78bfa', '#60a5fa', '#34d399', '#f472b6'];
-
 function ThumbCell({ thumb }) {
   const [revealed, setRevealed] = useState(false);
-  const bg = THUMB_COLORS[thumb % THUMB_COLORS.length];
   return (
     <div
-      style={{ position: 'relative', width: 52, height: 38, borderRadius: 4, overflow: 'hidden', cursor: 'pointer', flexShrink: 0 }}
+      style={{ position: 'relative', width: 52, height: 38, borderRadius: 4, overflow: 'hidden', cursor: 'pointer', flexShrink: 0, background: '#1e293b' }}
       onClick={e => { e.stopPropagation(); setRevealed(r => !r); }}
       title={revealed ? '클릭하여 블러 처리' : '클릭하여 이미지 확인'}
     >
-      <div style={{
-        width: '100%', height: '100%',
-        background: `linear-gradient(135deg, ${bg} 0%, #1e293b 100%)`,
-        filter: revealed ? 'none' : 'blur(5px)',
-        transition: 'filter 0.2s',
-      }} />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={`https://picsum.photos/seed/${thumb}/52/38`}
+        alt="탐지 이미지"
+        style={{
+          width: '100%', height: '100%',
+          objectFit: 'cover',
+          filter: revealed ? 'none' : 'blur(5px)',
+          transition: 'filter 0.2s',
+          transform: 'scale(1.15)',
+        }}
+      />
       {!revealed && (
         <div style={{
           position: 'absolute', inset: 0,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           color: '#fff',
+          textShadow: '0 0 4px rgba(0,0,0,0.6)',
         }}>
           <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24">
             <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5ZM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5Zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"/>
