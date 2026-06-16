@@ -2,14 +2,14 @@
 
 export const DUMMY = {
   schools: [
-    { schoolId:'s1', name:'학동중학교',   type:'중학교',   status:'active',   address:'서울시 강남구 학동로 12' },
-    { schoolId:'s2', name:'서초중학교',   type:'중학교',   status:'active',   address:'서울시 서초구 서초대로 45' },
-    { schoolId:'s3', name:'강남고등학교', type:'고등학교', status:'inactive', address:'서울시 강남구 테헤란로 78' },
-    { schoolId:'s4', name:'마포초등학교', type:'초등학교', status:'active',   address:'서울시 마포구 월드컵로 33' },
-    { schoolId:'s5', name:'분당고등학교', type:'고등학교', status:'active',   address:'경기도 성남시 분당구 판교로 20' },
-    { schoolId:'s6', name:'은평중학교',   type:'중학교',   status:'active',   address:'서울시 은평구 연서로 55' },
-    { schoolId:'s7', name:'성북초등학교', type:'초등학교', status:'inactive', address:'서울시 성북구 삼선교로 9' },
-    { schoolId:'s8', name:'강서고등학교', type:'고등학교', status:'active',   address:'서울시 강서구 화곡로 101' },
+    { schoolId:'s1', name:'학동중학교',   type:'중학교',   status:'active',   address:'서울시 강남구 학동로 12',        manager:'김민수', loginId:'hakdong1',  email:'hakdong@edu.kr',  contact:'02-1234-5678', schoolCode:'7001234', createdAt:'2025.03.10. 오전 9:00' },
+    { schoolId:'s2', name:'서초중학교',   type:'중학교',   status:'active',   address:'서울시 서초구 서초대로 45',      manager:'이수진', loginId:'seocho2',   email:'seocho@edu.kr',   contact:'02-2345-6789', schoolCode:'7002345', createdAt:'2025.03.15. 오후 2:00' },
+    { schoolId:'s3', name:'강남고등학교', type:'고등학교', status:'inactive', address:'서울시 강남구 테헤란로 78',      manager:'-',      loginId:'gangnam3',  email:'-',               contact:'-',            schoolCode:'7003456', createdAt:'2025.04.01. 오전 10:00' },
+    { schoolId:'s4', name:'마포초등학교', type:'초등학교', status:'active',   address:'서울시 마포구 월드컵로 33',      manager:'-',      loginId:'mapo4',     email:'-',               contact:'-',            schoolCode:'7251089', createdAt:'2025.05.19. 오전 9:00' },
+    { schoolId:'s5', name:'분당고등학교', type:'고등학교', status:'active',   address:'경기도 성남시 분당구 판교로 20', manager:'박철수', loginId:'bundang5',  email:'bundang@edu.kr',  contact:'031-345-6789', schoolCode:'7281026', createdAt:'2025.06.30. 오후 1:00' },
+    { schoolId:'s6', name:'은평중학교',   type:'중학교',   status:'active',   address:'서울시 은평구 연서로 55',        manager:'-',      loginId:'eunpyeong6',email:'-',               contact:'-',            schoolCode:'7271049', createdAt:'2025.05.29. 오후 3:00' },
+    { schoolId:'s7', name:'성북초등학교', type:'초등학교', status:'inactive', address:'서울시 성북구 삼선교로 9',       manager:'-',      loginId:'seongbuk7', email:'-',               contact:'-',            schoolCode:'7261065', createdAt:'2025.06.25. 오후 2:00' },
+    { schoolId:'s8', name:'강서고등학교', type:'고등학교', status:'active',   address:'서울시 강서구 화곡로 101',       manager:'최영희', loginId:'gangseo8',  email:'gangseo@edu.kr',  contact:'02-8765-4321', schoolCode:'7281028', createdAt:'2025.06.25. 오전 11:00' },
   ],
   groups: [
     { groupId:'g1', name:'그룹1', deviceCount:712, policyCount:2, pauseStatus:'normal',  status:'active',   updatedAt:'2026-03-15', schoolId:'s1' },
