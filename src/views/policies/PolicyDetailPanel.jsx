@@ -38,7 +38,14 @@ export default function PolicyDetailPanel({ policyId }) {
   const [selectedItems, setSelectedItems] = useState(new Set(policy.detectionItems || []));
   const [gradeVal, setGradeVal] = useState(policy.grade || '');
 
-  const appliedGroups = DUMMY.groups.slice(0, policy.appliedCount);
+  const appliedGroups = (() => {
+    const seen = new Set();
+    return DUMMY.groups.filter(g => {
+      if (seen.has(g.schoolId)) return false;
+      seen.add(g.schoolId);
+      return true;
+    }).slice(0, policy.appliedCount);
+  })();
 
   const toggleItem = (item) => {
     setSelectedItems(prev => {

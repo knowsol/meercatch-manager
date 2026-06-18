@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import { usePanel } from '../../context/PanelContext';
 import Pagination from '../../components/common/Pagination';
-import KPI from '../../components/common/KPI';
 import Table from '../../components/common/Table';
 import { fmtD } from '../../components/common/helpers';
 import { DUMMY } from '../../data/dummy';
@@ -34,8 +33,6 @@ export default function PolicyList() {
     return true;
   });
 
-  const activeCount = tabPolicies.filter(p => p.active).length;
-
   const cols = [
     { key: 'type',        label: '탐지 유형',  width: '90px' },
     { key: 'name',        label: '정책 이름',  render: (v, r) => (
@@ -50,23 +47,9 @@ export default function PolicyList() {
 
   return (
     <div>
-      <div className="ph">
-        <div className="ph-left">
-          <div className="ph-title">정책 목록</div>
-          <div className="ph-sub">총 {DUMMY.policies.length}개 정책</div>
-        </div>
-        <div className="ph-actions">
-          <button className="btn btn-p" onClick={() => openPanel(<PolicyNewPanel />)}>+ 정책 생성</button>
-        </div>
-      </div>
-
-      <div style={{ display: 'flex', gap: 0, borderBottom: '2px solid var(--bd)', marginBottom: 16 }}>
+      <div className="tabs" style={{ marginBottom: 16, marginTop: -10 }}>
         {['전체', '선정성', '도박'].map(t => (
-          <div key={t}
-            style={{ padding: '8px 20px', fontSize: 14, fontWeight: 600, cursor: 'pointer', borderBottom: '2px solid transparent', marginBottom: -2,
-              color: tab === t ? 'var(--ac)' : '#94a3b8', borderBottomColor: tab === t ? 'var(--ac)' : 'transparent' }}
-            onClick={() => setTab(t)}>{t}
-          </div>
+          <div key={t} className={`tab${tab === t ? ' a' : ''}`} onClick={() => setTab(t)}>{t}</div>
         ))}
       </div>
 
@@ -78,18 +61,12 @@ export default function PolicyList() {
           <option value="true">활성</option>
           <option value="false">비활성</option>
         </select>
+        <button className="btn btn-p" style={{ marginLeft: 'auto', whiteSpace: 'nowrap' }}
+          onClick={() => openPanel(<PolicyNewPanel />)}>+ 정책 생성</button>
       </div>
 
-      <div className="grid-4 section-gap">
-        <KPI label="전체 정책" value={tabPolicies.length} />
-        <KPI label="활성 정책" value={activeCount} color="ok" />
-        <KPI label="비활성"    value={tabPolicies.length - activeCount} color="err" />
-        <KPI label="적용 그룹" value={tabPolicies.reduce((a, p) => a + p.appliedCount, 0)} sub="총 그룹 적용 수" color="ac" />
-      </div>
-
-      <div style={{ fontSize: 13, color: 'var(--t2)', marginBottom: 8 }}>총 {filtered.length}개</div>
-      <Table cols={cols} rows={filtered.slice((page - 1) * 15, page * 15)} onRowClick={row => openPanel(<PolicyDetailPanel policyId={row.policyId} />)} />
-      <Pagination page={page} total={filtered.length} pageSize={15} onChange={setPage} />
+      <Table cols={cols} rows={filtered.slice((page - 1) * 25, page * 25)} onRowClick={row => openPanel(<PolicyDetailPanel policyId={row.policyId} />)} />
+      <Pagination page={page} total={filtered.length} pageSize={25} onChange={setPage} />
     </div>
   );
 }

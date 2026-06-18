@@ -1,6 +1,6 @@
 'use client'
 
-const PAGE_SIZE = 15;
+const PAGE_SIZE = 25;
 
 function btnStyle(active) {
   return {

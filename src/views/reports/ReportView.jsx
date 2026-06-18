@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react';
 import { DUMMY } from '../../data/dummy';
+import { useSchoolScope } from '../../hooks/useSchoolScope';
 
 /* ── SVG Line Chart ── */
 function LineChart({ data }) {
@@ -125,9 +126,16 @@ function topGroups(detections, n = 5) {
 
 /* ── Main ── */
 export default function ReportView() {
+  const { isSchoolAdmin, schoolId, schoolGroupIds } = useSchoolScope();
+  const mySchool = isSchoolAdmin ? DUMMY.schools.find(s => s.schoolId === schoolId) : null;
+
   const [school, setSchool] = useState('전체');
 
-  const dets = DUMMY.detections;
+  const allDets = DUMMY.detections;
+  const dets = isSchoolAdmin && mySchool
+    ? allDets.filter(d => d.groupName === mySchool.name)
+    : allDets;
+
   const PREV = '2026-02';
   const CURR = '2026-03';
   const prevLabel = '2026년 2월';
@@ -171,10 +179,13 @@ export default function ReportView() {
   const gambleRows  = buildGroupRows(currAll.filter(d => d.type === '도박'), prevAll.filter(d => d.type === '도박'));
 
   // Pause rows
-  const pauseGroups = DUMMY.groups.slice(0, 5).map((g, i) => {
+  const pauseSourceGroups = isSchoolAdmin && schoolGroupIds.length
+    ? DUMMY.groups.filter(g => schoolGroupIds.includes(g.groupId)).slice(0, 5)
+    : DUMMY.groups.slice(0, 5);
+  const pauseGroups = pauseSourceGroups.map((g) => {
     const sch = DUMMY.schools.find(s => s.schoolId === g.schoolId);
     return {
-      group: sch ? sch.name : g.name,
+      group: isSchoolAdmin ? g.name : (sch ? sch.name : g.name),
       prev_cnt: 0, prev_time: 0,
       curr_cnt: DUMMY.pauses.filter(p => p.groupId === g.groupId && p.startAt.startsWith(CURR)).length,
       curr_time: 0,
@@ -194,10 +205,14 @@ export default function ReportView() {
 
       {/* 학교/교육청 선택 + PDF */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#fff', border: '1px solid #e2e8f0', borderRadius: 8, padding: '12px 20px', marginBottom: 16 }}>
-        <select className="inp" style={{ maxWidth: 220, fontWeight: 600 }} value={school} onChange={e => setSchool(e.target.value)}>
-          <option value="전체">전체</option>
-          {DUMMY.schools.map(s => <option key={s.schoolId} value={s.name}>{s.name}</option>)}
-        </select>
+        {isSchoolAdmin ? (
+          <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--t1)' }}>{mySchool ? mySchool.name : '—'}</div>
+        ) : (
+          <select className="inp" style={{ maxWidth: 220, fontWeight: 600 }} value={school} onChange={e => setSchool(e.target.value)}>
+            <option value="전체">전체</option>
+            {DUMMY.schools.map(s => <option key={s.schoolId} value={s.name}>{s.name}</option>)}
+          </select>
+        )}
         <button className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           PDF 내보내기

@@ -5,16 +5,19 @@ import Sidebar from './Sidebar';
 import PanelShell from '../common/Panel';
 import ToastContainer from '../common/Toast';
 import { useToast } from '../../hooks/useToast';
-import { useAuth } from '../../context/AuthContext';
 import { DUMMY } from '../../data/dummy';
 import { createContext, useContext } from 'react';
 
 const ToastCtx = createContext(() => {});
 export const useToastCtx = () => useContext(ToastCtx);
 
+const PageActionsCtx = createContext(() => {});
+export const useSetPageActions = () => useContext(PageActionsCtx);
+
 const PAGE_TITLES = {
   '/':              '대시보드',
   '/groups':        '기관 관리',
+  '/classes':       '그룹 관리',
   '/devices':       '단말기 관리',
   '/policies':      '정책 관리',
   '/pauses':        '탐지중단',
@@ -23,21 +26,18 @@ const PAGE_TITLES = {
   '/detections':    '탐지 현황',
   '/reports':       '보고서',
   '/users':         '직원 관리',
-  '/licenses':      '라이선스',
-  '/notifications': '알림 설정',
-  '/account':       '내 계정',
-  '/components':    '컴포넌트',
+  '/licenses':          '라이선스',
+  '/notifications':     '알림 설정',
+  '/account':           '내 계정',
+  '/components':        '컴포넌트',
+  '/detection-policy':  '탐지정책설정',
+  '/whitelist':         '화이트리스트 관리',
+  '/blacklist':         '블랙리스트 관리',
+  '/valid-urls':        '유효 URL 관리',
+  '/app-versions':      '앱 버전 관리',
+  '/audit-logs':        '감사 로그',
 };
 
-function BellIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-      <path d="M13.73 21a2 2 0 01-3.46 0"/>
-    </svg>
-  );
-}
 
 function ExpiryBanner({ onDismiss }) {
   const router = useRouter();
@@ -78,15 +78,12 @@ function ExpiryBanner({ onDismiss }) {
 
 export default function Layout({ children }) {
   const { toasts, toast } = useToast();
-  const { userName, logout, role, switchRole } = useAuth();
   const pathname = usePathname();
-  const router = useRouter();
-  const [showDropdown, setShowDropdown] = useState(false);
   const [bannerDismissed, setBannerDismissed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [pageActions, setPageActions] = useState(null);
 
   const title = PAGE_TITLES[pathname] || '대시보드';
-  const initial = userName ? userName.charAt(0) : 'a';
 
   return (
     <ToastCtx.Provider value={toast}>
@@ -99,67 +96,17 @@ export default function Layout({ children }) {
             <button className="mh-hamburger" onClick={() => setMobileOpen(o => !o)} aria-label="메뉴 열기">
               <span /><span /><span />
             </button>
-            <div className="mh-title">{title}</div>
-            <div className="mh-actions">
-              {/* 개발 편의용 역할 전환 버튼 */}
-              <div style={{ display: 'flex', gap: 4 }}>
-                {[
-                  { label: '교육청 관리자', value: 'manager' },
-                  { label: '학교 관리자',   value: 'direct'  },
-                ].map(({ label, value }) => (
-                  <button key={value} onClick={() => switchRole(value)} style={{
-                    padding: '4px 10px', fontSize: 11, fontWeight: 600, borderRadius: 6, cursor: 'pointer',
-                    border: '1px solid',
-                    borderColor: role === value ? 'var(--ac)' : 'var(--bd)',
-                    background: role === value ? 'var(--ac)' : 'var(--bg)',
-                    color: role === value ? '#fff' : 'var(--t2)',
-                    transition: 'all 0.15s',
-                  }}>{label}</button>
-                ))}
-              </div>
-              {role !== 'direct' && (
-                <button className="mh-icon-btn" title="알림" onClick={() => router.push('/notifications')} style={{ position: 'relative' }}>
-                  <BellIcon />
-                  <span className="mh-notif-dot" />
-                </button>
-              )}
-              <div
-                className="mh-user"
-                style={{ position: 'relative' }}
-                onClick={() => setShowDropdown(d => !d)}
-              >
-                <div className="mh-user-avatar">{initial}</div>
-                <span className="mh-user-name">{userName || 'admin'}</span>
-                {showDropdown && (
-                  <div onClick={e => e.stopPropagation()} style={{
-                    position: 'absolute', top: '100%', right: 0, marginTop: 6,
-                    background: 'var(--bg1)', border: '1px solid var(--bd)',
-                    borderRadius: 8, boxShadow: '0 4px 16px rgba(0,0,0,.1)',
-                    minWidth: 140, zIndex: 200, overflow: 'hidden',
-                  }}>
-                    <div
-                      onClick={() => { setShowDropdown(false); router.push('/account'); }}
-                      style={{ padding: '10px 14px', fontSize: 13, cursor: 'pointer', color: 'var(--t1)' }}
-                      onMouseEnter={e => e.target.style.background = 'var(--bg3)'}
-                      onMouseLeave={e => e.target.style.background = 'transparent'}
-                    >마이페이지</div>
-                    <div
-                      onClick={() => { setShowDropdown(false); logout(); }}
-                      style={{ padding: '10px 14px', fontSize: 13, cursor: 'pointer', color: '#ef4444', borderTop: '1px solid var(--bd)' }}
-                      onMouseEnter={e => e.target.style.background = '#fef2f2'}
-                      onMouseLeave={e => e.target.style.background = 'transparent'}
-                    >로그아웃</div>
-                  </div>
-                )}
-              </div>
-            </div>
+            <div className="mh-page-title">{title}</div>
+            {pageActions && <div className="mh-actions">{pageActions}</div>}
           </div>
 
           {/* License expiry banner */}
           {!bannerDismissed && <ExpiryBanner onDismiss={() => setBannerDismissed(true)} />}
 
           {/* Page body */}
-          <div className="mb">{children}</div>
+          <PageActionsCtx.Provider value={setPageActions}>
+            <div className="mb">{children}</div>
+          </PageActionsCtx.Provider>
         </div>
         <PanelShell />
         <ToastContainer toasts={toasts} />

@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react';
 import { usePanel } from '../../context/PanelContext';
+import { useSchoolScope } from '../../hooks/useSchoolScope';
 import Pagination from '../../components/common/Pagination';
 import Table from '../../components/common/Table';
 import { fmtDT } from '../../components/common/helpers';
@@ -9,21 +10,30 @@ import DeviceDetailPanel from './DeviceDetailPanel';
 
 export default function DeviceList() {
   const { openPanel } = usePanel();
+  const { isSchoolAdmin, schoolGroupIds } = useSchoolScope();
   const [search, setSearch] = useState('');
   const [groupId, setGroupId] = useState('');
   const [status, setStatus] = useState('');
   const [page, setPage] = useState(1);
   useEffect(() => setPage(1), [search, groupId, status]);
 
-  const active = DUMMY.devices.filter(d => d.status === 'online').length;
+  const scopedDevices = isSchoolAdmin && schoolGroupIds.length
+    ? DUMMY.devices.filter(d => schoolGroupIds.includes(d.groupId))
+    : DUMMY.devices;
 
-  const filtered = DUMMY.devices.filter(d => {
+  const active = scopedDevices.filter(d => d.status === 'online').length;
+
+  const filtered = scopedDevices.filter(d => {
     const q = search.toLowerCase();
     if (q && !d.name.toLowerCase().includes(q) && !d.identifier.toLowerCase().includes(q)) return false;
     if (groupId && d.groupId !== groupId) return false;
     if (status && d.status !== status) return false;
     return true;
   });
+
+  const groupOptions = isSchoolAdmin && schoolGroupIds.length
+    ? DUMMY.groups.filter(g => schoolGroupIds.includes(g.groupId))
+    : DUMMY.groups;
 
   const cols = [
     { key: 'identifier',  label: '식별자', render: v => <span style={{ fontFamily: 'monospace', fontSize: 12, color: '#64748b' }}>{v}</span> },
@@ -37,7 +47,7 @@ export default function DeviceList() {
       <div className="ph">
         <div className="ph-left">
           <div className="ph-title">단말기 관리</div>
-          <div className="ph-sub">총 {DUMMY.devices.length}대 등록</div>
+          <div className="ph-sub">총 {scopedDevices.length}대 등록</div>
         </div>
       </div>
 
@@ -62,7 +72,7 @@ export default function DeviceList() {
           value={search} onChange={e => setSearch(e.target.value)} />
         <select className="inp" style={{ maxWidth: 160 }} value={groupId} onChange={e => setGroupId(e.target.value)}>
           <option value="">전체 그룹</option>
-          {DUMMY.groups.map(g => <option key={g.groupId} value={g.groupId}>{g.name}</option>)}
+          {groupOptions.map(g => <option key={g.groupId} value={g.groupId}>{g.name}</option>)}
         </select>
         <select className="inp" style={{ maxWidth: 120 }} value={status} onChange={e => setStatus(e.target.value)}>
           <option value="">전체 상태</option>
@@ -72,8 +82,8 @@ export default function DeviceList() {
       </div>
 
       <div style={{ fontSize: 13, color: 'var(--t2)', marginBottom: 8 }}>총 {filtered.length}대</div>
-      <Table cols={cols} rows={filtered.slice((page - 1) * 15, page * 15)} onRowClick={row => openPanel(<DeviceDetailPanel deviceId={row.deviceId} />)} />
-      <Pagination page={page} total={filtered.length} pageSize={15} onChange={setPage} />
+      <Table cols={cols} rows={filtered.slice((page - 1) * 25, page * 25)} onRowClick={row => openPanel(<DeviceDetailPanel deviceId={row.deviceId} />)} />
+      <Pagination page={page} total={filtered.length} pageSize={25} onChange={setPage} />
     </div>
   );
 }

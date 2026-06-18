@@ -149,12 +149,12 @@ export default function Licenses() {
       <div style={{ fontSize: 13, color: 'var(--t2)', marginBottom: 8 }}>총 {filtered.length}개</div>
       <Table
         cols={cols}
-        rows={filtered.slice((page - 1) * 15, page * 15)}
+        rows={filtered.slice((page - 1) * 25, page * 25)}
         onRowClick={row => openPanel(
           <LicenseDetailPanel lic={row} onClose={closePanel} />
         )}
       />
-      <Pagination page={page} total={filtered.length} pageSize={15} onChange={setPage} />
+      <Pagination page={page} total={filtered.length} pageSize={25} onChange={setPage} />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react';
 import Pagination from '../../components/common/Pagination';
+import { useSchoolScope } from '../../hooks/useSchoolScope';
 import { usePanel } from '../../context/PanelContext';
 import { useToastCtx } from '../../components/layout/Layout';
 import KPI from '../../components/common/KPI';
@@ -58,12 +59,17 @@ function PauseDetailPanel({ pauseId, onClose, onRelease }) {
 export default function PauseList() {
   const { openPanel, closePanel } = usePanel();
   const toast = useToastCtx();
+  const { isSchoolAdmin, schoolGroupIds } = useSchoolScope();
   const [pauses, setPauses] = useState(DUMMY.pauses);
   const [page, setPage] = useState(1);
 
-  const active = pauses.filter(p => p.status === 'ACTIVE').length;
-  const expired = pauses.filter(p => p.status === 'EXPIRED').length;
-  const cancelled = pauses.filter(p => p.status === 'CANCELLED').length;
+  const visiblePauses = isSchoolAdmin && schoolGroupIds.length
+    ? pauses.filter(p => schoolGroupIds.includes(p.groupId))
+    : pauses;
+
+  const active = visiblePauses.filter(p => p.status === 'ACTIVE').length;
+  const expired = visiblePauses.filter(p => p.status === 'EXPIRED').length;
+  const cancelled = visiblePauses.filter(p => p.status === 'CANCELLED').length;
 
   const handleRelease = (pauseId) => {
     if (window.confirm('탐지 중단을 해제하시겠습니까?')) {
@@ -103,7 +109,7 @@ export default function PauseList() {
       <div className="ph">
         <div className="ph-left">
           <div className="ph-title">탐지 중단 현황</div>
-          <div className="ph-sub">총 {pauses.length}건</div>
+          <div className="ph-sub">총 {visiblePauses.length}건</div>
         </div>
         <div className="ph-actions">
           <button className="btn btn-p" onClick={() => openPanel(<PauseNewPanel />)}>+ 중단 설정</button>
@@ -116,10 +122,10 @@ export default function PauseList() {
         <KPI label="취소" value={cancelled} />
       </div>
 
-      <div style={{ fontSize: 13, color: 'var(--t2)', marginBottom: 8 }}>총 {pauses.length}건</div>
+      <div style={{ fontSize: 13, color: 'var(--t2)', marginBottom: 8 }}>총 {visiblePauses.length}건</div>
       <Table
         cols={cols}
-        rows={pauses.slice((page - 1) * 15, page * 15)}
+        rows={visiblePauses.slice((page - 1) * 25, page * 25)}
         onRowClick={row => openPanel(
           <PauseDetailPanel
             pauseId={row.pauseId}
@@ -128,7 +134,7 @@ export default function PauseList() {
           />
         )}
       />
-      <Pagination page={page} total={pauses.length} pageSize={15} onChange={setPage} />
+      <Pagination page={page} total={visiblePauses.length} pageSize={25} onChange={setPage} />
     </div>
   );
 
