@@ -1,7 +1,9 @@
 'use client'
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { DUMMY } from '../../data/dummy';
 import Pagination from '../../components/common/Pagination';
+import { usePanel } from '../../context/PanelContext';
+import UserNewPanel from './UserNewPanel';
 
 const PERMISSIONS = ['교육청 관리자', '교육청 관리 지원'];
 const STATUS_OPTS  = ['전체', '활성', '비활성'];
@@ -160,6 +162,7 @@ function UserPanel({ account, onSave, onDelete, onClose }) {
 
 /* ── 메인 컴포넌트 ── */
 export default function UserList() {
+  const { openPanel } = usePanel();
   const [accounts, setAccounts]         = useState([...DUMMY.staffAccounts]);
   const [statusFilter, setStatusFilter] = useState('전체');
   const [searchInput, setSearchInput]   = useState('');
@@ -167,6 +170,15 @@ export default function UserList() {
   const [page, setPage]                 = useState(1);
   const [pageSize, setPageSize]         = useState(10);
   const [selected, setSelected]         = useState(null);
+  const [showAddMenu, setShowAddMenu]   = useState(false);
+  const [showExcelImport, setShowExcelImport] = useState(false);
+  const [excelFile, setExcelFile]       = useState(null);
+  const addMenuRef = useRef(null);
+  useEffect(() => {
+    const handler = (e) => { if (addMenuRef.current && !addMenuRef.current.contains(e.target)) setShowAddMenu(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
 
   function doSearch() {
     setQuery({ status: statusFilter, search: searchInput });
@@ -223,8 +235,85 @@ export default function UserList() {
           <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           검색
         </button>
-        <button className="btn btn-outline" style={{ marginLeft: 'auto', whiteSpace: 'nowrap' }}>+ 계정 추가</button>
+        <div ref={addMenuRef} style={{ position: 'relative', marginLeft: 'auto' }}>
+          <button className="btn btn-p" style={{ whiteSpace: 'nowrap' }} onClick={() => setShowAddMenu(m => !m)}>
+            + 계정 추가
+          </button>
+          {showAddMenu && (
+            <div style={{
+              position: 'absolute', top: 'calc(100% + 6px)', right: 0, minWidth: 200, zIndex: 300,
+              background: 'var(--bg1)', border: '1px solid var(--bd)', borderRadius: 8,
+              boxShadow: '0 4px 16px rgba(0,0,0,.2)', overflow: 'hidden',
+            }}>
+              <div
+                style={{ padding: '11px 16px', fontSize: 13, cursor: 'pointer', color: 'var(--t1)', display: 'flex', alignItems: 'center', gap: 8 }}
+                onMouseEnter={e => e.currentTarget.style.background = 'var(--bg3)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                onClick={() => { setShowAddMenu(false); openPanel(<UserNewPanel />); }}
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                새로운 계정 추가
+              </div>
+              <div style={{ height: 1, background: 'var(--bd)' }} />
+              <div
+                style={{ padding: '11px 16px', fontSize: 13, cursor: 'pointer', color: 'var(--t1)', display: 'flex', alignItems: 'center', gap: 8 }}
+                onMouseEnter={e => e.currentTarget.style.background = 'var(--bg3)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                onClick={() => { setShowAddMenu(false); setExcelFile(null); setShowExcelImport(true); }}
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                엑셀에서 가져오기
+              </div>
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* 엑셀에서 가져오기 모달 */}
+      {showExcelImport && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          onClick={e => { if (e.target === e.currentTarget) setShowExcelImport(false); }}>
+          <div style={{ background: 'var(--bg1)', borderRadius: 12, width: 480, boxShadow: '0 8px 32px rgba(0,0,0,.3)', overflow: 'hidden' }}>
+            <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--bd)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--t1)' }}>엑셀에서 가져오기</span>
+              <button onClick={() => setShowExcelImport(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--t3)', fontSize: 20, lineHeight: 1 }}>×</button>
+            </div>
+            <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div style={{ fontSize: 13, color: 'var(--t2)', lineHeight: 1.6 }}>
+                엑셀 파일(.xlsx, .xls)을 업로드하면 계정 목록을 일괄 등록할 수 있습니다.
+              </div>
+              <div>
+                <label style={{ fontSize: 12, color: 'var(--t2)', marginBottom: 6, display: 'block' }}>템플릿 다운로드</label>
+                <button className="btn" style={{ fontSize: 13, color: 'var(--ac)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  계정 등록 양식 다운로드
+                </button>
+              </div>
+              <div>
+                <label style={{ fontSize: 12, color: 'var(--t2)', marginBottom: 6, display: 'block' }}>파일 업로드</label>
+                <label style={{
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                  gap: 10, padding: '32px 20px', border: `2px dashed ${excelFile ? 'var(--ac)' : 'var(--bd)'}`,
+                  borderRadius: 8, cursor: 'pointer', background: excelFile ? 'rgba(99,102,241,0.05)' : 'var(--bg3)',
+                  transition: 'all .15s',
+                }}>
+                  <input type="file" accept=".xlsx,.xls,.csv" style={{ display: 'none' }} onChange={e => setExcelFile(e.target.files?.[0] || null)} />
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={excelFile ? 'var(--ac)' : 'var(--t3)'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  {excelFile
+                    ? <span style={{ fontSize: 13, color: 'var(--ac)', fontWeight: 600 }}>{excelFile.name}</span>
+                    : <><span style={{ fontSize: 13, color: 'var(--t2)' }}>파일을 끌어다 놓거나 클릭하여 선택</span>
+                       <span style={{ fontSize: 12, color: 'var(--t3)' }}>.xlsx, .xls, .csv</span></>
+                  }
+                </label>
+              </div>
+            </div>
+            <div style={{ padding: '16px 24px', borderTop: '1px solid var(--bd)', display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+              <button className="btn" onClick={() => setShowExcelImport(false)} style={{ color: 'var(--t2)' }}>취소</button>
+              <button className="btn btn-p" disabled={!excelFile} style={{ opacity: excelFile ? 1 : 0.4 }} onClick={() => setShowExcelImport(false)}>가져오기</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 테이블 */}
       <div style={{ border: '1px solid var(--bd)', borderRadius: 8, overflow: 'hidden' }}>
