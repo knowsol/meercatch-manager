@@ -30,7 +30,7 @@ const PAGE_TITLES = {
   '/notifications':     '알림 설정',
   '/account':           '내 계정',
   '/components':        '컴포넌트',
-  '/detection-policy':  '탐지정책설정',
+  '/detection-policy':  '예외 서비스 관리',
   '/whitelist':         '화이트리스트 관리',
   '/blacklist':         '블랙리스트 관리',
   '/valid-urls':        '유효 URL 관리',

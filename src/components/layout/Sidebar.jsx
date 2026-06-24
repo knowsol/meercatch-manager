@@ -53,7 +53,7 @@ const MENU = [
   { id: 'notifications',    icon: 'notifications',    label: '알림 설정',       path: '/notifications',    common: false },
   { id: 'account',          icon: 'account',          label: '내 계정',         path: '/account',          common: true  },
   { section: '운영 설정' },
-  { id: 'detection-policy', icon: 'detection-policy', label: '탐지정책 설정',   path: '/detection-policy', common: true  },
+  { id: 'detection-policy', icon: 'detection-policy', label: '예외 서비스 관리', path: '/detection-policy', common: true  },
   { id: 'whitelist',        icon: 'whitelist',        label: '화이트리스트 관리', path: '/whitelist',       common: true  },
   { id: 'blacklist',        icon: 'blacklist',        label: '블랙리스트 관리', path: '/blacklist',        common: true  },
   { section: '관리자 전용' },
