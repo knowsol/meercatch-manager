@@ -127,7 +127,7 @@ export default function GroupList() {
   const [search, setSearch]       = useState('');
   const [selected, setSelected]   = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize]   = useState(10);
+  const pageSize = 25;
   const [showModal, setShowModal] = useState(false);
 
   if (isSchoolAdmin && schoolId) {
@@ -143,8 +143,6 @@ export default function GroupList() {
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const paginated  = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
-  const start      = filtered.length === 0 ? 0 : (currentPage - 1) * pageSize + 1;
-  const end        = Math.min(currentPage * pageSize, filtered.length);
 
   const handleClose = () => setSelected(null);
 
@@ -199,15 +197,6 @@ export default function GroupList() {
             )}
           </tbody>
         </table>
-      </div>
-
-      {/* 하단 */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12, fontSize: 13, color: 'var(--t2)' }}>
-        <span>총 {filtered.length}개 항목 중 {start}-{end}개 표시</span>
-        <select className="inp" style={{ maxWidth: 70 }} value={pageSize}
-          onChange={e => { setPageSize(Number(e.target.value)); setCurrentPage(1); }}>
-          {[10, 20, 50].map(n => <option key={n} value={n}>{n}</option>)}
-        </select>
       </div>
 
       {/* 페이지네이션 */}
