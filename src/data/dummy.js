@@ -385,6 +385,46 @@ export const DUMMY = {
 
 // Computed totals
 DUMMY.stats.totalDevices = DUMMY.devices.length;
+DUMMY.staffAccounts = [
+  { id:'sa1',  org:'대구광역시교육청', role:'관리자', permission:'교육청 관리자',   loginId:'secureCoding', status:'active' },
+  { id:'sa2',  org:'대구광역시교육청', role:'관리자', permission:'교육청 관리자',   loginId:'aaaa1111',     status:'active' },
+  { id:'sa3',  org:'대구광역시교육청', role:'관리자', permission:'교육청 관리자',   loginId:'qwer',         status:'active' },
+  { id:'sa4',  org:'대구광역시교육청', role:'관리자', permission:'교육청 관리자',   loginId:'know123',      status:'active' },
+  { id:'sa5',  org:'대구광역시교육청', role:'관리자', permission:'교육청 관리자',   loginId:'hellgate',     status:'active' },
+  { id:'sa6',  org:'대구광역시교육청', role:'관리자', permission:'교육청 관리자',   loginId:'tkadmin',      status:'active' },
+  { id:'sa7',  org:'대구광역시교육청', role:'관리자', permission:'교육청 관리자',   loginId:'admin',        status:'active' },
+  { id:'sa8',  org:'대구광역시교육청', role:'관리자', permission:'교육청 관리자',   loginId:'hong25',       status:'active' },
+  { id:'sa9',  org:'대구광역시교육청', role:'관리자', permission:'교육청 관리자',   loginId:'hong7',        status:'active' },
+  { id:'sa10', org:'대구광역시교육청', role:'관리자', permission:'교육청 관리자',   loginId:'hong14',       status:'active' },
+  { id:'sa11', org:'대구광역시교육청', role:'지원',   permission:'교육청 관리 지원', loginId:'support01',   status:'active' },
+  { id:'sa12', org:'대구광역시교육청', role:'지원',   permission:'교육청 관리 지원', loginId:'support02',   status:'active' },
+  { id:'sa13', org:'대구광역시교육청', role:'지원',   permission:'교육청 관리 지원', loginId:'daegu_s1',    status:'inactive' },
+  { id:'sa14', org:'서울특별시교육청', role:'관리자', permission:'교육청 관리자',   loginId:'seoul_admin1', status:'active' },
+  { id:'sa15', org:'서울특별시교육청', role:'관리자', permission:'교육청 관리자',   loginId:'seoul_admin2', status:'active' },
+  { id:'sa16', org:'서울특별시교육청', role:'관리자', permission:'교육청 관리자',   loginId:'seouladmin3',  status:'active' },
+  { id:'sa17', org:'서울특별시교육청', role:'관리자', permission:'교육청 관리자',   loginId:'manager_se',   status:'active' },
+  { id:'sa18', org:'서울특별시교육청', role:'지원',   permission:'교육청 관리 지원', loginId:'seoul_s1',    status:'active' },
+  { id:'sa19', org:'서울특별시교육청', role:'지원',   permission:'교육청 관리 지원', loginId:'seoul_s2',    status:'inactive' },
+  { id:'sa20', org:'경기도교육청',     role:'관리자', permission:'교육청 관리자',   loginId:'gyeonggi1',    status:'active' },
+  { id:'sa21', org:'경기도교육청',     role:'관리자', permission:'교육청 관리자',   loginId:'gyeonggi2',    status:'active' },
+  { id:'sa22', org:'경기도교육청',     role:'관리자', permission:'교육청 관리자',   loginId:'kg_manager',   status:'active' },
+  { id:'sa23', org:'경기도교육청',     role:'지원',   permission:'교육청 관리 지원', loginId:'kg_support1', status:'active' },
+  { id:'sa24', org:'경기도교육청',     role:'지원',   permission:'교육청 관리 지원', loginId:'kg_support2', status:'inactive' },
+  { id:'sa25', org:'부산광역시교육청', role:'관리자', permission:'교육청 관리자',   loginId:'busan_adm1',   status:'active' },
+  { id:'sa26', org:'부산광역시교육청', role:'관리자', permission:'교육청 관리자',   loginId:'busan_adm2',   status:'active' },
+  { id:'sa27', org:'부산광역시교육청', role:'지원',   permission:'교육청 관리 지원', loginId:'busan_sup1',  status:'active' },
+  { id:'sa28', org:'부산광역시교육청', role:'지원',   permission:'교육청 관리 지원', loginId:'busan_sup2',  status:'inactive' },
+  { id:'sa29', org:'인천광역시교육청', role:'관리자', permission:'교육청 관리자',   loginId:'incheon_adm',  status:'active' },
+  { id:'sa30', org:'인천광역시교육청', role:'지원',   permission:'교육청 관리 지원', loginId:'incheon_sup', status:'active' },
+  { id:'sa31', org:'광주광역시교육청', role:'관리자', permission:'교육청 관리자',   loginId:'gwangju_adm',  status:'active' },
+  { id:'sa32', org:'광주광역시교육청', role:'지원',   permission:'교육청 관리 지원', loginId:'gwangju_sup', status:'inactive' },
+  { id:'sa33', org:'대전광역시교육청', role:'관리자', permission:'교육청 관리자',   loginId:'daejeon_adm',  status:'active' },
+  { id:'sa34', org:'대전광역시교육청', role:'지원',   permission:'교육청 관리 지원', loginId:'daejeon_sup', status:'active' },
+  { id:'sa35', org:'울산광역시교육청', role:'관리자', permission:'교육청 관리자',   loginId:'ulsan_adm',    status:'active' },
+  { id:'sa36', org:'울산광역시교육청', role:'지원',   permission:'교육청 관리 지원', loginId:'ulsan_sup',   status:'active' },
+  { id:'sa37', org:'세종특별자치시교육청', role:'관리자', permission:'교육청 관리자', loginId:'sejong_adm', status:'inactive' },
+];
+
 DUMMY.licensesTotal = DUMMY.licenses.reduce((s, l) => s + l.devices, 0);
 DUMMY.licensesUsed  = DUMMY.licenses.reduce((s, l) => s + l.usedDevices, 0);
 
