@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - nextjs-v2
+  workflow_dispatch:
 
 jobs:
   deploy:
