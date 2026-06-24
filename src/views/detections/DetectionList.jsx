@@ -80,6 +80,21 @@ function ThumbCell({ thumb }) {
 const GRADES = ['하', '중', '상'];
 const ACTIONS = ['정탐', '오탐'];
 const SCHOOLS = ['관동초등학교', '서초중학교', '강남고등학교', '마포초등학교', '분당중학교', '인천고등학교'];
+const OS_LIST = ['Android', 'iOS', 'Windows', 'WhaleOS', 'ChromeOS'];
+const KEYWORD_POOL = [
+  ['게임', '충전', '한도'],
+  ['배당', '베팅', '토토', '스포츠', '라이브'],
+  ['라이브카지노', '게임', '토너먼트'],
+  ['입출금', '게임', '충전'],
+  ['바카라', '포커', '슬롯'],
+];
+const URL_POOL = [
+  'https://xn--oi2b30g.com',
+  'https://xn--mk1bu44c.net',
+  'http://core-gambling.xyz',
+  'https://sepa-bet.com',
+  'https://live-casino.kr',
+];
 const HISTORY = Array.from({ length: 120 }, (_, i) => ({
   _id: i + 1,
   grade: GRADES[i % 3],
@@ -91,6 +106,9 @@ const HISTORY = Array.from({ length: 120 }, (_, i) => ({
   actionAt:   `2026.${String(Math.floor(i / 10) % 6 + 1).padStart(2, '0')}.${String((i % 28) + 2).padStart(2, '0')}. 오후 02:${String(i % 60).padStart(2, '0')}`,
   operator:   'superadmin',
   school:     SCHOOLS[i % SCHOOLS.length],
+  keywords:   KEYWORD_POOL[i % KEYWORD_POOL.length],
+  url:        URL_POOL[i % URL_POOL.length],
+  os:         OS_LIST[i % OS_LIST.length],
 }));
 
 
@@ -116,15 +134,17 @@ function HistoryView() {
   const rows  = filtered.slice((page - 1) * pageSize, page * pageSize);
 
   const cols = [
-    { key: '_id',        label: 'No.',     width: '60px' },
-    { key: 'grade',      label: '탐지등급', width: '80px' },
-    { key: 'schoolYear', label: '학년',    width: '70px' },
-    { key: 'classNum',   label: '반',      width: '60px' },
-    { key: 'studentNo',  label: '학생번호', width: '80px' },
-    { key: 'actionType', label: '조치유형', width: '80px' },
-    { key: 'detectedAt', label: '탐지일시', width: '170px' },
-    { key: 'actionAt',   label: '조치일시', width: '170px' },
-    { key: 'operator',   label: '조치자',  width: '100px' },
+    { key: '_id',       label: 'No.',      width: '55px' },
+    { key: 'keywords',  label: '탐지 키워드', width: '200px', render: v => <KeywordTags keywords={v || []} /> },
+    { key: 'url',       label: 'URL',      width: '160px', render: v => v ? <UrlCell url={v} /> : <span style={{ color: 'var(--t3)' }}>—</span> },
+    { key: 'school',    label: '학교',     width: '120px' },
+    { key: 'schoolYear', label: '학생정보', width: '110px', render: (v, row) => `${row.schoolYear} ${row.classNum} ${row.studentNo}번` },
+    { key: 'os',        label: 'OS유형',   width: '90px' },
+    { key: 'grade',     label: '탐지등급', width: '70px' },
+    { key: 'actionType',label: '조치유형', width: '70px' },
+    { key: 'detectedAt',label: '탐지일시', width: '160px' },
+    { key: 'actionAt',  label: '조치일시', width: '160px' },
+    { key: 'operator',  label: '조치자',   width: '90px' },
   ];
 
   return (
