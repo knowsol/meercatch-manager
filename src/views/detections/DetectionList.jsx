@@ -93,16 +93,6 @@ const HISTORY = Array.from({ length: 120 }, (_, i) => ({
   school:     SCHOOLS[i % SCHOOLS.length],
 }));
 
-function GradeBadge({ v }) {
-  const cfg = { 상: { bg: '#fef2f2', color: '#dc2626', border: '#fecaca' }, 중: { bg: '#fffbeb', color: '#d97706', border: '#fde68a' }, 하: { bg: '#f0fdf4', color: '#16a34a', border: '#bbf7d0' } };
-  const c = cfg[v] || cfg['하'];
-  return <span style={{ display: 'inline-block', padding: '2px 10px', borderRadius: 20, fontSize: 12, fontWeight: 600, background: c.bg, color: c.color, border: `1px solid ${c.border}` }}>{v}</span>;
-}
-
-function ActionBadge({ v }) {
-  const isReal = v === '정탐';
-  return <span style={{ display: 'inline-block', padding: '2px 10px', borderRadius: 20, fontSize: 12, fontWeight: 600, background: isReal ? '#eff6ff' : '#f8fafc', color: isReal ? '#3b82f6' : '#64748b', border: `1px solid ${isReal ? '#bfdbfe' : '#e2e8f0'}` }}>{v}</span>;
-}
 
 function HistoryView() {
   const [search, setSearch]       = useState('');
@@ -127,11 +117,11 @@ function HistoryView() {
 
   const cols = [
     { key: '_id',        label: 'No.',     width: '60px' },
-    { key: 'grade',      label: '탐지등급', width: '80px',  render: v => <GradeBadge v={v} /> },
+    { key: 'grade',      label: '탐지등급', width: '80px' },
     { key: 'schoolYear', label: '학년',    width: '70px' },
     { key: 'classNum',   label: '반',      width: '60px' },
     { key: 'studentNo',  label: '학생번호', width: '80px' },
-    { key: 'actionType', label: '조치유형', width: '80px',  render: v => <ActionBadge v={v} /> },
+    { key: 'actionType', label: '조치유형', width: '80px' },
     { key: 'detectedAt', label: '탐지일시', width: '170px' },
     { key: 'actionAt',   label: '조치일시', width: '170px' },
     { key: 'operator',   label: '조치자',  width: '100px' },
