@@ -38,13 +38,65 @@ const DETAIL_TABS = ['기본 정보'];
 function parseGrade(name) { const m = name?.match(/(\d+)학년/); return m ? m[1] : ''; }
 function parseClass(name) { const m = name?.match(/(\d+)반/);  return m ? m[1] : ''; }
 
-function SchoolDetail({ school, onClose }) {
+function SchoolEditModal({ info, onSave, onClose }) {
+  const [manager, setManager] = useState(info.manager || '');
+  const [loginId, setLoginId] = useState(info.loginId || '');
+  const [email,   setEmail]   = useState(info.email   || '');
+  const [contact, setContact] = useState(info.contact || '');
+
+  const field = (label, value, onChange, mono) => (
+    <div style={{ display: 'flex', alignItems: 'center', marginBottom: 14 }}>
+      <div style={{ width: 72, fontSize: 13, color: 'var(--t2)', flexShrink: 0 }}>{label}</div>
+      <input className="inp" value={value} onChange={e => onChange(e.target.value)}
+        style={{ flex: 1, fontFamily: mono ? 'monospace' : undefined }} />
+    </div>
+  );
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+      onClick={e => e.target === e.currentTarget && onClose()}>
+      <div style={{ background: '#fff', borderRadius: 12, padding: '28px 28px 24px', width: 420, boxShadow: '0 8px 32px rgba(0,0,0,0.18)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+          <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--t1)' }}>관리자 정보 수정</div>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: 'var(--t3)', lineHeight: 1 }}>×</button>
+        </div>
+        <div style={{ fontSize: 13, color: 'var(--t3)', marginBottom: 24 }}>관리자 정보만 수정할 수 있습니다.</div>
+        {field('관리자', manager, setManager)}
+        {field('아이디', loginId, setLoginId, true)}
+        {field('이메일', email,   setEmail)}
+        {field('연락처', contact, setContact)}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 14 }}>
+          <button className="btn" onClick={onClose} style={{ minWidth: 64 }}>취소</button>
+          <button className="btn" style={{ background: '#1f2937', color: '#fff', border: 'none', minWidth: 64 }}
+            onClick={() => { onSave({ manager, loginId, email, contact }); onClose(); }}>저장</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SchoolDetail({ school: initialSchool, onClose }) {
+  const [school, setSchool] = useState(initialSchool);
+  const [editing, setEditing] = useState(false);
+
   const groups       = DUMMY.groups.filter(g => g.schoolId === school.schoolId);
   const studentTotal = groups.reduce((sum, g) => sum + (g.studentCount || 0), 0);
   const deviceTotal  = groups.reduce((sum, g) => sum + (g.deviceCount  || 0), 0);
 
+  function handleSave(updated) {
+    setSchool(prev => ({ ...prev, ...updated }));
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      {editing && (
+        <SchoolEditModal
+          info={{ manager: school.manager, loginId: school.loginId, email: school.email, contact: school.contact }}
+          onSave={handleSave}
+          onClose={() => setEditing(false)}
+        />
+      )}
+
       {/* 헤더 */}
       <div style={{ padding: '20px 24px 0', flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
@@ -53,7 +105,7 @@ function SchoolDetail({ school, onClose }) {
             <div style={{ fontSize: 12, color: 'var(--t3)' }}>{school.type} · {getRegion(school.address)}</div>
           </div>
           <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-            <button className="btn">수정</button>
+            <button className="btn" onClick={() => setEditing(true)}>수정</button>
             <button className="btn" style={{ color: 'var(--err)' }}>삭제</button>
             <button onClick={onClose} style={{ marginLeft: 4, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--t3)', fontSize: 18, lineHeight: 1, padding: '0 2px' }}>✕</button>
           </div>

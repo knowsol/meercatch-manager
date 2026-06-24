@@ -4,26 +4,26 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
 
 const IC = {
-  dashboard:    '<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>',
-  groups:       '<path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
-  classes:      '<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>',
-  devices:      '<rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18.01"/>',
-  policies:     '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
-  pauses:       '<circle cx="12" cy="12" r="10"/><line x1="10" y1="15" x2="10" y2="9"/><line x1="14" y1="15" x2="14" y2="9"/>',
-  detections:   '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',
-  reports:      '<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>',
-  users:        '<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>',
-  students:     '<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>',
-  licenses:     '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>',
-  notifications:'<path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/>',
-  account:      '<path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>',
-  components:   '<rect x="3" y="3" width="7" height="4" rx="1"/><rect x="14" y="3" width="7" height="4" rx="1"/><rect x="3" y="11" width="7" height="10" rx="1"/><rect x="14" y="11" width="7" height="4" rx="1"/><rect x="14" y="19" width="7" height="4" rx="1"/>',
+  dashboard:         '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
+  groups:            '<path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
+  classes:           '<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>',
+  devices:           '<rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18.01"/>',
+  policies:          '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+  pauses:            '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>',
+  detections:        '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',
+  reports:           '<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>',
+  users:             '<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>',
+  students:          '<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>',
+  licenses:          '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>',
+  notifications:     '<path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/>',
+  account:           '<path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+  components:        '<rect x="2" y="3" width="6" height="6" rx="1"/><rect x="16" y="3" width="6" height="6" rx="1"/><rect x="2" y="15" width="6" height="6" rx="1"/><rect x="10" y="3" width="4" height="18"/>',
   urls:              '<path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/>',
   'detection-policy':'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/>',
-  whitelist:         '<circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/>',
-  blacklist:         '<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>',
-  'app-versions':    '<path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>',
-  'audit-logs':      '<rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/>',
+  whitelist:         '<polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>',
+  blacklist:         '<circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>',
+  'app-versions':    '<path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>',
+  'audit-logs':      '<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>',
 };
 
 function SvgIcon({ paths }) {
@@ -36,60 +36,39 @@ function SvgIcon({ paths }) {
 }
 
 const MENU = [
-  { section: '메인' },
-  { id: 'dashboard',     icon: 'dashboard',     label: '대시보드',    path: '/',              roles: ['m', 'd'] },
+  { id: 'dashboard',        icon: 'dashboard',        label: '대시보드',        path: '/',                 common: true  },
   { section: '운영 관리' },
-  { id: 'groups',        icon: 'groups',        label: '기관 관리',   path: '/groups',        roles: ['m'] },
-  { id: 'classes',       icon: 'classes',       label: '그룹 관리',   path: '/classes',       roles: ['d'] },
-  { id: 'students',      icon: 'students',      label: '학생 관리',   path: '/students',      roles: ['d'] },
-  { id: 'devices',       icon: 'devices',       label: '단말기 관리', path: '/devices',       roles: ['d'] },
-  { id: 'policies',      icon: 'policies',      label: '정책 관리',   path: '/policies',      roles: ['m'] },
+  { id: 'groups',           icon: 'groups',           label: '기관 관리',       path: '/groups',           common: false },
+  { id: 'classes',          icon: 'classes',          label: '그룹 관리',       path: '/classes',          common: true  },
+  { id: 'students',         icon: 'students',         label: '학생 관리',       path: '/students',         common: true  },
+  { id: 'devices',          icon: 'devices',          label: '단말기 관리',     path: '/devices',          common: true  },
+  { id: 'policies',         icon: 'policies',         label: '정책 관리',       path: '/policies',         common: false },
   { section: '모니터링' },
-  { id: 'detections',    icon: 'detections',    label: '탐지 현황',   path: '/detections',    roles: ['m', 'd'] },
-  { id: 'reports',       icon: 'reports',       label: '보고서',      path: '/reports',       roles: ['m', 'd'] },
+  { id: 'detections',       icon: 'detections',       label: '탐지 현황',       path: '/detections',       common: true  },
+  { id: 'reports',          icon: 'reports',          label: '보고서',          path: '/reports',          common: true  },
   { section: '직원 관리' },
-  { id: 'users',         icon: 'users',         label: '직원 관리',   path: '/users',         roles: ['m', 'd'] },
+  { id: 'users',            icon: 'users',            label: '계정 현황',       path: '/users',            common: true  },
   { section: '설정' },
-  { id: 'licenses',      icon: 'licenses',      label: '라이선스',    path: '/licenses',      roles: ['m', 'd'] },
-  { id: 'notifications', icon: 'notifications', label: '알림 설정',   path: '/notifications', roles: ['m'] },
-  { id: 'account',       icon: 'account',       label: '내 계정',     path: '/account',       roles: ['m', 'd'] },
-  { id: 'components',    icon: 'components',    label: '컴포넌트',    path: '/components',    roles: ['m', 'd'] },
+  { id: 'licenses',         icon: 'licenses',         label: '라이선스',        path: '/licenses',         common: true  },
+  { id: 'notifications',    icon: 'notifications',    label: '알림 설정',       path: '/notifications',    common: false },
+  { id: 'account',          icon: 'account',          label: '내 계정',         path: '/account',          common: true  },
   { section: '운영 설정' },
-  { id: 'detection-policy', icon: 'detection-policy', label: '탐지정책설정',      path: '/detection-policy', roles: ['m'] },
-  { id: 'whitelist',        icon: 'whitelist',         label: '화이트리스트 관리', path: '/whitelist',        roles: ['m'] },
-  { id: 'blacklist',        icon: 'blacklist',         label: '블랙리스트 관리',   path: '/blacklist',        roles: ['m'] },
+  { id: 'detection-policy', icon: 'detection-policy', label: '탐지정책 설정',   path: '/detection-policy', common: true  },
+  { id: 'whitelist',        icon: 'whitelist',        label: '화이트리스트 관리', path: '/whitelist',       common: true  },
+  { id: 'blacklist',        icon: 'blacklist',        label: '블랙리스트 관리', path: '/blacklist',        common: true  },
   { section: '관리자 전용' },
-  { id: 'valid-urls',    icon: 'urls',          label: '유효 URL 관리', path: '/valid-urls',   roles: ['m'] },
-  { id: 'app-versions',  icon: 'app-versions',  label: '앱 버전 관리',  path: '/app-versions', roles: ['m'] },
-  { id: 'audit-logs',    icon: 'audit-logs',    label: '감사 로그',     path: '/audit-logs',   roles: ['m'] },
+  { id: 'audit-logs',       icon: 'audit-logs',       label: '감사 로그',       path: '/audit-logs',       common: true  },
+  { id: 'app-versions',     icon: 'app-versions',     label: '앱 버전 관리',    path: '/app-versions',     common: true  },
+  { id: 'valid-urls',       icon: 'urls',             label: '검증 URL 현황',   path: '/valid-urls',       common: false },
 ];
-
-function filterMenu(menu, role) {
-  const r = role === 'direct' ? 'd' : 'm';
-  const result = [];
-  for (let i = 0; i < menu.length; i++) {
-    const item = menu[i];
-    if (item.section) {
-      const hasVisible = menu.slice(i + 1).some(
-        x => !x.section && x.roles.includes(r)
-          && !menu.slice(i + 1, menu.indexOf(x)).some(y => y.section)
-      );
-      if (hasVisible) result.push(item);
-    } else {
-      if (item.roles.includes(r)) result.push(item);
-    }
-  }
-  return result;
-}
 
 export default function Sidebar({ mobileOpen, onMobileClose }) {
   const [collapsed, setCollapsed] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
-  const { role, userName, logout, switchRole } = useAuth();
+  const { userName, logout } = useAuth();
 
-  const visibleMenu = filterMenu(MENU, role);
   const initial = userName ? userName.charAt(0) : 'a';
 
   const handleNavigate = (path) => {
@@ -117,7 +96,7 @@ export default function Sidebar({ mobileOpen, onMobileClose }) {
 
       {/* Nav */}
       <nav className="sb-nav">
-        {visibleMenu.map((item, i) => {
+        {MENU.map((item, i) => {
           if (item.section) return <div key={i} className="ns">{item.section}</div>;
           const isActive = item.path === '/'
             ? pathname === '/'
@@ -126,44 +105,29 @@ export default function Sidebar({ mobileOpen, onMobileClose }) {
             <div key={item.id} className={`ni${isActive ? ' a' : ''}`} onClick={() => handleNavigate(item.path)}>
               <span className="ic"><SvgIcon paths={IC[item.icon]} /></span>
               <span className="ni-txt">{item.label}</span>
+              {!collapsed && item.common && (
+                <span style={{ fontSize: 10, fontWeight: 600, background: 'rgba(255,255,255,0.13)', color: 'rgba(255,255,255,0.55)', padding: '1px 5px', borderRadius: 3, marginLeft: 'auto', flexShrink: 0 }}>공통</span>
+              )}
             </div>
           );
         })}
       </nav>
 
-      {/* Bottom: role switcher + user */}
+      {/* Bottom: user */}
       <div className="sb-bottom">
-        {/* Role switcher */}
-        {!collapsed && (
-          <div className="sb-role-row">
-            {[
-              { label: '교육청 관리자', value: 'manager' },
-              { label: '학교 관리자',   value: 'direct'  },
-            ].map(({ label, value }) => (
-              <button
-                key={value}
-                onClick={() => switchRole(value)}
-                className={`sb-role-btn${role === value ? ' a' : ''}`}
-              >{label}</button>
-            ))}
-          </div>
-        )}
-
         {/* User row */}
         <div className="sb-user-row" style={{ position: 'relative' }}>
-          {role !== 'direct' && (
-            <button
-              className="sb-bell"
-              title="알림"
-              onClick={() => router.push('/notifications')}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-                <path d="M13.73 21a2 2 0 01-3.46 0"/>
-              </svg>
-              <span className="sb-notif-dot" />
-            </button>
-          )}
+          <button
+            className="sb-bell"
+            title="알림"
+            onClick={() => router.push('/notifications')}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 01-3.46 0"/>
+            </svg>
+            <span className="sb-notif-dot" />
+          </button>
 
           <div
             className="sb-user"

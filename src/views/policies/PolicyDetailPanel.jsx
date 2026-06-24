@@ -26,7 +26,7 @@ function policyDetectSummary(policy) {
   return '—';
 }
 
-export default function PolicyDetailPanel({ policyId }) {
+export default function PolicyDetailPanel({ policyId, verdict, onSetVerdict }) {
   const { closePanel } = usePanel();
   const toast = useToastCtx();
   const policy = DUMMY.policies.find(p => p.policyId === policyId) || DUMMY.policies[0];
@@ -63,8 +63,8 @@ export default function PolicyDetailPanel({ policyId }) {
       }
     },
     {
-      key: 'schoolId', label: '학교유형', render: v => {
-        const sch = DUMMY.schools.find(s => s.schoolId === v);
+      key: 'schoolType', label: '학교유형', render: (v, row) => {
+        const sch = DUMMY.schools.find(s => s.schoolId === row.schoolId);
         return sch ? <Badge cls="bdg-ac">{sch.type}</Badge> : '—';
       }
     },
@@ -162,30 +162,42 @@ export default function PolicyDetailPanel({ policyId }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <div className="mod-h">
-        <button className="cx" onClick={closePanel}>✕</button>
-        <h2>{policy.name}</h2>
+      <div className="mod-h" style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', padding: '16px 20px 0' }}>
+        <h2 style={{ margin: '0 0 16px', paddingBottom: 16, borderBottom: 'none' }}>{policy.name}</h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+          {!isEditing && (
+            <>
+              <button className="btn" style={{ padding: '4px 12px', fontSize: 12 }} onClick={() => setIsEditing(true)}>수정</button>
+              <button className="btn" style={{ padding: '4px 12px', fontSize: 12, background: 'var(--err)', color: '#fff', border: 'none' }}
+                onClick={() => { toast('정책이 삭제되었습니다.', 'warn'); closePanel(); }}>삭제</button>
+            </>
+          )}
+          <button className="cx" onClick={closePanel}>✕</button>
+        </div>
       </div>
       <div className="mod-b" style={{ flex: 1, overflowY: 'auto' }}>
         {isEditing ? renderEdit() : renderView()}
       </div>
-      <div className="mod-f">
-        <div />
-        <div className="mod-f-right">
-          <button className="btn btn-outline" onClick={closePanel}>닫기</button>
-          {isEditing ? (
-            <>
-              <button className="btn btn-outline" onClick={() => setIsEditing(false)}>취소</button>
-              <button className="btn btn-p" onClick={() => { toast('저장되었습니다.'); setIsEditing(false); }}>저장</button>
-            </>
-          ) : (
-            <>
-              <button className="btn btn-outline" onClick={() => setIsEditing(true)}>수정</button>
-              <button className="btn btn-d" onClick={() => { toast('정책이 삭제되었습니다.', 'warn'); closePanel(); }}>삭제</button>
-            </>
-          )}
+      {(isEditing || onSetVerdict) && (
+        <div className="mod-f">
+          <div />
+          <div className="mod-f-right">
+            {isEditing ? (
+              <>
+                <button className="btn btn-outline" onClick={() => setIsEditing(false)}>취소</button>
+                <button className="btn btn-p" onClick={() => { toast('저장되었습니다.'); setIsEditing(false); }}>저장</button>
+              </>
+            ) : onSetVerdict && (
+              <>
+                <button className="btn" style={{ background: '#ef4444', color: '#fff', border: 'none' }}
+                  onClick={() => { onSetVerdict('오탐'); closePanel(); }}>오탐</button>
+                <button className="btn" style={{ background: '#10b981', color: '#fff', border: 'none' }}
+                  onClick={() => { onSetVerdict('정탐'); closePanel(); }}>정탐</button>
+              </>
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

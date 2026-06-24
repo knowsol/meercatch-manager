@@ -55,7 +55,7 @@ function ExpiryBanner({ onDismiss }) {
       padding: '10px 20px', display: 'flex', alignItems: 'center',
       gap: 10, fontSize: 13, color: '#92400e', flexShrink: 0,
     }}>
-      <span style={{ fontSize: 15, flexShrink: 0 }}>⚠️</span>
+      <svg width="16" height="16" fill="none" stroke="#d97706" strokeWidth="2" viewBox="0 0 24 24" style={{ flexShrink: 0 }}><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
       <span style={{ flex: 1 }}>
         라이선스 만료 임박: {expiring.length}개 라이선스가 14일 이내에 만료됩니다.
         {' '}(가장 빠른 만료: <strong>{top.os}</strong> — {days}일 후)

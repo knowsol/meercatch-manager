@@ -58,7 +58,7 @@ ul, ol { list-style: none; }
 .sb.collapsed .sb-u-actions { display: none; }
 .sb-u-btn { flex: 1; padding: 4px 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius-sm); color: rgba(255,255,255,0.55); font-size: 11px; text-align: center; transition: background var(--trans), color var(--trans); cursor: pointer; }
 .sb-u-btn:hover { background: rgba(255,255,255,0.14); color: #fff; }
-.sb-nav { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 8px 0; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.15) transparent; }
+.sb-nav { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; padding: 8px 0; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.15) transparent; }
 .sb-nav::-webkit-scrollbar { width: 4px; }
 .sb-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
 .ns { padding: 12px 20px 4px; font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.3); letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap; overflow: hidden; }

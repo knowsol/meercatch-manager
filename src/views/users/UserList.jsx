@@ -1,117 +1,209 @@
 'use client'
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import { DUMMY } from '../../data/dummy';
 import Pagination from '../../components/common/Pagination';
 
 const PERMISSIONS = ['교육청 관리자', '교육청 관리 지원'];
 const STATUS_OPTS  = ['전체', '활성', '비활성'];
 
-function EditModal({ account, onClose }) {
+/* ── 사이드 패널 ── */
+function UserPanel({ account, onSave, onDelete, onClose }) {
+  const [editing, setEditing]     = useState(false);
+  const [pwConfirm, setPwConfirm] = useState(false);
+  const [pwDone, setPwDone]       = useState(false);
+  const [delConfirm, setDelConfirm] = useState(false);
+
+  /* 수정 폼 상태 */
   const [permission, setPermission] = useState(account.permission);
   const [status, setStatus]         = useState(account.status === 'active' ? '활성화' : '비활성화');
 
+  function handleSave() {
+    onSave({ ...account, permission, status: status === '활성화' ? 'active' : 'inactive' });
+    setEditing(false);
+  }
+
+  const row = (label, value, mono) => (
+    <div key={label} style={{ display: 'flex', alignItems: 'flex-start', padding: '11px 0', borderBottom: '1px solid var(--bd)' }}>
+      <div style={{ width: 90, flexShrink: 0, fontSize: 12, color: 'var(--t3)', fontWeight: 500 }}>{label}</div>
+      <div style={{ flex: 1, fontSize: 13, color: value ? 'var(--t1)' : 'var(--t3)', fontFamily: mono ? 'monospace' : undefined }}>{value || '-'}</div>
+    </div>
+  );
+
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-      onClick={e => e.target === e.currentTarget && onClose()}>
-      <div style={{ background: '#fff', borderRadius: 12, padding: '28px 28px 24px', width: 420, boxShadow: '0 8px 32px rgba(0,0,0,0.18)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-          <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--t1)' }}>계정 수정</div>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: 'var(--t3)', lineHeight: 1 }}>×</button>
-        </div>
-        <div style={{ fontSize: 13, color: 'var(--t3)', marginBottom: 24 }}>계정 정보를 수정합니다.</div>
+    <div style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: 400, background: '#fff', boxShadow: '-4px 0 20px rgba(0,0,0,0.12)', zIndex: 200, display: 'flex', flexDirection: 'column' }}>
 
-        {[['계정아이디', account.loginId], ['역할', account.role], ['기관', account.org]].map(([label, value]) => (
-          <div key={label} style={{ display: 'flex', alignItems: 'center', marginBottom: 14 }}>
-            <div style={{ width: 88, fontSize: 13, color: 'var(--t2)', flexShrink: 0 }}>{label}</div>
-            <input className="inp" value={value} readOnly style={{ flex: 1, background: 'var(--bg2)', color: 'var(--t3)', cursor: 'default' }} />
+      {/* 비밀번호 초기화 확인 */}
+      {pwConfirm && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          onClick={() => setPwConfirm(false)}>
+          <div style={{ background: '#fff', borderRadius: 12, padding: '28px 28px 24px', width: 360, boxShadow: '0 8px 32px rgba(0,0,0,0.18)' }} onClick={e => e.stopPropagation()}>
+            <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--t1)', marginBottom: 8 }}>비밀번호 초기화</div>
+            <div style={{ fontSize: 13, color: 'var(--t2)', marginBottom: 28 }}>
+              <span style={{ fontFamily: 'monospace', color: 'var(--ac)' }}>{account.loginId}</span> 계정의 비밀번호를 초기화하시겠습니까?
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+              <button className="btn" onClick={() => setPwConfirm(false)} style={{ minWidth: 64 }}>취소</button>
+              <button className="btn" style={{ background: '#1f2937', color: '#fff', border: 'none', minWidth: 64 }}
+                onClick={() => { setPwConfirm(false); setPwDone(true); }}>초기화</button>
+            </div>
           </div>
-        ))}
+        </div>
+      )}
 
-        <div style={{ display: 'flex', alignItems: 'center', marginBottom: 14 }}>
-          <div style={{ width: 88, fontSize: 13, color: 'var(--t2)', flexShrink: 0 }}>권한</div>
-          <select className="inp" value={permission} onChange={e => setPermission(e.target.value)} style={{ flex: 1 }}>
-            {PERMISSIONS.map(p => <option key={p} value={p}>{p}</option>)}
-          </select>
+      {/* 비밀번호 초기화 완료 */}
+      {pwDone && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          onClick={() => setPwDone(false)}>
+          <div style={{ background: '#fff', borderRadius: 12, padding: '28px 28px 24px', width: 360, boxShadow: '0 8px 32px rgba(0,0,0,0.18)' }} onClick={e => e.stopPropagation()}>
+            <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--t1)', marginBottom: 8 }}>비밀번호 초기화</div>
+            <div style={{ fontSize: 13, color: 'var(--t2)', marginBottom: 28 }}>
+              <span style={{ fontFamily: 'monospace', color: 'var(--ac)' }}>{account.loginId}</span> 계정의 비밀번호가 초기화되었습니다.
+            </div>
+            <div style={{ textAlign: 'right' }}>
+              <button className="btn" style={{ background: '#1f2937', color: '#fff', border: 'none', minWidth: 64 }} onClick={() => setPwDone(false)}>확인</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 삭제 확인 */}
+      {delConfirm && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          onClick={() => setDelConfirm(false)}>
+          <div style={{ background: '#fff', borderRadius: 12, padding: '28px 28px 24px', width: 360, boxShadow: '0 8px 32px rgba(0,0,0,0.18)' }} onClick={e => e.stopPropagation()}>
+            <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--t1)', marginBottom: 8 }}>계정 삭제</div>
+            <div style={{ fontSize: 13, color: 'var(--t2)', marginBottom: 28 }}>
+              <span style={{ fontFamily: 'monospace', color: 'var(--err)' }}>{account.loginId}</span> 계정을 삭제하시겠습니까?
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+              <button className="btn" onClick={() => setDelConfirm(false)} style={{ minWidth: 64 }}>취소</button>
+              <button className="btn" style={{ background: 'var(--err)', color: '#fff', border: 'none', minWidth: 64 }}
+                onClick={() => { setDelConfirm(false); onDelete(account.id); onClose(); }}>삭제</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 패널 헤더 */}
+      <div style={{ padding: '20px 24px 0', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
+          <div>
+            <div style={{ fontSize: 17, fontWeight: 700, color: 'var(--t1)', marginBottom: 3 }}>{account.name}</div>
+            <div style={{ fontSize: 12, color: 'var(--t3)' }}>{account.org} · {account.role}</div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <button className="btn" style={{ padding: '4px 12px', fontSize: 12 }} onClick={() => setEditing(true)}>수정</button>
+            <button className="btn" style={{ padding: '4px 12px', fontSize: 12, background: 'var(--err)', color: '#fff', border: 'none' }} onClick={() => setDelConfirm(true)}>삭제</button>
+            <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--t3)', fontSize: 18, lineHeight: 1, padding: '0 2px', marginLeft: 2 }}>✕</button>
+          </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', marginBottom: 28 }}>
-          <div style={{ width: 88, fontSize: 13, color: 'var(--t2)', flexShrink: 0 }}>계정 상태</div>
-          <select className="inp" value={status} onChange={e => setStatus(e.target.value)} style={{ flex: 1 }}>
-            <option>활성화</option>
-            <option>비활성화</option>
-          </select>
-        </div>
+        <div style={{ borderBottom: '1px solid var(--bd)' }} />
+      </div>
 
-        <div style={{ textAlign: 'right' }}>
-          <button className="btn" style={{ background: '#1f2937', color: '#fff', border: 'none', minWidth: 64 }} onClick={onClose}>수정</button>
-        </div>
+      {/* 패널 본문 */}
+      <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px' }}>
+        {!editing ? (
+          <>
+            <div style={{ background: 'var(--bg1)', border: '1px solid var(--bd)', borderRadius: 8, padding: '0 14px', marginBottom: 20 }}>
+              {row('소속기관', account.org)}
+              {row('역할',     account.role)}
+              {row('권한',     account.permission)}
+              {row('계정명',   account.loginId, true)}
+              {row('계정 상태', account.status === 'active' ? '활성' : '비활성')}
+            </div>
+
+            {/* 액션 버튼 */}
+            <button className="btn" style={{ width: '100%', justifyContent: 'center', display: 'flex', alignItems: 'center', gap: 6 }}
+              onClick={() => setPwConfirm(true)}>
+              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+              비밀번호 초기화
+            </button>
+          </>
+        ) : (
+          /* 수정 폼 */
+          <>
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--t1)', marginBottom: 16 }}>계정 수정</div>
+
+            {[['계정아이디', account.loginId], ['역할', account.role], ['기관', account.org]].map(([label, value]) => (
+              <div key={label} style={{ display: 'flex', alignItems: 'center', marginBottom: 14 }}>
+                <div style={{ width: 80, fontSize: 13, color: 'var(--t2)', flexShrink: 0 }}>{label}</div>
+                <input className="inp" value={value} readOnly style={{ flex: 1, background: 'var(--bg2)', color: 'var(--t3)', cursor: 'default' }} />
+              </div>
+            ))}
+
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: 14 }}>
+              <div style={{ width: 80, fontSize: 13, color: 'var(--t2)', flexShrink: 0 }}>권한</div>
+              <select className="inp" value={permission} onChange={e => setPermission(e.target.value)} style={{ flex: 1 }}>
+                {PERMISSIONS.map(p => <option key={p} value={p}>{p}</option>)}
+              </select>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: 24 }}>
+              <div style={{ width: 80, fontSize: 13, color: 'var(--t2)', flexShrink: 0 }}>계정 상태</div>
+              <select className="inp" value={status} onChange={e => setStatus(e.target.value)} style={{ flex: 1 }}>
+                <option>활성화</option>
+                <option>비활성화</option>
+              </select>
+            </div>
+
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button className="btn" style={{ flex: 1, justifyContent: 'center' }} onClick={() => setEditing(false)}>취소</button>
+              <button className="btn" style={{ flex: 1, justifyContent: 'center', background: '#1f2937', color: '#fff', border: 'none' }} onClick={handleSave}>저장</button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
 }
 
-function ActionDropdown({ account, onEdit, onClose }) {
-  return (
-    <div style={{ position: 'absolute', right: 8, top: 32, background: '#fff', border: '1px solid var(--bd)', borderRadius: 8, boxShadow: '0 4px 16px rgba(0,0,0,0.12)', zIndex: 100, minWidth: 148, padding: '4px 0' }}>
-      <button onClick={() => { onEdit(); onClose(); }}
-        style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '9px 16px', background: 'none', border: 'none', fontSize: 13, color: 'var(--t1)', cursor: 'pointer', textAlign: 'left' }}
-        onMouseEnter={e => e.currentTarget.style.background = 'var(--bg2)'}
-        onMouseLeave={e => e.currentTarget.style.background = 'none'}>
-        <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        수정
-      </button>
-      <button onClick={onClose}
-        style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '9px 16px', background: 'none', border: 'none', fontSize: 13, color: 'var(--err)', cursor: 'pointer', textAlign: 'left' }}
-        onMouseEnter={e => e.currentTarget.style.background = 'var(--bg2)'}
-        onMouseLeave={e => e.currentTarget.style.background = 'none'}>
-        <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
-        삭제
-      </button>
-      <button onClick={onClose}
-        style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '9px 16px', background: 'none', border: 'none', fontSize: 13, color: 'var(--t1)', cursor: 'pointer', textAlign: 'left' }}
-        onMouseEnter={e => e.currentTarget.style.background = 'var(--bg2)'}
-        onMouseLeave={e => e.currentTarget.style.background = 'none'}>
-        <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-        비밀번호 초기화
-      </button>
-    </div>
-  );
-}
-
+/* ── 메인 컴포넌트 ── */
 export default function UserList() {
+  const [accounts, setAccounts]         = useState([...DUMMY.staffAccounts]);
   const [statusFilter, setStatusFilter] = useState('전체');
   const [searchInput, setSearchInput]   = useState('');
   const [query, setQuery]               = useState({ status: '전체', search: '' });
   const [page, setPage]                 = useState(1);
   const [pageSize, setPageSize]         = useState(10);
-  const [openMenu, setOpenMenu]         = useState(null);
-  const [editAccount, setEditAccount]   = useState(null);
-
-  useEffect(() => {
-    function handleClick() { setOpenMenu(null); }
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
-  }, []);
+  const [selected, setSelected]         = useState(null);
 
   function doSearch() {
     setQuery({ status: statusFilter, search: searchInput });
     setPage(1);
   }
 
-  const filtered = DUMMY.staffAccounts.filter(a => {
+  function handleSave(updated) {
+    setAccounts(prev => prev.map(a => a.id === updated.id ? updated : a));
+    setSelected(updated);
+  }
+
+  function handleDelete(id) {
+    setAccounts(prev => prev.filter(a => a.id !== id));
+    setSelected(null);
+  }
+
+  const filtered = accounts.filter(a => {
     if (query.status !== '전체' && (query.status === '활성' ? a.status !== 'active' : a.status !== 'inactive')) return false;
     if (query.search && !a.org.includes(query.search) && !a.loginId.includes(query.search)) return false;
     return true;
   });
 
-  const total    = filtered.length;
-  const start    = total === 0 ? 0 : (page - 1) * pageSize + 1;
-  const end      = Math.min(page * pageSize, total);
-  const rows     = filtered.slice((page - 1) * pageSize, page * pageSize);
+  const total = filtered.length;
+  const start = total === 0 ? 0 : (page - 1) * pageSize + 1;
+  const end   = Math.min(page * pageSize, total);
+  const rows  = filtered.slice((page - 1) * pageSize, page * pageSize);
 
   return (
     <div>
-      {editAccount && <EditModal account={editAccount} onClose={() => setEditAccount(null)} />}
+      {selected && (
+        <UserPanel
+          account={selected}
+          onSave={handleSave}
+          onDelete={handleDelete}
+          onClose={() => setSelected(null)}
+        />
+      )}
 
       {/* 필터 바 */}
       <div style={{ display: 'flex', gap: 16, alignItems: 'flex-end', marginBottom: 20, flexWrap: 'wrap' }}>
@@ -123,7 +215,7 @@ export default function UserList() {
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           <span style={{ fontSize: 13, color: 'var(--t2)' }}>검색어</span>
-          <input className="inp" style={{ width: 240 }} placeholder="소속기관,계정명으로 검색"
+          <input className="inp" style={{ width: 240 }} placeholder="소속기관, 계정명으로 검색"
             value={searchInput} onChange={e => setSearchInput(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && doSearch()} />
         </div>
@@ -139,7 +231,7 @@ export default function UserList() {
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
           <thead>
             <tr style={{ background: 'var(--bg2)', borderBottom: '1px solid var(--bd)' }}>
-              {['No.', '소속기관', '역할', '권한명', '계정명', '계정상태', '관리'].map(h => (
+              {['No.', '소속기관', '역할', '권한명', '계정명', '계정상태'].map(h => (
                 <th key={h} style={{ padding: '10px 16px', textAlign: 'left', fontWeight: 600, color: 'var(--t2)', whiteSpace: 'nowrap' }}>{h}</th>
               ))}
             </tr>
@@ -147,10 +239,14 @@ export default function UserList() {
           <tbody>
             {rows.map((a, i) => {
               const no = total - ((page - 1) * pageSize + i);
+              const isSelected = selected?.id === a.id;
               return (
-                <tr key={a.id} style={{ borderBottom: '1px solid var(--bd)' }}
-                  onMouseEnter={e => e.currentTarget.style.background = 'var(--bg2)'}
-                  onMouseLeave={e => e.currentTarget.style.background = ''}>
+                <tr key={a.id}
+                  onClick={() => setSelected(prev => prev?.id === a.id ? null : a)}
+                  style={{ borderBottom: '1px solid var(--bd)', cursor: 'pointer',
+                    background: isSelected ? 'var(--bg2)' : '' }}
+                  onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = 'var(--bg2)'; }}
+                  onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = ''; }}>
                   <td style={{ padding: '10px 16px', color: 'var(--t3)', fontSize: 12 }}>{no}</td>
                   <td style={{ padding: '10px 16px' }}>{a.org}</td>
                   <td style={{ padding: '10px 16px' }}>{a.role}</td>
@@ -164,25 +260,11 @@ export default function UserList() {
                       {a.status === 'active' ? '활성' : '비활성'}
                     </span>
                   </td>
-                  <td style={{ padding: '10px 16px', position: 'relative' }}>
-                    <button
-                      onMouseDown={e => { e.stopPropagation(); setOpenMenu(openMenu === a.id ? null : a.id); }}
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, color: 'var(--t3)', padding: '2px 6px', borderRadius: 4 }}>
-                      •••
-                    </button>
-                    {openMenu === a.id && (
-                      <ActionDropdown
-                        account={a}
-                        onEdit={() => setEditAccount(a)}
-                        onClose={() => setOpenMenu(null)}
-                      />
-                    )}
-                  </td>
                 </tr>
               );
             })}
             {filtered.length === 0 && (
-              <tr><td colSpan={7} style={{ padding: '40px', textAlign: 'center', color: 'var(--t3)' }}>검색 결과가 없습니다.</td></tr>
+              <tr><td colSpan={6} style={{ padding: '40px', textAlign: 'center', color: 'var(--t3)' }}>검색 결과가 없습니다.</td></tr>
             )}
           </tbody>
         </table>

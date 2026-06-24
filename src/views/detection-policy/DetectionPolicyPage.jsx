@@ -76,62 +76,34 @@ export default function DetectionPolicyPage() {
   return (
     <div>
       <div className="ph">
-        <div className="ph-left"><div className="ph-title">탐지정책설정</div></div>
+        <div className="ph-left"><div className="ph-title">예외서비스 관리</div></div>
       </div>
 
       <div style={{ background: 'var(--bg1)', border: '1px solid var(--bd)', borderRadius: 8, padding: '20px 24px', marginBottom: 24 }}>
-        <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 16, borderBottom: '1px solid var(--bd)', paddingBottom: 10 }}>탐지정책설정</div>
-
-        <div className="info-row" style={{ marginBottom: 16 }}>
-          <dt>권한 정보</dt>
-          <dd style={{ fontSize: 13 }}>기관유형: <strong>교육청</strong> &nbsp;&nbsp; 기관명: <strong>대구광역시교육청</strong></dd>
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
-          <div style={{ fontSize: 13, fontWeight: 500, minWidth: 80 }}>탐지 적용항목</div>
-          <select className="inp" style={{ maxWidth: 110 }} value={scope} onChange={e => setScope(e.target.value)}>
-            {SCOPES.map(s => <option key={s} value={s}>{s}</option>)}
-          </select>
-          {ITEMS.map(item => (
-            <label key={item} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 13, cursor: 'pointer' }}>
-              <input type="checkbox" checked={checked.has(item)} onChange={() => toggle(item)} />
-              {item}
-            </label>
-          ))}
-          <button className="btn btn-p" style={{ marginLeft: 8, display: 'flex', alignItems: 'center', gap: 6 }}
-            onClick={() => toast('정책 설정을 불러왔습니다.')}>
-            <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-            설정 저장
+        <div className="fb" style={{ gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
+          <input className="inp" style={{ maxWidth: 240 }} placeholder="서비스명, OS, 패키지/주소로 검색"
+            value={svcSearch} onChange={e => setSvcSearch(e.target.value)} />
+          <div style={{ display: 'flex', gap: 6 }}>
+            {['Android','iOS','Windows','WhaleOS'].map(os => (
+              <button key={os}
+                className={`btn${osFilter === os ? ' btn-p' : ' btn-outline'}`}
+                style={{ padding: '5px 12px', fontSize: 12 }}
+                onClick={() => setOsFilter(osFilter === os ? '' : os)}>{os}</button>
+            ))}
+          </div>
+          <button className="btn btn-outline" style={{ marginLeft: 'auto', whiteSpace: 'nowrap' }}
+            onClick={() => toast('서비스 추가 기능은 준비 중입니다.')}>
+            + 예외서비스 추가하기
           </button>
         </div>
-
-        <div style={{ borderTop: '1px solid var(--bd)', paddingTop: 16 }}>
-          <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 12 }}>예외 서비스</div>
-          <div className="fb" style={{ gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
-            <input className="inp" style={{ maxWidth: 240 }} placeholder="서비스명, OS, 패키지/주소로 검색"
-              value={svcSearch} onChange={e => setSvcSearch(e.target.value)} />
-            <div style={{ display: 'flex', gap: 6 }}>
-              {['Android','iOS','Windows','WhaleOS'].map(os => (
-                <button key={os}
-                  className={`btn${osFilter === os ? ' btn-p' : ' btn-outline'}`}
-                  style={{ padding: '5px 12px', fontSize: 12 }}
-                  onClick={() => setOsFilter(osFilter === os ? '' : os)}>{os}</button>
-              ))}
-            </div>
-            <button className="btn btn-outline" style={{ marginLeft: 'auto', whiteSpace: 'nowrap' }}
-              onClick={() => toast('서비스 추가 기능은 준비 중입니다.')}>
-              + 예외서비스 추가하기
-            </button>
-          </div>
-          <Table cols={cols} rows={filtered.slice((page-1)*pageSize, page*pageSize)} />
-          <div className="fb" style={{ marginTop: 8, fontSize: 13, color: 'var(--t2)', alignItems: 'center', gap: 8 }}>
-            <span>총 {filtered.length}개 항목 중 {Math.min((page-1)*pageSize+1, filtered.length)}-{Math.min(page*pageSize, filtered.length)}개 표시</span>
-            <select className="inp" style={{ maxWidth: 70 }} value={pageSize} onChange={e => { setPageSize(Number(e.target.value)); setPage(1); }}>
-              {[10,20,50].map(n => <option key={n} value={n}>{n}</option>)}
-            </select>
-          </div>
-          <Pagination page={page} total={filtered.length} pageSize={pageSize} onChange={setPage} />
+        <Table cols={cols} rows={filtered.slice((page-1)*pageSize, page*pageSize)} />
+        <div className="fb" style={{ marginTop: 8, fontSize: 13, color: 'var(--t2)', alignItems: 'center', gap: 8 }}>
+          <span>총 {filtered.length}개 항목 중 {Math.min((page-1)*pageSize+1, filtered.length)}-{Math.min(page*pageSize, filtered.length)}개 표시</span>
+          <select className="inp" style={{ maxWidth: 70 }} value={pageSize} onChange={e => { setPageSize(Number(e.target.value)); setPage(1); }}>
+            {[10,20,50].map(n => <option key={n} value={n}>{n}</option>)}
+          </select>
         </div>
+        <Pagination page={page} total={filtered.length} pageSize={pageSize} onChange={setPage} />
       </div>
     </div>
   );
