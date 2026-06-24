@@ -95,24 +95,29 @@ const URL_POOL = [
   'https://sepa-bet.com',
   'https://live-casino.kr',
 ];
-const HISTORY = Array.from({ length: 120 }, (_, i) => ({
-  _id: i + 1,
-  grade: GRADES[i % 3],
-  schoolYear: `${(i % 3) + 1}학년`,
-  classNum: `${(i % 6) + 1}반`,
-  studentNo: (i % 30) + 1,
-  actionType: ACTIONS[i % 7 === 0 ? 1 : 0],
-  detectedAt: `2026.${String(Math.floor(i / 10) % 6 + 1).padStart(2, '0')}.${String((i % 28) + 1).padStart(2, '0')}. 오후 ${String((i % 12) + 1).padStart(2, '0')}:${String(i % 60).padStart(2, '0')}`,
-  actionAt:   `2026.${String(Math.floor(i / 10) % 6 + 1).padStart(2, '0')}.${String((i % 28) + 2).padStart(2, '0')}. 오후 02:${String(i % 60).padStart(2, '0')}`,
-  operator:   'superadmin',
-  school:     SCHOOLS[i % SCHOOLS.length],
-  keywords:   KEYWORD_POOL[i % KEYWORD_POOL.length],
-  url:        URL_POOL[i % URL_POOL.length],
-  os:         OS_LIST[i % OS_LIST.length],
-}));
+const HISTORY = Array.from({ length: 120 }, (_, i) => {
+  const det = DUMMY.detections[i % DUMMY.detections.length];
+  return {
+    _id: i + 1,
+    detId: det.detId,
+    grade: GRADES[i % 3],
+    schoolYear: `${(i % 3) + 1}학년`,
+    classNum: `${(i % 6) + 1}반`,
+    studentNo: (i % 30) + 1,
+    actionType: ACTIONS[i % 7 === 0 ? 1 : 0],
+    detectedAt: `2026.${String(Math.floor(i / 10) % 6 + 1).padStart(2, '0')}.${String((i % 28) + 1).padStart(2, '0')}. 오후 ${String((i % 12) + 1).padStart(2, '0')}:${String(i % 60).padStart(2, '0')}`,
+    actionAt:   `2026.${String(Math.floor(i / 10) % 6 + 1).padStart(2, '0')}.${String((i % 28) + 2).padStart(2, '0')}. 오후 02:${String(i % 60).padStart(2, '0')}`,
+    operator:   'superadmin',
+    school:     SCHOOLS[i % SCHOOLS.length],
+    keywords:   KEYWORD_POOL[i % KEYWORD_POOL.length],
+    url:        URL_POOL[i % URL_POOL.length],
+    os:         OS_LIST[i % OS_LIST.length],
+  };
+});
 
 
 function HistoryView() {
+  const { openPanel } = usePanel();
   const [search, setSearch]       = useState('');
   const [inputVal, setInputVal]   = useState('');
   const [fromDate, setFromDate]   = useState('');
@@ -179,7 +184,7 @@ function HistoryView() {
         탐지목록 총 <span style={{ color: 'var(--ac)', fontWeight: 600 }}>{total}개</span>
       </div>
 
-      <Table cols={cols} rows={rows} />
+      <Table cols={cols} rows={rows} onRowClick={row => openPanel(<DetectionDetailPanel detId={row.detId} />)} />
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12, fontSize: 13, color: 'var(--t2)' }}>
         <span>총 {total}개 항목 중 {start}-{end}개 표시</span>
