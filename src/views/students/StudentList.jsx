@@ -65,7 +65,7 @@ export default function StudentList() {
       {/* 필터 + 등록 버튼 */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
         <input className="inp search" placeholder="이름 검색..." type="text"
-          value={search} onChange={e => setSearch(e.target.value)} style={{ flex: 1 }} />
+          value={search} onChange={e => setSearch(e.target.value)} style={{ width: 200, flexShrink: 0 }} />
         {!isSchoolAdmin && (
           <SearchableSelect
             value={schoolFilter}
