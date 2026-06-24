@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { DUMMY } from '../../data/dummy';
 import Pagination from '../../components/common/Pagination';
 import { useSchoolScope } from '../../hooks/useSchoolScope';
+import SearchableSelect from '../../components/common/SearchableSelect';
 
 const PAGE_SIZE = 25;
 
@@ -76,15 +77,13 @@ export default function ClassList() {
       {/* 검색 + 필터 + 버튼 */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
         {!isSchoolAdmin && (
-          <select
-            className="inp"
+          <SearchableSelect
             value={schoolFilter}
-            onChange={e => setSchoolFilter(e.target.value)}
-            style={{ width: 130, flexShrink: 0 }}
-          >
-            <option value="">전체 학교</option>
-            {schools.map(s => <option key={s.schoolId} value={s.schoolId}>{s.name}</option>)}
-          </select>
+            onChange={setSchoolFilter}
+            options={schools.map(s => ({ value: s.schoolId, label: s.name }))}
+            placeholder="전체 학교"
+            style={{ width: 130 }}
+          />
         )}
         <select
           className="inp"
