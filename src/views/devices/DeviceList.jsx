@@ -1,15 +1,12 @@
 'use client'
 import { useState, useEffect } from 'react';
-import { usePanel } from '../../context/PanelContext';
 import { useSchoolScope } from '../../hooks/useSchoolScope';
 import Pagination from '../../components/common/Pagination';
 import Table from '../../components/common/Table';
 import { fmtDT } from '../../components/common/helpers';
 import { DUMMY } from '../../data/dummy';
-import DeviceDetailPanel from './DeviceDetailPanel';
 
 export default function DeviceList() {
-  const { openPanel } = usePanel();
   const { isSchoolAdmin, schoolGroupIds } = useSchoolScope();
   const [search, setSearch] = useState('');
   const [groupId, setGroupId] = useState('');
@@ -82,7 +79,7 @@ export default function DeviceList() {
       </div>
 
       <div style={{ fontSize: 13, color: 'var(--t2)', marginBottom: 8 }}>총 {filtered.length}대</div>
-      <Table cols={cols} rows={filtered.slice((page - 1) * 25, page * 25)} onRowClick={row => openPanel(<DeviceDetailPanel deviceId={row.deviceId} />)} />
+      <Table cols={cols} rows={filtered.slice((page - 1) * 25, page * 25)} />
       <Pagination page={page} total={filtered.length} pageSize={25} onChange={setPage} />
     </div>
   );
