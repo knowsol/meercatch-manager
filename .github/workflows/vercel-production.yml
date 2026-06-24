@@ -1,0 +1,15 @@
+name: Vercel Production Deploy
+
+on:
+  push:
+    branches:
+      - nextjs-v2
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to Vercel Production
+        run: npx vercel --prod --token ${{ secrets.VERCEL_TOKEN }} --scope kws-brand --yes
