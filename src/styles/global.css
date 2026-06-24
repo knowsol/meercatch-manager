@@ -104,7 +104,7 @@ ul, ol { list-style: none; }
 .mh-user:hover { background: var(--bg3); }
 .mh-user-avatar { width: 24px; height: 24px; background: var(--ac); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #fff; }
 .mh-user-name { font-size: 12.5px; font-weight: 500; color: var(--t1); }
-.mb { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 24px; scrollbar-width: thin; scrollbar-color: var(--bd2) transparent; }
+.mb { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 24px 24px 72px; scrollbar-width: thin; scrollbar-color: var(--bd2) transparent; }
 .mb::-webkit-scrollbar { width: 6px; }
 .mb::-webkit-scrollbar-thumb { background: var(--bd2); border-radius: 3px; }
 
