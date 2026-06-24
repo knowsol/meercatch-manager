@@ -2,7 +2,65 @@ import * as react_jsx_runtime from 'react/jsx-runtime';
 import { ReactNode } from 'react';
 
 type SessionStatus = 'active' | 'done' | 'pending';
+type MarkerAlign = 'left' | 'center' | 'right';
 type SessionViewport = 'desktop' | 'tablet' | 'mobile';
+type PanelMode = 'overlay' | 'push';
+type SpecStatus = 'planned' | 'draft' | 'review' | 'confirmed' | 'changed' | 'deprecated';
+type RuleType = 'policy' | 'logic' | 'data' | 'permission' | 'chart' | 'api';
+/** 화면(pageId) 단위 메타 정보 */
+interface ScreenSpec {
+    id: string | null;
+    pageId: string;
+    title: string;
+    description: string;
+    status: SpecStatus;
+    /** 핀 좌표 기준 정렬 방식 (미설정 시 전역 설정 기준) */
+    markerAlign?: MarkerAlign | null;
+    createdBy?: string | null;
+    updatedBy?: string | null;
+    createdAt?: string | null;
+    updatedAt?: string | null;
+}
+/** 화면 요소(data-spec-id)에 연결된 Page Spec */
+interface PageSpec {
+    id: string;
+    pageId: string;
+    elementId: string;
+    elementLabel?: string | null;
+    title: string;
+    content: string;
+    status: SpecStatus;
+    relatedRules: string[];
+    pinX?: number | null;
+    pinY?: number | null;
+    num?: number | null;
+    createdBy?: string | null;
+    updatedBy?: string | null;
+    createdAt: string;
+    updatedAt: string;
+}
+/** 전역 Rule Spec (페이지 비종속) */
+interface RuleSpec {
+    id: string;
+    title: string;
+    type: RuleType;
+    content: string;
+    status: SpecStatus;
+    tags: string[];
+    createdBy?: string | null;
+    updatedBy?: string | null;
+    createdAt: string;
+    updatedAt: string;
+}
+/** 프로젝트 변경 이력 엔트리 */
+interface ChangelogEntry {
+    id: string;
+    seq: number;
+    version: string | null;
+    content: string;
+    author: string | null;
+    createdAt: string;
+}
 /** 검토 회차 — 화면 버전별 어노테이션 그룹 */
 interface AnnotSession {
     id: string;
@@ -91,6 +149,41 @@ interface StorageAdapter {
     deleteSession(id: string): Promise<void>;
     loadCurrentSessionId(): Promise<string | null>;
     saveCurrentSessionId(id: string | null): Promise<void>;
+    loadPageSpecs?: (pageId: string) => Promise<PageSpec[]>;
+    /** pageId 없이 프로젝트 전체 스펙 조회 */
+    loadAllPageSpecs?: () => Promise<PageSpec[]>;
+    loadScreenSpecs?: () => Promise<ScreenSpec[]>;
+    loadScreenSpec?: (pageId: string) => Promise<ScreenSpec>;
+    saveScreenSpec?: (pageId: string, data: {
+        title?: string;
+        description?: string;
+        status?: SpecStatus;
+        markerAlign?: MarkerAlign | null;
+        updatedBy?: string | null;
+    }) => Promise<ScreenSpec>;
+    deleteScreenSpec?: (pageId: string) => Promise<void>;
+    savePageSpec?: (pageId: string, elementId: string, data: {
+        elementLabel?: string | null;
+        title?: string;
+        content?: string;
+        status?: SpecStatus;
+        relatedRules?: string[];
+        pinX?: number | null;
+        pinY?: number | null;
+        updatedBy?: string | null;
+    }) => Promise<PageSpec>;
+    deletePageSpec?: (id: string) => Promise<void>;
+    loadRuleSpecs?: () => Promise<RuleSpec[]>;
+    /** 프로젝트 레벨 key/value 설정 조회 (meta API) */
+    loadSetting?: (key: string) => Promise<string | null>;
+    /** 프로젝트 레벨 key/value 설정 저장 (meta API) */
+    saveSetting?: (key: string, value: string | null) => Promise<void>;
+    /** 프로젝트 변경 이력 전체 조회 (최신순) */
+    loadChangelog?: () => Promise<ChangelogEntry[]>;
+    /** 변경 이력 항목 추가 (date: YYYY-MM-DD 형식, 미지정 시 오늘) */
+    addChangelogEntry?: (content: string, author: string | null, date?: string | null, version?: string | null) => Promise<ChangelogEntry>;
+    /** 변경 이력 항목 삭제 */
+    deleteChangelogEntry?: (id: string) => Promise<void>;
     /** 서버에서 최신/최소 SDK 버전 정보를 가져옵니다. httpAdapter 에서만 구현됩니다. */
     checkSdkVersion?: () => Promise<{
         latest: string | null;
@@ -103,60 +196,69 @@ interface ExportPayload {
     labels: LabelDef[];
 }
 
-interface Props$6 {
+interface Props$7 {
     pageId: string;
     enabled?: boolean;
     storage?: StorageAdapter;
-    onExport?: (payload: ExportPayload) => void;
+    onNavigate?: (pageId: string) => void;
     children?: ReactNode;
+    overlayMode?: boolean;
+    pageWrapper?: HTMLElement;
+    serviceId?: string;
 }
-declare function SpecBridgeAnnotation({ pageId, enabled: initialEnabled, storage, onExport, children, }: Props$6): react_jsx_runtime.JSX.Element;
+declare function SpecBridgeAnnotation({ pageId, enabled: initialEnabled, storage, onNavigate, children, overlayMode, pageWrapper, serviceId, }: Props$7): react_jsx_runtime.JSX.Element;
 
-interface Props$5 {
+interface SpecBridgeSettings {
+    /** 패널 표시 방식: overlay = 콘텐츠 위에 떠 있음 / push = 콘텐츠를 오른쪽으로 밀어냄 */
+    panelMode: PanelMode;
+    /** 핀 좌표 기준 정렬 방식 (전역) */
+    markerAlign: MarkerAlign;
+}
+declare function useSettings(): {
+    settings: SpecBridgeSettings;
+    setSetting: <K extends keyof SpecBridgeSettings>(key: K, value: SpecBridgeSettings[K]) => void;
+};
+
+interface Props$6 {
     enabled: boolean;
     onToggleEnabled: () => void;
     author: string;
-    onEditAuthor: () => void;
+    defaultLabelId?: string | null;
+    onSaveAuthor?: (name: string, labelId: string | null) => void;
     adding: boolean;
     onToggleAdd: () => void;
     pinCount: number;
     showList: boolean;
     onToggleList: () => void;
-    onExport: () => void;
+    onExportJson: () => void;
+    onExportMarkdown: () => void;
     /** 레이블 필터 */
     labels?: LabelDef[];
-    filterLabelIds?: Set<string>;
-    onToggleLabelFilter?: (id: string) => void;
-    onClearLabelFilter?: () => void;
     /** 서버에서 가져온 최신 버전 (null = 체크 전/실패) */
     latestSdkVersion?: string | null;
     /** 온보딩 가이드 열기 */
     onShowGuide?: () => void;
     /** 로고 클릭 툴팁 (첫 가이드 닫을 때 1회 노출) */
     showLogoTip?: boolean;
-    /** 검토 회차 */
-    sessions?: AnnotSession[];
-    currentSessionId?: string | null;
-    sessionProgress?: Record<string, {
-        total: number;
-        resolved: number;
-    }>;
-    onSelectSession?: (id: string | null) => void;
-    onCreateSession?: (name: string, options?: {
-        viewport?: SessionViewport | null;
-    }) => Promise<string | null>;
-    onDeleteSession?: (id: string) => Promise<void>;
-    onUpdateSession?: (id: string, patch: Partial<Pick<AnnotSession, 'name' | 'status' | 'viewport' | 'note'>>) => Promise<void>;
-    onSetSessionStatus?: (id: string, status: SessionStatus) => Promise<void>;
-    onSetSessionViewport?: (id: string, viewport: SessionViewport | null) => Promise<void>;
+    /** 스펙 요소 추가 */
+    onAddSpec?: () => void;
+    /** 스펙 요소 선택 중 (요소 클릭 대기) */
+    addingSpec?: boolean;
+    /** 뷰포트 전환 */
+    currentViewport?: SessionViewport;
+    onViewportChange?: (vp: SessionViewport) => void;
+    /** 설정 (패널 모드) */
+    settings?: SpecBridgeSettings;
+    onChangeSetting?: <K extends keyof SpecBridgeSettings>(key: K, value: SpecBridgeSettings[K]) => void;
 }
-declare function AnnotationToolbar({ enabled, onToggleEnabled, author, onEditAuthor, adding, onToggleAdd, pinCount, showList, onToggleList, onExport, labels, filterLabelIds, onToggleLabelFilter, onClearLabelFilter, latestSdkVersion, onShowGuide, showLogoTip, sessions, currentSessionId, sessionProgress, onSelectSession, onCreateSession, onDeleteSession, onSetSessionStatus, onUpdateSession, }: Props$5): react_jsx_runtime.JSX.Element;
+declare function AnnotationToolbar({ enabled, onToggleEnabled, author, defaultLabelId, onSaveAuthor, adding, onToggleAdd, pinCount, showList, onToggleList, onExportJson, onExportMarkdown, labels, latestSdkVersion, onShowGuide, showLogoTip, onAddSpec, addingSpec, currentViewport, onViewportChange, settings, onChangeSetting, }: Props$6): react_jsx_runtime.JSX.Element;
 
-interface Props$4 {
+interface Props$5 {
     pin: Pin;
     num: number;
     label?: LabelDef;
     layerId: string;
+    align: MarkerAlign;
     isSelected: boolean;
     isHovered?: boolean;
     onSelect: () => void;
@@ -167,9 +269,9 @@ interface Props$4 {
     onHoverEnter: (id: string) => void;
     onHoverLeave: (id: string) => void;
 }
-declare function AnnotPin({ pin, num, label, layerId, isSelected, isHovered, onSelect, onMove, onHoverEnter, onHoverLeave, }: Props$4): react_jsx_runtime.JSX.Element;
+declare function AnnotPin({ pin, num, label, layerId, align, isSelected, isHovered, onSelect, onMove, onHoverEnter, onHoverLeave, }: Props$5): react_jsx_runtime.JSX.Element;
 
-interface Props$3 {
+interface Props$4 {
     pins: Pin[];
     selectedId: string;
     anchor: {
@@ -179,6 +281,7 @@ interface Props$3 {
     labels: LabelDef[];
     currentAuthor: string;
     leftBound?: number;
+    rightBound?: number;
     onClose: () => void;
     onUpdate: (id: string, patch: Partial<Omit<Pin, 'id' | 'comments'>>) => void | Promise<void>;
     onDelete: (id: string) => void | Promise<void>;
@@ -189,9 +292,9 @@ interface Props$3 {
     onResolve: (pinId: string) => void;
     onReopen: (pinId: string) => void | Promise<void>;
 }
-declare function AnnotPanel({ pins, selectedId, anchor, labels, currentAuthor, leftBound, onClose, onUpdate, onDelete, onManageLabels, onAddComment, onUpdateComment, onDeleteComment, onResolve, onReopen, }: Props$3): react_jsx_runtime.JSX.Element | null;
+declare function AnnotPanel({ pins, selectedId, anchor, labels, currentAuthor, leftBound, rightBound, onClose, onUpdate, onDelete, onManageLabels, onAddComment, onUpdateComment, onDeleteComment, onResolve, onReopen, }: Props$4): react_jsx_runtime.JSX.Element | null;
 
-interface Props$2 {
+interface Props$3 {
     pins: Pin[];
     labels: LabelDef[];
     pageId: string;
@@ -199,23 +302,24 @@ interface Props$2 {
     hoveredId?: string | null;
     showResolved: boolean;
     resolvedCount: number;
+    currentAuthor?: string;
     onSelect: (id: string) => void;
     onHover?: (id: string | null) => void;
     onToggleShowResolved: () => void;
     onClose: () => void;
 }
-declare function AnnotList({ pins, labels, pageId, selectedId, hoveredId, showResolved, resolvedCount, onSelect, onHover, onToggleShowResolved, onClose, }: Props$2): react_jsx_runtime.JSX.Element;
+declare function AnnotList({ pins, labels, pageId, selectedId, hoveredId, showResolved, resolvedCount, currentAuthor, onSelect, onHover, onToggleShowResolved, onClose, }: Props$3): react_jsx_runtime.JSX.Element;
 
-interface Props$1 {
+interface Props$2 {
     currentAuthor: string;
     currentDefaultLabelId: string | null;
     labels: LabelDef[];
     onSave: (name: string, defaultLabelId: string | null) => void;
     onCancel: () => void;
 }
-declare function AuthorModal({ currentAuthor, currentDefaultLabelId, labels, onSave, onCancel, }: Props$1): react_jsx_runtime.JSX.Element;
+declare function AuthorModal({ currentAuthor, currentDefaultLabelId, labels, onSave, onCancel, }: Props$2): react_jsx_runtime.JSX.Element;
 
-interface Props {
+interface Props$1 {
     labels: LabelDef[];
     pinUsage: Record<string, number>;
     onAdd: (name: string, color: string) => void | Promise<unknown>;
@@ -223,7 +327,7 @@ interface Props {
     onDelete: (id: string) => void | Promise<void>;
     onClose: () => void;
 }
-declare function LabelManagerModal({ labels, pinUsage, onAdd, onUpdate, onDelete, onClose }: Props): react_jsx_runtime.JSX.Element;
+declare function LabelManagerModal({ labels, pinUsage, onAdd, onUpdate, onDelete, onClose }: Props$1): react_jsx_runtime.JSX.Element;
 
 declare function useAnnotations(pageId: string, storage: StorageAdapter): {
     loading: boolean;
@@ -258,6 +362,18 @@ declare function useLabels(storage: StorageAdapter): {
     deleteLabel: (id: string) => Promise<void>;
     loading: boolean;
 };
+
+interface Props {
+    settings: SpecBridgeSettings;
+    onChangeSetting: <K extends keyof SpecBridgeSettings>(key: K, value: SpecBridgeSettings[K]) => void;
+    author: string;
+    labels: LabelDef[];
+    onExportJson?: () => void;
+    onExportMarkdown?: () => void;
+    defaultLabelId: string | null;
+    onSaveAuthor: (name: string, labelId: string | null) => void;
+}
+declare function SettingsPopover({ settings, onChangeSetting, author, labels, defaultLabelId, onSaveAuthor, onExportJson, onExportMarkdown }: Props): react_jsx_runtime.JSX.Element;
 
 /**
  * 기본 어댑터 — 브라우저 localStorage 사용 (오프라인/로컬 데모에 적합).
@@ -333,4 +449,4 @@ declare const DEFAULT_LABELS: LabelDef[];
 declare const FALLBACK_LABEL_COLOR = "#9ca3af";
 declare const LABEL_COLOR_PRESETS: string[];
 
-export { AnnotList, AnnotPanel, AnnotPin, AnnotationToolbar, AuthorModal, COLORS, type Comment, type CreateLabelInput, type CreatePinInput, DEFAULT_LABELS, type ExportPayload, FALLBACK_LABEL_COLOR, type HttpAdapterOptions, LABEL_COLOR_PRESETS, type LabelDef, LabelManagerModal, type PagePins, type Pin, type PinStatus, SDK_VERSION, STORAGE_KEYS, SpecBridgeAnnotation, type StorageAdapter, type WhoamiInfo, httpAdapter, localStorageAdapter, useAnnotations, useAuthor, useLabels, whoami };
+export { AnnotList, AnnotPanel, AnnotPin, AnnotationToolbar, AuthorModal, COLORS, type Comment, type CreateLabelInput, type CreatePinInput, DEFAULT_LABELS, type ExportPayload, FALLBACK_LABEL_COLOR, type HttpAdapterOptions, LABEL_COLOR_PRESETS, type LabelDef, LabelManagerModal, type PagePins, type PageSpec, type PanelMode, type Pin, type PinStatus, type RuleSpec, type RuleType, SDK_VERSION, STORAGE_KEYS, SettingsPopover, SpecBridgeAnnotation, type SpecBridgeSettings, type SpecStatus, type StorageAdapter, type WhoamiInfo, httpAdapter, localStorageAdapter, useAnnotations, useAuthor, useLabels, useSettings, whoami };

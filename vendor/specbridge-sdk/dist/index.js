@@ -1,8 +1,754 @@
 // src/SpecBridgeAnnotation.tsx
-import { useCallback as useCallback5, useEffect as useEffect11, useMemo as useMemo2, useRef as useRef4, useState as useState12 } from "react";
+import { useCallback as useCallback8, useEffect as useEffect15, useMemo as useMemo4, useRef as useRef7, useState as useState16 } from "react";
 
-// src/AnnotList.tsx
-import { useState } from "react";
+// node_modules/.pnpm/fflate@0.8.3/node_modules/fflate/esm/browser.js
+var u8 = Uint8Array;
+var u16 = Uint16Array;
+var i32 = Int32Array;
+var fleb = new u8([
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  1,
+  1,
+  1,
+  1,
+  2,
+  2,
+  2,
+  2,
+  3,
+  3,
+  3,
+  3,
+  4,
+  4,
+  4,
+  4,
+  5,
+  5,
+  5,
+  5,
+  0,
+  /* unused */
+  0,
+  0,
+  /* impossible */
+  0
+]);
+var fdeb = new u8([
+  0,
+  0,
+  0,
+  0,
+  1,
+  1,
+  2,
+  2,
+  3,
+  3,
+  4,
+  4,
+  5,
+  5,
+  6,
+  6,
+  7,
+  7,
+  8,
+  8,
+  9,
+  9,
+  10,
+  10,
+  11,
+  11,
+  12,
+  12,
+  13,
+  13,
+  /* unused */
+  0,
+  0
+]);
+var clim = new u8([16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15]);
+var freb = function(eb, start) {
+  var b = new u16(31);
+  for (var i = 0; i < 31; ++i) {
+    b[i] = start += 1 << eb[i - 1];
+  }
+  var r = new i32(b[30]);
+  for (var i = 1; i < 30; ++i) {
+    for (var j = b[i]; j < b[i + 1]; ++j) {
+      r[j] = j - b[i] << 5 | i;
+    }
+  }
+  return { b, r };
+};
+var _a = freb(fleb, 2);
+var fl = _a.b;
+var revfl = _a.r;
+fl[28] = 258, revfl[258] = 28;
+var _b = freb(fdeb, 0);
+var fd = _b.b;
+var revfd = _b.r;
+var rev = new u16(32768);
+for (i = 0; i < 32768; ++i) {
+  x = (i & 43690) >> 1 | (i & 21845) << 1;
+  x = (x & 52428) >> 2 | (x & 13107) << 2;
+  x = (x & 61680) >> 4 | (x & 3855) << 4;
+  rev[i] = ((x & 65280) >> 8 | (x & 255) << 8) >> 1;
+}
+var x;
+var i;
+var hMap = (function(cd, mb, r) {
+  var s = cd.length;
+  var i = 0;
+  var l = new u16(mb);
+  for (; i < s; ++i) {
+    if (cd[i])
+      ++l[cd[i] - 1];
+  }
+  var le = new u16(mb);
+  for (i = 1; i < mb; ++i) {
+    le[i] = le[i - 1] + l[i - 1] << 1;
+  }
+  var co;
+  if (r) {
+    co = new u16(1 << mb);
+    var rvb = 15 - mb;
+    for (i = 0; i < s; ++i) {
+      if (cd[i]) {
+        var sv = i << 4 | cd[i];
+        var r_1 = mb - cd[i];
+        var v = le[cd[i] - 1]++ << r_1;
+        for (var m = v | (1 << r_1) - 1; v <= m; ++v) {
+          co[rev[v] >> rvb] = sv;
+        }
+      }
+    }
+  } else {
+    co = new u16(s);
+    for (i = 0; i < s; ++i) {
+      if (cd[i]) {
+        co[i] = rev[le[cd[i] - 1]++] >> 15 - cd[i];
+      }
+    }
+  }
+  return co;
+});
+var flt = new u8(288);
+for (i = 0; i < 144; ++i)
+  flt[i] = 8;
+var i;
+for (i = 144; i < 256; ++i)
+  flt[i] = 9;
+var i;
+for (i = 256; i < 280; ++i)
+  flt[i] = 7;
+var i;
+for (i = 280; i < 288; ++i)
+  flt[i] = 8;
+var i;
+var fdt = new u8(32);
+for (i = 0; i < 32; ++i)
+  fdt[i] = 5;
+var i;
+var flm = /* @__PURE__ */ hMap(flt, 9, 0);
+var fdm = /* @__PURE__ */ hMap(fdt, 5, 0);
+var shft = function(p) {
+  return (p + 7) / 8 | 0;
+};
+var slc = function(v, s, e) {
+  if (s == null || s < 0)
+    s = 0;
+  if (e == null || e > v.length)
+    e = v.length;
+  return new u8(v.subarray(s, e));
+};
+var ec = [
+  "unexpected EOF",
+  "invalid block type",
+  "invalid length/literal",
+  "invalid distance",
+  "stream finished",
+  "no stream handler",
+  ,
+  // determined by compression function
+  "no callback",
+  "invalid UTF-8 data",
+  "extra field too long",
+  "date not in range 1980-2099",
+  "filename too long",
+  "stream finishing",
+  "invalid zip data"
+  // determined by unknown compression method
+];
+var err = function(ind, msg, nt) {
+  var e = new Error(msg || ec[ind]);
+  e.code = ind;
+  if (Error.captureStackTrace)
+    Error.captureStackTrace(e, err);
+  if (!nt)
+    throw e;
+  return e;
+};
+var wbits = function(d, p, v) {
+  v <<= p & 7;
+  var o = p / 8 | 0;
+  d[o] |= v;
+  d[o + 1] |= v >> 8;
+};
+var wbits16 = function(d, p, v) {
+  v <<= p & 7;
+  var o = p / 8 | 0;
+  d[o] |= v;
+  d[o + 1] |= v >> 8;
+  d[o + 2] |= v >> 16;
+};
+var hTree = function(d, mb) {
+  var t = [];
+  for (var i = 0; i < d.length; ++i) {
+    if (d[i])
+      t.push({ s: i, f: d[i] });
+  }
+  var s = t.length;
+  var t2 = t.slice();
+  if (!s)
+    return { t: et, l: 0 };
+  if (s == 1) {
+    var v = new u8(t[0].s + 1);
+    v[t[0].s] = 1;
+    return { t: v, l: 1 };
+  }
+  t.sort(function(a, b) {
+    return a.f - b.f;
+  });
+  t.push({ s: -1, f: 25001 });
+  var l = t[0], r = t[1], i0 = 0, i1 = 1, i2 = 2;
+  t[0] = { s: -1, f: l.f + r.f, l, r };
+  while (i1 != s - 1) {
+    l = t[t[i0].f < t[i2].f ? i0++ : i2++];
+    r = t[i0 != i1 && t[i0].f < t[i2].f ? i0++ : i2++];
+    t[i1++] = { s: -1, f: l.f + r.f, l, r };
+  }
+  var maxSym = t2[0].s;
+  for (var i = 1; i < s; ++i) {
+    if (t2[i].s > maxSym)
+      maxSym = t2[i].s;
+  }
+  var tr = new u16(maxSym + 1);
+  var mbt = ln(t[i1 - 1], tr, 0);
+  if (mbt > mb) {
+    var i = 0, dt = 0;
+    var lft = mbt - mb, cst = 1 << lft;
+    t2.sort(function(a, b) {
+      return tr[b.s] - tr[a.s] || a.f - b.f;
+    });
+    for (; i < s; ++i) {
+      var i2_1 = t2[i].s;
+      if (tr[i2_1] > mb) {
+        dt += cst - (1 << mbt - tr[i2_1]);
+        tr[i2_1] = mb;
+      } else
+        break;
+    }
+    dt >>= lft;
+    while (dt > 0) {
+      var i2_2 = t2[i].s;
+      if (tr[i2_2] < mb)
+        dt -= 1 << mb - tr[i2_2]++ - 1;
+      else
+        ++i;
+    }
+    for (; i >= 0 && dt; --i) {
+      var i2_3 = t2[i].s;
+      if (tr[i2_3] == mb) {
+        --tr[i2_3];
+        ++dt;
+      }
+    }
+    mbt = mb;
+  }
+  return { t: new u8(tr), l: mbt };
+};
+var ln = function(n, l, d) {
+  return n.s == -1 ? Math.max(ln(n.l, l, d + 1), ln(n.r, l, d + 1)) : l[n.s] = d;
+};
+var lc = function(c) {
+  var s = c.length;
+  while (s && !c[--s])
+    ;
+  var cl = new u16(++s);
+  var cli = 0, cln = c[0], cls = 1;
+  var w = function(v) {
+    cl[cli++] = v;
+  };
+  for (var i = 1; i <= s; ++i) {
+    if (c[i] == cln && i != s)
+      ++cls;
+    else {
+      if (!cln && cls > 2) {
+        for (; cls > 138; cls -= 138)
+          w(32754);
+        if (cls > 2) {
+          w(cls > 10 ? cls - 11 << 5 | 28690 : cls - 3 << 5 | 12305);
+          cls = 0;
+        }
+      } else if (cls > 3) {
+        w(cln), --cls;
+        for (; cls > 6; cls -= 6)
+          w(8304);
+        if (cls > 2)
+          w(cls - 3 << 5 | 8208), cls = 0;
+      }
+      while (cls--)
+        w(cln);
+      cls = 1;
+      cln = c[i];
+    }
+  }
+  return { c: cl.subarray(0, cli), n: s };
+};
+var clen = function(cf, cl) {
+  var l = 0;
+  for (var i = 0; i < cl.length; ++i)
+    l += cf[i] * cl[i];
+  return l;
+};
+var wfblk = function(out, pos, dat) {
+  var s = dat.length;
+  var o = shft(pos + 2);
+  out[o] = s & 255;
+  out[o + 1] = s >> 8;
+  out[o + 2] = out[o] ^ 255;
+  out[o + 3] = out[o + 1] ^ 255;
+  for (var i = 0; i < s; ++i)
+    out[o + i + 4] = dat[i];
+  return (o + 4 + s) * 8;
+};
+var wblk = function(dat, out, final, syms, lf, df, eb, li, bs, bl, p) {
+  wbits(out, p++, final);
+  ++lf[256];
+  var _a2 = hTree(lf, 15), dlt = _a2.t, mlb = _a2.l;
+  var _b2 = hTree(df, 15), ddt = _b2.t, mdb = _b2.l;
+  var _c = lc(dlt), lclt = _c.c, nlc = _c.n;
+  var _d = lc(ddt), lcdt = _d.c, ndc = _d.n;
+  var lcfreq = new u16(19);
+  for (var i = 0; i < lclt.length; ++i)
+    ++lcfreq[lclt[i] & 31];
+  for (var i = 0; i < lcdt.length; ++i)
+    ++lcfreq[lcdt[i] & 31];
+  var _e = hTree(lcfreq, 7), lct = _e.t, mlcb = _e.l;
+  var nlcc = 19;
+  for (; nlcc > 4 && !lct[clim[nlcc - 1]]; --nlcc)
+    ;
+  var flen = bl + 5 << 3;
+  var ftlen = clen(lf, flt) + clen(df, fdt) + eb;
+  var dtlen = clen(lf, dlt) + clen(df, ddt) + eb + 14 + 3 * nlcc + clen(lcfreq, lct) + 2 * lcfreq[16] + 3 * lcfreq[17] + 7 * lcfreq[18];
+  if (bs >= 0 && flen <= ftlen && flen <= dtlen)
+    return wfblk(out, p, dat.subarray(bs, bs + bl));
+  var lm, ll, dm, dl;
+  wbits(out, p, 1 + (dtlen < ftlen)), p += 2;
+  if (dtlen < ftlen) {
+    lm = hMap(dlt, mlb, 0), ll = dlt, dm = hMap(ddt, mdb, 0), dl = ddt;
+    var llm = hMap(lct, mlcb, 0);
+    wbits(out, p, nlc - 257);
+    wbits(out, p + 5, ndc - 1);
+    wbits(out, p + 10, nlcc - 4);
+    p += 14;
+    for (var i = 0; i < nlcc; ++i)
+      wbits(out, p + 3 * i, lct[clim[i]]);
+    p += 3 * nlcc;
+    var lcts = [lclt, lcdt];
+    for (var it = 0; it < 2; ++it) {
+      var clct = lcts[it];
+      for (var i = 0; i < clct.length; ++i) {
+        var len = clct[i] & 31;
+        wbits(out, p, llm[len]), p += lct[len];
+        if (len > 15)
+          wbits(out, p, clct[i] >> 5 & 127), p += clct[i] >> 12;
+      }
+    }
+  } else {
+    lm = flm, ll = flt, dm = fdm, dl = fdt;
+  }
+  for (var i = 0; i < li; ++i) {
+    var sym = syms[i];
+    if (sym > 255) {
+      var len = sym >> 18 & 31;
+      wbits16(out, p, lm[len + 257]), p += ll[len + 257];
+      if (len > 7)
+        wbits(out, p, sym >> 23 & 31), p += fleb[len];
+      var dst = sym & 31;
+      wbits16(out, p, dm[dst]), p += dl[dst];
+      if (dst > 3)
+        wbits16(out, p, sym >> 5 & 8191), p += fdeb[dst];
+    } else {
+      wbits16(out, p, lm[sym]), p += ll[sym];
+    }
+  }
+  wbits16(out, p, lm[256]);
+  return p + ll[256];
+};
+var deo = /* @__PURE__ */ new i32([65540, 131080, 131088, 131104, 262176, 1048704, 1048832, 2114560, 2117632]);
+var et = /* @__PURE__ */ new u8(0);
+var dflt = function(dat, lvl, plvl, pre, post, st) {
+  var s = st.z || dat.length;
+  var o = new u8(pre + s + 5 * (1 + Math.ceil(s / 7e3)) + post);
+  var w = o.subarray(pre, o.length - post);
+  var lst = st.l;
+  var pos = (st.r || 0) & 7;
+  if (lvl) {
+    if (pos)
+      w[0] = st.r >> 3;
+    var opt = deo[lvl - 1];
+    var n = opt >> 13, c = opt & 8191;
+    var msk_1 = (1 << plvl) - 1;
+    var prev = st.p || new u16(32768), head = st.h || new u16(msk_1 + 1);
+    var bs1_1 = Math.ceil(plvl / 3), bs2_1 = 2 * bs1_1;
+    var hsh = function(i2) {
+      return (dat[i2] ^ dat[i2 + 1] << bs1_1 ^ dat[i2 + 2] << bs2_1) & msk_1;
+    };
+    var syms = new i32(25e3);
+    var lf = new u16(288), df = new u16(32);
+    var lc_1 = 0, eb = 0, i = st.i || 0, li = 0, wi = st.w || 0, bs = 0;
+    for (; i + 2 < s; ++i) {
+      var hv = hsh(i);
+      var imod = i & 32767, pimod = head[hv];
+      prev[imod] = pimod;
+      head[hv] = imod;
+      if (wi <= i) {
+        var rem = s - i;
+        if ((lc_1 > 7e3 || li > 24576) && (rem > 423 || !lst)) {
+          pos = wblk(dat, w, 0, syms, lf, df, eb, li, bs, i - bs, pos);
+          li = lc_1 = eb = 0, bs = i;
+          for (var j = 0; j < 286; ++j)
+            lf[j] = 0;
+          for (var j = 0; j < 30; ++j)
+            df[j] = 0;
+        }
+        var l = 2, d = 0, ch_1 = c, dif = imod - pimod & 32767;
+        if (rem > 2 && hv == hsh(i - dif)) {
+          var maxn = Math.min(n, rem) - 1;
+          var maxd = Math.min(32767, i);
+          var ml = Math.min(258, rem);
+          while (dif <= maxd && --ch_1 && imod != pimod) {
+            if (dat[i + l] == dat[i + l - dif]) {
+              var nl = 0;
+              for (; nl < ml && dat[i + nl] == dat[i + nl - dif]; ++nl)
+                ;
+              if (nl > l) {
+                l = nl, d = dif;
+                if (nl > maxn)
+                  break;
+                var mmd = Math.min(dif, nl - 2);
+                var md = 0;
+                for (var j = 0; j < mmd; ++j) {
+                  var ti = i - dif + j & 32767;
+                  var pti = prev[ti];
+                  var cd = ti - pti & 32767;
+                  if (cd > md)
+                    md = cd, pimod = ti;
+                }
+              }
+            }
+            imod = pimod, pimod = prev[imod];
+            dif += imod - pimod & 32767;
+          }
+        }
+        if (d) {
+          syms[li++] = 268435456 | revfl[l] << 18 | revfd[d];
+          var lin = revfl[l] & 31, din = revfd[d] & 31;
+          eb += fleb[lin] + fdeb[din];
+          ++lf[257 + lin];
+          ++df[din];
+          wi = i + l;
+          ++lc_1;
+        } else {
+          syms[li++] = dat[i];
+          ++lf[dat[i]];
+        }
+      }
+    }
+    for (i = Math.max(i, wi); i < s; ++i) {
+      syms[li++] = dat[i];
+      ++lf[dat[i]];
+    }
+    pos = wblk(dat, w, lst, syms, lf, df, eb, li, bs, i - bs, pos);
+    if (!lst) {
+      st.r = pos & 7 | w[pos / 8 | 0] << 3;
+      pos -= 7;
+      st.h = head, st.p = prev, st.i = i, st.w = wi;
+    }
+  } else {
+    for (var i = st.w || 0; i < s + lst; i += 65535) {
+      var e = i + 65535;
+      if (e >= s) {
+        w[pos / 8 | 0] = lst;
+        e = s;
+      }
+      pos = wfblk(w, pos + 1, dat.subarray(i, e));
+    }
+    st.i = s;
+  }
+  return slc(o, 0, pre + shft(pos) + post);
+};
+var crct = /* @__PURE__ */ (function() {
+  var t = new Int32Array(256);
+  for (var i = 0; i < 256; ++i) {
+    var c = i, k = 9;
+    while (--k)
+      c = (c & 1 && -306674912) ^ c >>> 1;
+    t[i] = c;
+  }
+  return t;
+})();
+var crc = function() {
+  var c = -1;
+  return {
+    p: function(d) {
+      var cr = c;
+      for (var i = 0; i < d.length; ++i)
+        cr = crct[cr & 255 ^ d[i]] ^ cr >>> 8;
+      c = cr;
+    },
+    d: function() {
+      return ~c;
+    }
+  };
+};
+var dopt = function(dat, opt, pre, post, st) {
+  if (!st) {
+    st = { l: 1 };
+    if (opt.dictionary) {
+      var dict = opt.dictionary.subarray(-32768);
+      var newDat = new u8(dict.length + dat.length);
+      newDat.set(dict);
+      newDat.set(dat, dict.length);
+      dat = newDat;
+      st.w = dict.length;
+    }
+  }
+  return dflt(dat, opt.level == null ? 6 : opt.level, opt.mem == null ? st.l ? Math.ceil(Math.max(8, Math.min(13, Math.log(dat.length))) * 1.5) : 20 : 12 + opt.mem, pre, post, st);
+};
+var mrg = function(a, b) {
+  var o = {};
+  for (var k in a)
+    o[k] = a[k];
+  for (var k in b)
+    o[k] = b[k];
+  return o;
+};
+var wbytes = function(d, b, v) {
+  for (; v; ++b)
+    d[b] = v, v >>>= 8;
+};
+function deflateSync(data, opts) {
+  return dopt(data, opts || {}, 0, 0);
+}
+var fltn = function(d, p, t, o) {
+  for (var k in d) {
+    var val = d[k], n = p + k, op = o;
+    if (Array.isArray(val))
+      op = mrg(o, val[1]), val = val[0];
+    if (ArrayBuffer.isView(val))
+      t[n] = [val, op];
+    else {
+      t[n += "/"] = [new u8(0), op];
+      fltn(val, n, t, o);
+    }
+  }
+};
+var te = typeof TextEncoder != "undefined" && /* @__PURE__ */ new TextEncoder();
+var td = typeof TextDecoder != "undefined" && /* @__PURE__ */ new TextDecoder();
+var tds = 0;
+try {
+  td.decode(et, { stream: true });
+  tds = 1;
+} catch (e) {
+}
+function strToU8(str, latin1) {
+  if (latin1) {
+    var ar_1 = new u8(str.length);
+    for (var i = 0; i < str.length; ++i)
+      ar_1[i] = str.charCodeAt(i);
+    return ar_1;
+  }
+  if (te)
+    return te.encode(str);
+  var l = str.length;
+  var ar = new u8(str.length + (str.length >> 1));
+  var ai = 0;
+  var w = function(v) {
+    ar[ai++] = v;
+  };
+  for (var i = 0; i < l; ++i) {
+    if (ai + 5 > ar.length) {
+      var n = new u8(ai + 8 + (l - i << 1));
+      n.set(ar);
+      ar = n;
+    }
+    var c = str.charCodeAt(i);
+    if (c < 128 || latin1)
+      w(c);
+    else if (c < 2048)
+      w(192 | c >> 6), w(128 | c & 63);
+    else if (c > 55295 && c < 57344)
+      c = 65536 + (c & 1023 << 10) | str.charCodeAt(++i) & 1023, w(240 | c >> 18), w(128 | c >> 12 & 63), w(128 | c >> 6 & 63), w(128 | c & 63);
+    else
+      w(224 | c >> 12), w(128 | c >> 6 & 63), w(128 | c & 63);
+  }
+  return slc(ar, 0, ai);
+}
+var exfl = function(ex) {
+  var le = 0;
+  if (ex) {
+    for (var k in ex) {
+      var l = ex[k].length;
+      if (l > 65535)
+        err(9);
+      le += l + 4;
+    }
+  }
+  return le;
+};
+var wzh = function(d, b, f, fn, u, c, ce, co) {
+  var fl2 = fn.length, ex = f.extra, col = co && co.length;
+  var exl = exfl(ex);
+  wbytes(d, b, ce != null ? 33639248 : 67324752), b += 4;
+  if (ce != null)
+    d[b++] = 20, d[b++] = f.os;
+  d[b] = 20, b += 2;
+  d[b++] = f.flag << 1 | (c < 0 && 8), d[b++] = u && 8;
+  d[b++] = f.compression & 255, d[b++] = f.compression >> 8;
+  var dt = new Date(f.mtime == null ? Date.now() : f.mtime), y = dt.getFullYear() - 1980;
+  if (y < 0 || y > 119)
+    err(10);
+  wbytes(d, b, y << 25 | dt.getMonth() + 1 << 21 | dt.getDate() << 16 | dt.getHours() << 11 | dt.getMinutes() << 5 | dt.getSeconds() >> 1), b += 4;
+  if (c != -1) {
+    wbytes(d, b, f.crc);
+    wbytes(d, b + 4, c < 0 ? -c - 2 : c);
+    wbytes(d, b + 8, f.size);
+  }
+  wbytes(d, b + 12, fl2);
+  wbytes(d, b + 14, exl), b += 16;
+  if (ce != null) {
+    wbytes(d, b, col);
+    wbytes(d, b + 6, f.attrs);
+    wbytes(d, b + 10, ce), b += 14;
+  }
+  d.set(fn, b);
+  b += fl2;
+  if (exl) {
+    for (var k in ex) {
+      var exf = ex[k], l = exf.length;
+      wbytes(d, b, +k);
+      wbytes(d, b + 2, l);
+      d.set(exf, b + 4), b += 4 + l;
+    }
+  }
+  if (col)
+    d.set(co, b), b += col;
+  return b;
+};
+var wzf = function(o, b, c, d, e) {
+  wbytes(o, b, 101010256);
+  wbytes(o, b + 8, c);
+  wbytes(o, b + 10, c);
+  wbytes(o, b + 12, d);
+  wbytes(o, b + 16, e);
+};
+function zipSync(data, opts) {
+  if (!opts)
+    opts = {};
+  var r = {};
+  var files = [];
+  fltn(data, "", r, opts);
+  var o = 0;
+  var tot = 0;
+  for (var fn in r) {
+    var _a2 = r[fn], file = _a2[0], p = _a2[1];
+    var compression = p.level == 0 ? 0 : 8;
+    var f = strToU8(fn), s = f.length;
+    var com = p.comment, m = com && strToU8(com), ms = m && m.length;
+    var exl = exfl(p.extra);
+    if (s > 65535)
+      err(11);
+    var d = compression ? deflateSync(file, p) : file, l = d.length;
+    var c = crc();
+    c.p(file);
+    files.push(mrg(p, {
+      size: file.length,
+      crc: c.d(),
+      c: d,
+      f,
+      m,
+      u: s != fn.length || m && com.length != ms,
+      o,
+      compression
+    }));
+    o += 30 + s + exl + l;
+    tot += 76 + 2 * (s + exl) + (ms || 0) + l;
+  }
+  var out = new u8(tot + 22), oe = o, cdl = tot - o;
+  for (var i = 0; i < files.length; ++i) {
+    var f = files[i];
+    wzh(out, f.o, f, f.f, f.u, f.c.length);
+    var badd = 30 + f.f.length + exfl(f.extra);
+    out.set(f.c, f.o + badd);
+    wzh(out, o, f, f.f, f.u, f.c.length, f.o, f.m), o += 16 + badd + (f.m ? f.m.length : 0);
+  }
+  wzf(out, o, files.length, cdl, oe);
+  return out;
+}
+
+// src/analytics.ts
+var GA_ENDPOINT = "https://www.google-analytics.com/mp/collect";
+var MEASUREMENT_ID = "G-64Z1HHSLK0";
+var API_SECRET = "tb0d3RSUTpaHJxHi1eo79w";
+var CID_KEY = "sb_ga_cid";
+var _serviceId;
+function setServiceId(id) {
+  _serviceId = id;
+}
+function getClientId() {
+  try {
+    let cid = localStorage.getItem(CID_KEY);
+    if (!cid) {
+      cid = `${Math.random().toString(36).slice(2, 10)}.${Date.now()}`;
+      localStorage.setItem(CID_KEY, cid);
+    }
+    return cid;
+  } catch {
+    return `anon.${Date.now()}`;
+  }
+}
+function trackEvent(name, params = {}) {
+  try {
+    const enriched = _serviceId ? { service_id: _serviceId, ...params } : params;
+    const g = window.gtag;
+    if (typeof g === "function") {
+      g("event", name, enriched);
+      return;
+    }
+    fetch(`${GA_ENDPOINT}?measurement_id=${MEASUREMENT_ID}&api_secret=${API_SECRET}`, {
+      method: "POST",
+      body: JSON.stringify({
+        client_id: getClientId(),
+        events: [{ name, params: enriched }]
+      }),
+      keepalive: true
+    }).catch(() => {
+    });
+  } catch {
+  }
+}
 
 // src/constants.ts
 var STORAGE_KEYS = {
@@ -82,264 +828,77 @@ var SESSION_VIEWPORT_CONFIG = {
   mobile: { label: "Mobile", icon: "\u{1F4F1}" }
 };
 
-// src/AnnotList.tsx
-import { Fragment, jsx, jsxs } from "react/jsx-runtime";
-function AnnotList({
-  pins,
-  labels,
-  pageId,
-  selectedId,
-  hoveredId,
-  showResolved,
-  resolvedCount,
-  onSelect,
-  onHover,
-  onToggleShowResolved,
-  onClose
-}) {
-  const labelById = new Map(labels.map((l) => [l.id, l]));
-  const [authorFilter, setAuthorFilter] = useState(null);
-  const uniqueAuthors = Array.from(new Set(pins.map((p) => p.author).filter((a) => !!a)));
-  const filteredPins = authorFilter ? pins.filter((p) => p.author === authorFilter) : pins;
-  return /* @__PURE__ */ jsxs(
-    "div",
+// src/icons.tsx
+import { jsx, jsxs } from "react/jsx-runtime";
+function IconChat({ size = 12, color = "currentColor", style }) {
+  return /* @__PURE__ */ jsx(
+    "svg",
     {
-      style: {
-        position: "fixed",
-        left: 0,
-        top: 0,
-        bottom: 0,
-        width: 252,
-        background: DARK.bg,
-        borderRight: `1px solid ${DARK.brd}`,
-        boxShadow: "4px 0 24px rgba(0,0,0,.3)",
-        zIndex: 9999,
-        display: "flex",
-        flexDirection: "column",
-        fontFamily: FONT_FAMILY
-      },
+      width: size,
+      height: size,
+      viewBox: "0 0 16 16",
+      fill: "none",
+      xmlns: "http://www.w3.org/2000/svg",
+      style: { flexShrink: 0, display: "inline-block", verticalAlign: "middle", ...style },
+      children: /* @__PURE__ */ jsx(
+        "path",
+        {
+          d: "M13.5 2H2.5C1.95 2 1.5 2.45 1.5 3V10C1.5 10.55 1.95 11 2.5 11H5.5L8 14L10.5 11H13.5C14.05 11 14.5 10.55 14.5 10V3C14.5 2.45 14.05 2 13.5 2Z",
+          stroke: color,
+          strokeWidth: "1.4",
+          strokeLinejoin: "round"
+        }
+      )
+    }
+  );
+}
+function IconPin({ size = 12, color = "currentColor", style }) {
+  return /* @__PURE__ */ jsxs(
+    "svg",
+    {
+      width: size,
+      height: size,
+      viewBox: "0 0 16 16",
+      fill: "none",
+      xmlns: "http://www.w3.org/2000/svg",
+      style: { flexShrink: 0, display: "inline-block", verticalAlign: "middle", ...style },
       children: [
-        /* @__PURE__ */ jsx("style", { children: `
-        .sb-scroll::-webkit-scrollbar{width:4px;height:4px}
-        .sb-scroll::-webkit-scrollbar-track{background:transparent}
-        .sb-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);border-radius:10px}
-        .sb-scroll::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.26)}
-        .sb-scroll{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.14) transparent}
-      ` }),
-        /* @__PURE__ */ jsxs("div", { style: { padding: "14px 16px", background: DARK.bg2, flexShrink: 0, borderBottom: `1px solid ${DARK.brd}` }, children: [
-          /* @__PURE__ */ jsxs("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center" }, children: [
-            /* @__PURE__ */ jsxs("div", { children: [
-              /* @__PURE__ */ jsx("div", { style: { fontSize: 12, fontWeight: 700, color: DARK.txt }, children: "\u{1F4CB} \uBC88\uD638 \uBAA9\uB85D" }),
-              /* @__PURE__ */ jsx("div", { style: { fontSize: 10, color: DARK.txL, marginTop: 2, fontFamily: "monospace" }, children: pageId })
-            ] }),
-            /* @__PURE__ */ jsx(
-              "button",
-              {
-                onClick: onClose,
-                style: {
-                  background: "rgba(255,255,255,.08)",
-                  border: "none",
-                  color: DARK.txS,
-                  width: 26,
-                  height: 26,
-                  borderRadius: 5,
-                  cursor: "pointer",
-                  fontSize: 14
-                },
-                children: "\xD7"
-              }
-            )
-          ] }),
-          /* @__PURE__ */ jsxs("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 10 }, children: [
-            /* @__PURE__ */ jsxs("span", { style: { fontSize: 11, color: DARK.txL }, children: [
-              "\uCD1D ",
-              filteredPins.length,
-              "\uAC1C"
-            ] }),
-            resolvedCount > 0 && /* @__PURE__ */ jsxs(
-              "button",
-              {
-                onClick: onToggleShowResolved,
-                title: showResolved ? "\uD574\uACB0\uB41C \uD56D\uBAA9 \uC228\uAE30\uAE30" : "\uD574\uACB0\uB41C \uD56D\uBAA9 \uBCF4\uAE30",
-                style: {
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 4,
-                  padding: "3px 8px",
-                  borderRadius: 2,
-                  border: `1px solid ${showResolved ? "rgba(22,163,74,.5)" : DARK.brd}`,
-                  background: showResolved ? "rgba(22,163,74,.15)" : "rgba(255,255,255,.04)",
-                  color: showResolved ? "#4ade80" : DARK.txL,
-                  fontSize: 10,
-                  fontWeight: 600,
-                  cursor: "pointer",
-                  transition: "all .15s"
-                },
-                children: [
-                  /* @__PURE__ */ jsx("span", { style: { fontSize: 11 }, children: showResolved ? "\u2713" : "\u25CB" }),
-                  /* @__PURE__ */ jsxs("span", { children: [
-                    "\uD574\uACB0 ",
-                    resolvedCount
-                  ] })
-                ]
-              }
-            )
-          ] }),
-          uniqueAuthors.length > 0 && /* @__PURE__ */ jsx("div", { style: { marginTop: 8 }, children: /* @__PURE__ */ jsxs(
-            "select",
-            {
-              value: authorFilter ?? "",
-              onChange: (e) => setAuthorFilter(e.target.value || null),
-              style: {
-                width: "100%",
-                padding: "4px 8px",
-                background: DARK.bg3,
-                border: `1px solid ${authorFilter ? "rgba(59,130,246,.5)" : DARK.brd}`,
-                borderRadius: 2,
-                color: authorFilter ? DARK.txt : DARK.txL,
-                fontSize: 11,
-                cursor: "pointer",
-                outline: "none",
-                fontFamily: FONT_FAMILY
-              },
-              children: [
-                /* @__PURE__ */ jsx("option", { value: "", style: { background: DARK.bg3, color: DARK.txL }, children: "\uC804\uCCB4 \uC791\uC131\uC790" }),
-                uniqueAuthors.map((a) => /* @__PURE__ */ jsx("option", { value: a, style: { background: DARK.bg3, color: DARK.txt }, children: a }, a))
-              ]
-            }
-          ) })
-        ] }),
-        /* @__PURE__ */ jsx("div", { className: "sb-scroll", style: { flex: 1, overflowY: "auto", padding: 8 }, children: filteredPins.length === 0 ? /* @__PURE__ */ jsx(
-          "div",
-          {
-            style: {
-              textAlign: "center",
-              color: DARK.txL,
-              fontSize: 12,
-              marginTop: 36,
-              lineHeight: 1.8
-            },
-            children: authorFilter ? "\uC120\uD0DD\uD55C \uC791\uC131\uC790\uC758 \uD540\uC774 \uC5C6\uC2B5\uB2C8\uB2E4." : /* @__PURE__ */ jsxs(Fragment, { children: [
-              /* @__PURE__ */ jsx("br", {}),
-              "\uC544\uC9C1 \uCD94\uAC00\uB41C \uB808\uC774\uBE14\uC774 \uC5C6\uC2B5\uB2C8\uB2E4.",
-              /* @__PURE__ */ jsx("br", {}),
-              "\uD654\uBA74\uC744 \uD074\uB9AD\uD574\uC11C \uCD94\uAC00\uD558\uC138\uC694."
-            ] })
-          }
-        ) : filteredPins.map((p) => {
-          const sel = p.id === selectedId;
-          const hov = p.id === hoveredId;
-          const label = p.labelId ? labelById.get(p.labelId) : void 0;
-          const color = label?.color ?? FALLBACK_LABEL_COLOR;
-          const resolved = p.status === "resolved";
-          return /* @__PURE__ */ jsxs(
-            "div",
-            {
-              onClick: () => onSelect(p.id),
-              onMouseEnter: () => onHover?.(p.id),
-              onMouseLeave: () => onHover?.(null),
-              style: {
-                padding: "10px 12px",
-                borderRadius: 2,
-                marginBottom: 4,
-                cursor: "pointer",
-                border: `1px solid ${sel ? color : hov ? color : DARK.brd}`,
-                background: sel ? `${color}1a` : hov ? `${color}0d` : DARK.bg2,
-                display: "flex",
-                alignItems: "flex-start",
-                gap: 8,
-                transition: "all .12s",
-                opacity: resolved ? 0.6 : 1
-              },
-              children: [
-                /* @__PURE__ */ jsxs(
-                  "div",
-                  {
-                    style: {
-                      position: "relative",
-                      width: 20,
-                      height: 20,
-                      borderRadius: "50%",
-                      background: color,
-                      color: "#fff",
-                      fontSize: 10,
-                      fontWeight: 700,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      flexShrink: 0
-                    },
-                    children: [
-                      p.num,
-                      resolved && /* @__PURE__ */ jsx(
-                        "span",
-                        {
-                          style: {
-                            position: "absolute",
-                            top: -3,
-                            right: -3,
-                            width: 11,
-                            height: 11,
-                            borderRadius: "50%",
-                            background: "#16a34a",
-                            color: "#fff",
-                            fontSize: 7,
-                            fontWeight: 900,
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            border: "1.5px solid #fff"
-                          },
-                          children: "\u2713"
-                        }
-                      )
-                    ]
-                  }
-                ),
-                /* @__PURE__ */ jsxs("div", { style: { flex: 1, minWidth: 0 }, children: [
-                  /* @__PURE__ */ jsxs("div", { style: { display: "flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600, color: DARK.txt, overflow: "hidden" }, children: [
-                    /* @__PURE__ */ jsx(
-                      "span",
-                      {
-                        style: {
-                          padding: "1px 7px",
-                          borderRadius: 999,
-                          background: `${color}22`,
-                          color,
-                          fontSize: 10,
-                          fontWeight: 700,
-                          flexShrink: 0,
-                          textDecoration: resolved ? "line-through" : "none"
-                        },
-                        children: label?.name ?? "\uBBF8\uBD84\uB958"
-                      }
-                    ),
-                    resolved && /* @__PURE__ */ jsx("span", { style: { fontSize: 9, padding: "1px 5px", background: "rgba(22,163,74,.2)", color: "#4ade80", borderRadius: 5, fontWeight: 700, flexShrink: 0 }, children: "\uD574\uACB0" })
-                  ] }),
-                  /* @__PURE__ */ jsxs("div", { style: { display: "flex", alignItems: "center", gap: 5, marginTop: 2 }, children: [
-                    p.author && /* @__PURE__ */ jsx("span", { style: { fontSize: 10, color: DARK.txL }, children: p.author }),
-                    p.comments.length > 0 && /* @__PURE__ */ jsxs("span", { style: { fontSize: 9, padding: "1px 5px", background: "rgba(59,130,246,.2)", color: "#93C5FD", borderRadius: 5, fontWeight: 700 }, children: [
-                      "\u{1F4AC} ",
-                      p.comments.length
-                    ] })
-                  ] }),
-                  p.note && /* @__PURE__ */ jsx("div", { style: { fontSize: 11, color: DARK.txL, marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, children: p.note })
-                ] })
-              ]
-            },
-            p.id
-          );
-        }) })
+        /* @__PURE__ */ jsx("circle", { cx: "8", cy: "5", r: "3", stroke: color, strokeWidth: "1.4" }),
+        /* @__PURE__ */ jsx("path", { d: "M8 8V13", stroke: color, strokeWidth: "1.4", strokeLinecap: "round" }),
+        /* @__PURE__ */ jsx("path", { d: "M5.5 13H10.5", stroke: color, strokeWidth: "1.4", strokeLinecap: "round" })
+      ]
+    }
+  );
+}
+function IconDocument({ size = 12, color = "currentColor", style }) {
+  return /* @__PURE__ */ jsxs(
+    "svg",
+    {
+      width: size,
+      height: size,
+      viewBox: "0 0 16 16",
+      fill: "none",
+      xmlns: "http://www.w3.org/2000/svg",
+      style: { flexShrink: 0, display: "inline-block", verticalAlign: "middle", ...style },
+      children: [
+        /* @__PURE__ */ jsx("rect", { x: "3", y: "1.5", width: "10", height: "13", rx: "1.5", stroke: color, strokeWidth: "1.4" }),
+        /* @__PURE__ */ jsx("path", { d: "M5.5 5.5H10.5M5.5 8.5H10.5M5.5 11.5H8.5", stroke: color, strokeWidth: "1.4", strokeLinecap: "round" })
       ]
     }
   );
 }
 
 // src/AnnotPanel.tsx
-import { useEffect, useLayoutEffect, useRef, useState as useState2 } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 // src/Markdown.tsx
-import { Fragment as Fragment2, jsx as jsx2 } from "react/jsx-runtime";
+import { Fragment, jsx as jsx2, jsxs as jsxs2 } from "react/jsx-runtime";
+function getMentionColor(name) {
+  const palette = ["#D97757", "#B85E3F", "#E8956D", "#C75B39", "#A0522D", "#CF7A5A", "#E8A87C", "#8B4513"];
+  let h = 0;
+  for (const ch of name) h = h * 31 + ch.charCodeAt(0) & 255;
+  return palette[h % palette.length];
+}
 var COLOR_MAP = {
   red: "#ef4444",
   green: "#34D399",
@@ -424,6 +983,33 @@ function parseInline(text, theme) {
         }
       }
     }
+    if (text[i] === "@") {
+      const nameMatch = text.slice(i + 1).match(/^[\w가-힣가-힣]+/);
+      if (nameMatch) {
+        flush();
+        const name = nameMatch[0];
+        const c = getMentionColor(name);
+        parts.push(
+          /* @__PURE__ */ jsxs2("span", { style: {
+            display: "inline-flex",
+            alignItems: "center",
+            padding: "1px 6px",
+            borderRadius: 3,
+            fontSize: "0.9em",
+            fontWeight: 600,
+            background: `${c}22`,
+            color: c,
+            border: `1px solid ${c}44`,
+            whiteSpace: "nowrap"
+          }, children: [
+            "@",
+            name
+          ] }, keyN++)
+        );
+        i += 1 + name.length;
+        continue;
+      }
+    }
     if (text[i] === "[") {
       const cb = text.indexOf("]", i + 1);
       if (cb !== -1 && text[cb + 1] === "(") {
@@ -452,7 +1038,7 @@ function parseInline(text, theme) {
     i++;
   }
   flush();
-  return parts.length === 1 ? parts[0] : /* @__PURE__ */ jsx2(Fragment2, { children: parts });
+  return parts.length === 1 ? parts[0] : /* @__PURE__ */ jsx2(Fragment, { children: parts });
 }
 function Markdown({ children, theme = "light", style }) {
   const isDark = theme === "dark";
@@ -529,7 +1115,7 @@ function Markdown({ children, theme = "light", style }) {
         i++;
       }
       elements.push(
-        /* @__PURE__ */ jsx2("ul", { style: { margin: "3px 0", paddingLeft: 18, lineHeight: 1.6 }, children: items }, `ul${i}`)
+        /* @__PURE__ */ jsx2("ul", { style: { margin: "3px 0", paddingLeft: 18, lineHeight: 1.6, listStyle: "disc" }, children: items }, `ul${i}`)
       );
       continue;
     }
@@ -541,7 +1127,7 @@ function Markdown({ children, theme = "light", style }) {
         i++;
       }
       elements.push(
-        /* @__PURE__ */ jsx2("ol", { style: { margin: "3px 0", paddingLeft: 18, lineHeight: 1.6 }, children: items }, `ol${i}`)
+        /* @__PURE__ */ jsx2("ol", { style: { margin: "3px 0", paddingLeft: 18, lineHeight: 1.6, listStyle: "decimal" }, children: items }, `ol${i}`)
       );
       continue;
     }
@@ -559,7 +1145,7 @@ function Markdown({ children, theme = "light", style }) {
 }
 
 // src/AnnotPanel.tsx
-import { Fragment as Fragment3, jsx as jsx3, jsxs as jsxs2 } from "react/jsx-runtime";
+import { Fragment as Fragment2, jsx as jsx3, jsxs as jsxs3 } from "react/jsx-runtime";
 var PANEL_W_SINGLE = 400;
 var PANEL_W_DOUBLE = 680;
 var LEFT_COL_W = 360;
@@ -580,6 +1166,7 @@ function AnnotPanel({
   labels,
   currentAuthor,
   leftBound = 0,
+  rightBound = 0,
   onClose,
   onUpdate,
   onDelete,
@@ -592,15 +1179,19 @@ function AnnotPanel({
 }) {
   const pin = pins.find((p) => p.id === selectedId);
   const num = pin?.num ?? 0;
-  const [panelMode, setPanelMode] = useState2("view");
-  const [showThreadTooltip, setShowThreadTooltip] = useState2(false);
-  const [showMoreMenu, setShowMoreMenu] = useState2(false);
-  const [note, setNote] = useState2("");
-  const [noteMode, setNoteMode] = useState2("write");
-  const [saved, setSaved] = useState2(false);
-  const [newComment, setNewComment] = useState2("");
-  const [threadOpen, setThreadOpen] = useState2(false);
-  const [pos, setPos] = useState2(null);
+  const [panelMode, setPanelMode] = useState("view");
+  const [showThreadTooltip, setShowThreadTooltip] = useState(false);
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const [note, setNote] = useState("");
+  const [noteMode, setNoteMode] = useState("write");
+  const [saved, setSaved] = useState(false);
+  const [newComment, setNewComment] = useState("");
+  const [threadOpen, setThreadOpen] = useState(false);
+  const [mentionQuery, setMentionQuery] = useState("");
+  const [showMention, setShowMention] = useState(false);
+  const [mentionStart, setMentionStart] = useState(0);
+  const [mentionIndex, setMentionIndex] = useState(0);
+  const [pos, setPos] = useState(null);
   const noteRef = useRef(null);
   const commentInputRef = useRef(null);
   const panelRef = useRef(null);
@@ -699,9 +1290,10 @@ function AnnotPanel({
       const vw = window.innerWidth;
       const vh = window.innerHeight;
       const minLeft = Math.max(EDGE_MARGIN, leftBound + EDGE_MARGIN);
+      const maxRight = vw - rightBound - EDGE_MARGIN;
       let left = anchor.x + PIN_W + OFFSET;
       let side = "right";
-      if (left + panelWidth > vw - EDGE_MARGIN) {
+      if (left + panelWidth > maxRight) {
         left = anchor.x - OFFSET - panelWidth;
         side = "left";
       }
@@ -709,7 +1301,7 @@ function AnnotPanel({
         left = minLeft;
         side = "right";
       }
-      left = Math.max(minLeft, Math.min(left, vw - panelWidth - EDGE_MARGIN));
+      left = Math.max(minLeft, Math.min(left, maxRight - panelWidth));
       let top = anchor.y - 8;
       const maxTop = vh - TOOLBAR_RESERVE - panelH;
       if (top > maxTop) top = maxTop;
@@ -735,11 +1327,56 @@ function AnnotPanel({
   const handleSelectLabel = (labelId) => {
     onUpdate(pin.id, { labelId });
   };
+  const allAuthors = useMemo(() => {
+    const set = /* @__PURE__ */ new Set();
+    for (const p of pins) {
+      if (p.author) set.add(p.author);
+      for (const c of p.comments) if (c.author) set.add(c.author);
+    }
+    return Array.from(set);
+  }, [pins]);
+  const filteredMentions = useMemo(() => {
+    if (!showMention) return [];
+    if (!mentionQuery) return allAuthors;
+    const q = mentionQuery.toLowerCase();
+    return allAuthors.filter((a) => a.toLowerCase().includes(q));
+  }, [showMention, mentionQuery, allAuthors]);
+  const handleSelectMention = (author) => {
+    const before = newComment.slice(0, mentionStart);
+    const after = newComment.slice(mentionStart + 1 + mentionQuery.length);
+    const inserted = `${before}@${author} ${after}`;
+    setNewComment(inserted);
+    setShowMention(false);
+    setMentionIndex(0);
+    const newCursor = mentionStart + 1 + author.length + 1;
+    setTimeout(() => {
+      const el = commentInputRef.current;
+      if (el) {
+        el.focus();
+        el.setSelectionRange(newCursor, newCursor);
+      }
+    }, 0);
+  };
+  const handleCommentChange = (e) => {
+    const val = e.target.value;
+    setNewComment(val);
+    const cursor = e.target.selectionStart ?? val.length;
+    const m = val.slice(0, cursor).match(/@([^\s@]*)$/);
+    if (m) {
+      setMentionQuery(m[1]);
+      setMentionStart(cursor - m[0].length);
+      setShowMention(true);
+      setMentionIndex(0);
+    } else {
+      setShowMention(false);
+    }
+  };
   const handleSubmitComment = () => {
     const t = newComment.trim();
     if (!t || !currentAuthor) return;
     onAddComment(pin.id, t);
     setNewComment("");
+    setShowMention(false);
   };
   const closeBtnStyle = {
     background: "transparent",
@@ -770,7 +1407,7 @@ function AnnotPanel({
     background: DARK.bg3,
     color: DARK.txt
   };
-  return /* @__PURE__ */ jsxs2(
+  return /* @__PURE__ */ jsxs3(
     "div",
     {
       ref: panelRef,
@@ -825,7 +1462,7 @@ function AnnotPanel({
             },
             children: panelMode === "view" ? (
               /* 상세보기 헤더: [번호원형] [작성자 · 날짜] [상태] spacer [...] [×] */
-              /* @__PURE__ */ jsxs2("div", { style: { display: "flex", alignItems: "center", gap: 7, minWidth: 0 }, children: [
+              /* @__PURE__ */ jsxs3("div", { style: { display: "flex", alignItems: "center", gap: 7, minWidth: 0 }, children: [
                 /* @__PURE__ */ jsx3(
                   "div",
                   {
@@ -852,9 +1489,9 @@ function AnnotPanel({
                 })() }),
                 /* @__PURE__ */ jsx3("span", { style: { fontSize: 9, color: DARK.txL, flexShrink: 0, whiteSpace: "nowrap", paddingTop: 4 }, children: fmtTime(pin.createdAt) }),
                 /* @__PURE__ */ jsx3("div", { style: { flex: 1, minWidth: 0 } }),
-                /* @__PURE__ */ jsxs2("div", { style: { display: "flex", alignItems: "center", gap: 2, flexShrink: 0 }, children: [
-                  /* @__PURE__ */ jsxs2("div", { style: { position: "relative", flexShrink: 0 }, children: [
-                    /* @__PURE__ */ jsxs2(
+                /* @__PURE__ */ jsxs3("div", { style: { display: "flex", alignItems: "center", gap: 2, flexShrink: 0 }, children: [
+                  /* @__PURE__ */ jsxs3("div", { style: { position: "relative", flexShrink: 0 }, children: [
+                    /* @__PURE__ */ jsxs3(
                       "button",
                       {
                         onClick: () => setThreadOpen((v) => !v),
@@ -878,7 +1515,7 @@ function AnnotPanel({
                     ),
                     showThreadTooltip && /* @__PURE__ */ jsx3("div", { style: { position: "absolute", bottom: "100%", left: "50%", transform: "translateX(-50%)", marginBottom: 6, background: "rgba(15,23,42,.95)", color: "rgba(255,255,255,.85)", fontSize: 10, fontWeight: 600, padding: "3px 8px", borderRadius: 5, whiteSpace: "nowrap", pointerEvents: "none", border: "1px solid rgba(255,255,255,.1)" }, children: "\uC2A4\uB808\uB4DC" })
                   ] }),
-                  /* @__PURE__ */ jsxs2("div", { ref: moreMenuRef, style: { position: "relative", flexShrink: 0 }, children: [
+                  /* @__PURE__ */ jsxs3("div", { ref: moreMenuRef, style: { position: "relative", flexShrink: 0 }, children: [
                     /* @__PURE__ */ jsx3(
                       "button",
                       {
@@ -888,7 +1525,7 @@ function AnnotPanel({
                         children: "\xB7\xB7\xB7"
                       }
                     ),
-                    showMoreMenu && /* @__PURE__ */ jsxs2("div", { style: { position: "absolute", top: "calc(100% + 4px)", right: 0, background: DARK.bg3, border: `1px solid ${DARK.brd2}`, borderRadius: 9, padding: 4, zIndex: 10001, minWidth: 130, boxShadow: "0 8px 28px rgba(0,0,0,.45)" }, children: [
+                    showMoreMenu && /* @__PURE__ */ jsxs3("div", { style: { position: "absolute", top: "calc(100% + 4px)", right: 0, background: DARK.bg3, border: `1px solid ${DARK.brd2}`, borderRadius: 9, padding: 4, zIndex: 10001, minWidth: 130, boxShadow: "0 8px 28px rgba(0,0,0,.45)" }, children: [
                       /* @__PURE__ */ jsx3(
                         MoreMenuItem,
                         {
@@ -937,7 +1574,7 @@ function AnnotPanel({
               ] })
             ) : (
               /* 수정 헤더: [#N] [작성/수정하기] spacer [작성자·날짜] [×] */
-              /* @__PURE__ */ jsxs2("div", { style: { display: "flex", alignItems: "center", gap: 10, minWidth: 0 }, children: [
+              /* @__PURE__ */ jsxs3("div", { style: { display: "flex", alignItems: "center", gap: 10, minWidth: 0 }, children: [
                 /* @__PURE__ */ jsx3(
                   "div",
                   {
@@ -959,7 +1596,7 @@ function AnnotPanel({
                 ),
                 /* @__PURE__ */ jsx3("span", { style: { fontSize: 13, fontWeight: 700 }, children: (pin.note ?? "").length > 0 ? "\uC218\uC815\uD558\uAE30" : "\uC791\uC131\uD558\uAE30" }),
                 /* @__PURE__ */ jsx3("div", { style: { flex: 1 } }),
-                /* @__PURE__ */ jsxs2("span", { style: { fontSize: 9, color: DARK.txL }, children: [
+                /* @__PURE__ */ jsxs3("span", { style: { fontSize: 9, color: DARK.txL }, children: [
                   pin.author,
                   " \xB7 ",
                   fmtTime(pin.createdAt)
@@ -969,7 +1606,7 @@ function AnnotPanel({
             )
           }
         ),
-        /* @__PURE__ */ jsxs2("div", { style: { flex: 1, display: "flex", minHeight: 0 }, children: [
+        /* @__PURE__ */ jsxs3("div", { style: { flex: 1, display: "flex", minHeight: 0 }, children: [
           /* @__PURE__ */ jsx3(
             "div",
             {
@@ -982,9 +1619,9 @@ function AnnotPanel({
               },
               children: panelMode === "view" ? (
                 /* ── 상세보기 ── */
-                /* @__PURE__ */ jsx3(Fragment3, { children: /* @__PURE__ */ jsxs2("div", { className: "sb-scroll", style: { flex: 1, overflowY: "auto", padding: "16px 18px" }, children: [
+                /* @__PURE__ */ jsx3(Fragment2, { children: /* @__PURE__ */ jsxs3("div", { className: "sb-scroll", style: { flex: 1, overflowY: "auto", padding: "16px 18px" }, children: [
                   /* @__PURE__ */ jsx3(StatusBadge, { resolved: isResolved, resolvedBy: pin.resolvedBy, resolvedAt: pin.resolvedAt }),
-                  (pin.note ?? "").length > 0 ? /* @__PURE__ */ jsx3(Markdown, { theme: "dark", style: { fontSize: 13, color: DARK.txt, lineHeight: 1.75 }, children: pin.note }) : /* @__PURE__ */ jsxs2("div", { style: { color: DARK.txL, fontSize: 12, textAlign: "center", padding: "28px 0" }, children: [
+                  (pin.note ?? "").length > 0 ? /* @__PURE__ */ jsx3(Markdown, { theme: "dark", style: { fontSize: 13, color: DARK.txt, lineHeight: 1.75 }, children: pin.note }) : /* @__PURE__ */ jsxs3("div", { style: { color: DARK.txL, fontSize: 12, textAlign: "center", padding: "28px 0" }, children: [
                     "\uB0B4\uC6A9\uC774 \uC5C6\uC2B5\uB2C8\uB2E4.",
                     /* @__PURE__ */ jsx3("br", {}),
                     /* @__PURE__ */ jsx3(
@@ -1002,11 +1639,11 @@ function AnnotPanel({
                 ] }) })
               ) : (
                 /* ── 작성/수정하기 ── */
-                /* @__PURE__ */ jsx3(Fragment3, { children: /* @__PURE__ */ jsxs2("div", { style: { flex: 1, display: "flex", flexDirection: "column", minHeight: 0, padding: "12px 14px", gap: 10 }, children: [
-                  /* @__PURE__ */ jsx3("div", { style: { flexShrink: 0 }, children: /* @__PURE__ */ jsxs2("div", { style: { display: "flex", alignItems: "center", gap: 3, flexWrap: "wrap" }, children: [
+                /* @__PURE__ */ jsx3(Fragment2, { children: /* @__PURE__ */ jsxs3("div", { style: { flex: 1, display: "flex", flexDirection: "column", minHeight: 0, padding: "12px 14px", gap: 10 }, children: [
+                  /* @__PURE__ */ jsx3("div", { style: { flexShrink: 0 }, children: /* @__PURE__ */ jsxs3("div", { style: { display: "flex", alignItems: "center", gap: 3, flexWrap: "wrap" }, children: [
                     labels.length === 0 ? /* @__PURE__ */ jsx3("span", { style: { fontSize: 11, color: DARK.txL }, children: "\uB4F1\uB85D\uB41C \uB808\uC774\uBE14\uC774 \uC5C6\uC2B5\uB2C8\uB2E4." }) : labels.map((l) => {
                       const selected = pin.labelId === l.id;
-                      return /* @__PURE__ */ jsxs2(
+                      return /* @__PURE__ */ jsxs3(
                         "button",
                         {
                           onClick: () => handleSelectLabel(selected ? null : l.id),
@@ -1067,7 +1704,7 @@ function AnnotPanel({
                       }
                     )
                   ] }) }),
-                  /* @__PURE__ */ jsxs2("div", { style: { flex: 1, position: "relative", minHeight: 0, display: "flex", flexDirection: "column" }, children: [
+                  /* @__PURE__ */ jsxs3("div", { style: { flex: 1, position: "relative", minHeight: 0, display: "flex", flexDirection: "column" }, children: [
                     /* @__PURE__ */ jsx3(
                       MarkdownEditor,
                       {
@@ -1075,6 +1712,7 @@ function AnnotPanel({
                         value: note,
                         onChange: setNote,
                         onCtrlEnter: handleSaveNote,
+                        mentionUsers: allAuthors,
                         placeholder: "\uAE30\uB2A5 \uC815\uCC45, \uC694\uAD6C\uC0AC\uD56D, \uC0AC\uC591 \uB4F1\uC744 \uC791\uC131\uD558\uC138\uC694.\n\n**\uAD75\uAC8C**, *\uAE30\uC6B8\uC784*, `\uCF54\uB4DC`\n# \uC81C\uBAA9, - \uBAA9\uB85D, > \uC778\uC6A9",
                         className: "sb-scroll sb-md-editor",
                         style: { ...inp, flex: 1, lineHeight: 1.65, minHeight: 0, paddingBottom: 32, overflowY: "auto", cursor: "text" }
@@ -1107,14 +1745,14 @@ function AnnotPanel({
               )
             }
           ),
-          showThread && /* @__PURE__ */ jsxs2(Fragment3, { children: [
+          showThread && /* @__PURE__ */ jsxs3(Fragment2, { children: [
             /* @__PURE__ */ jsx3("div", { style: { width: 1, background: DARK.brd, alignSelf: "stretch", flexShrink: 0 } }),
-            /* @__PURE__ */ jsxs2("div", { style: { flex: 1, display: "flex", flexDirection: "column", minWidth: 0, background: DARK.bg }, children: [
-              /* @__PURE__ */ jsxs2("div", { style: { padding: "11px 14px 9px", borderBottom: `1px solid ${DARK.brd}`, flexShrink: 0, display: "flex", alignItems: "center", gap: 6 }, children: [
+            /* @__PURE__ */ jsxs3("div", { style: { flex: 1, display: "flex", flexDirection: "column", minWidth: 0, background: DARK.bg }, children: [
+              /* @__PURE__ */ jsxs3("div", { style: { padding: "11px 14px 9px", borderBottom: `1px solid ${DARK.brd}`, flexShrink: 0, display: "flex", alignItems: "center", gap: 6 }, children: [
                 /* @__PURE__ */ jsx3("span", { style: { fontSize: 11, fontWeight: 700, color: DARK.txt }, children: "Comment" }),
                 pin.comments.length > 0 && /* @__PURE__ */ jsx3("span", { style: { fontSize: 10, color: DARK.txL, fontWeight: 500 }, children: pin.comments.length })
               ] }),
-              /* @__PURE__ */ jsxs2("div", { className: "sb-scroll", style: { flex: 1, overflowY: "auto", padding: "10px 12px", display: "flex", flexDirection: "column", gap: 2 }, children: [
+              /* @__PURE__ */ jsxs3("div", { className: "sb-scroll", style: { flex: 1, overflowY: "auto", padding: "10px 12px", display: "flex", flexDirection: "column", gap: 2 }, children: [
                 pin.comments.length === 0 ? /* @__PURE__ */ jsx3("div", { style: { fontSize: 11, color: DARK.txL, textAlign: "center", padding: "32px 0", opacity: 0.6 }, children: "\uC2A4\uB808\uB4DC\uB97C \uC2DC\uC791\uD574\uBCF4\uC138\uC694" }) : pin.comments.map((c) => /* @__PURE__ */ jsx3(
                   CommentItem,
                   {
@@ -1127,15 +1765,98 @@ function AnnotPanel({
                 )),
                 /* @__PURE__ */ jsx3("div", { ref: commentsEndRef })
               ] }),
-              /* @__PURE__ */ jsx3("div", { style: { padding: "8px 10px 10px", flexShrink: 0, borderTop: `1px solid ${DARK.brd}`, background: DARK.bg }, children: /* @__PURE__ */ jsxs2("div", { style: { position: "relative" }, children: [
+              /* @__PURE__ */ jsx3("div", { style: { padding: "8px 10px 10px", flexShrink: 0, borderTop: `1px solid ${DARK.brd}`, background: DARK.bg }, children: /* @__PURE__ */ jsxs3("div", { style: { position: "relative" }, children: [
+                showMention && filteredMentions.length > 0 && /* @__PURE__ */ jsx3(
+                  "div",
+                  {
+                    className: "sb-scroll",
+                    style: {
+                      position: "absolute",
+                      bottom: "100%",
+                      left: 0,
+                      right: 0,
+                      marginBottom: 4,
+                      background: "#242424",
+                      border: `1px solid ${DARK.brd2}`,
+                      borderRadius: 8,
+                      boxShadow: "0 4px 16px rgba(0,0,0,.5)",
+                      maxHeight: 160,
+                      overflowY: "auto",
+                      zIndex: 10002
+                    },
+                    children: filteredMentions.map((author, idx) => /* @__PURE__ */ jsxs3(
+                      "button",
+                      {
+                        onMouseDown: (e) => {
+                          e.preventDefault();
+                          handleSelectMention(author);
+                        },
+                        style: {
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 8,
+                          width: "100%",
+                          padding: "7px 10px",
+                          background: idx === mentionIndex ? "rgba(255,255,255,.08)" : "transparent",
+                          border: "none",
+                          color: DARK.txt,
+                          fontSize: 12,
+                          cursor: "pointer",
+                          textAlign: "left",
+                          fontFamily: "inherit",
+                          boxSizing: "border-box"
+                        },
+                        children: [
+                          /* @__PURE__ */ jsx3("span", { style: {
+                            display: "inline-flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            width: 20,
+                            height: 20,
+                            borderRadius: 4,
+                            fontSize: 10,
+                            fontWeight: 700,
+                            background: `${getAvatarColor(author)}22`,
+                            color: getAvatarColor(author),
+                            border: `1px solid ${getAvatarColor(author)}44`,
+                            flexShrink: 0
+                          }, children: author[0]?.toUpperCase() }),
+                          /* @__PURE__ */ jsx3("span", { children: author })
+                        ]
+                      },
+                      author
+                    ))
+                  }
+                ),
                 /* @__PURE__ */ jsx3(
                   "textarea",
                   {
                     ref: commentInputRef,
                     className: "sb-scroll",
                     value: newComment,
-                    onChange: (e) => setNewComment(e.target.value),
+                    onChange: handleCommentChange,
                     onKeyDown: (e) => {
+                      if (showMention && filteredMentions.length > 0) {
+                        if (e.key === "ArrowDown") {
+                          e.preventDefault();
+                          setMentionIndex((i) => Math.min(i + 1, filteredMentions.length - 1));
+                          return;
+                        }
+                        if (e.key === "ArrowUp") {
+                          e.preventDefault();
+                          setMentionIndex((i) => Math.max(i - 1, 0));
+                          return;
+                        }
+                        if (e.key === "Enter" || e.key === "Tab") {
+                          e.preventDefault();
+                          handleSelectMention(filteredMentions[mentionIndex]);
+                          return;
+                        }
+                        if (e.key === "Escape") {
+                          setShowMention(false);
+                          return;
+                        }
+                      }
                       if ((e.metaKey || e.ctrlKey) && e.key === "Enter") handleSubmitComment();
                       if (e.key === "Escape") onClose();
                     },
@@ -1191,7 +1912,7 @@ function MoreMenuItem({
   color,
   onClick
 }) {
-  const [hov, setHov] = useState2(false);
+  const [hov, setHov] = useState(false);
   const base = {
     display: "flex",
     alignItems: "center",
@@ -1209,7 +1930,7 @@ function MoreMenuItem({
     fontFamily: "inherit",
     boxSizing: "border-box"
   };
-  return /* @__PURE__ */ jsxs2("button", { style: base, onMouseEnter: () => setHov(true), onMouseLeave: () => setHov(false), onClick, children: [
+  return /* @__PURE__ */ jsxs3("button", { style: base, onMouseEnter: () => setHov(true), onMouseLeave: () => setHov(false), onClick, children: [
     /* @__PURE__ */ jsx3("span", { style: { width: 14, textAlign: "center", fontSize: 13 }, children: icon }),
     /* @__PURE__ */ jsx3("span", { style: { flex: 1 }, children: label }),
     shortcut && /* @__PURE__ */ jsx3("span", { style: { fontSize: 9, color: "rgba(255,255,255,.28)", fontFamily: "monospace", marginLeft: 4 }, children: shortcut })
@@ -1217,7 +1938,7 @@ function MoreMenuItem({
 }
 function StatusBadge({ resolved, resolvedBy, resolvedAt }) {
   if (!resolved) return null;
-  return /* @__PURE__ */ jsx3("div", { style: { marginBottom: 12 }, children: /* @__PURE__ */ jsxs2(
+  return /* @__PURE__ */ jsx3("div", { style: { marginBottom: 12 }, children: /* @__PURE__ */ jsxs3(
     "span",
     {
       style: {
@@ -1273,6 +1994,10 @@ function mdToEditorHtml(md) {
     h = h.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
     h = h.replace(/\*(.+?)\*/g, "<em>$1</em>");
     h = h.replace(/`(.+?)`/g, "<code>$1</code>");
+    h = h.replace(/@([\w가-힣]+)/g, (_, name) => {
+      const c = getAvatarColor(name);
+      return `<span data-mention="${name}" style="display:inline-flex;align-items:center;padding:1px 5px;border-radius:3px;font-size:.9em;font-weight:600;background:${c}22;color:${c};border:1px solid ${c}44;white-space:nowrap;contenteditable:false;">@${name}</span>`;
+    });
     return h;
   };
   return md.split("\n").map((line) => {
@@ -1300,6 +2025,8 @@ function domToMd(root) {
       case "br":
         return "";
       case "span": {
+        const mention = node.getAttribute("data-mention");
+        if (mention) return `@${mention}`;
         const c = node.getAttribute("data-color");
         return c ? `{${c}:${inner}}` : inner;
       }
@@ -1335,12 +2062,79 @@ function domToMd(root) {
   return lines.join("\n");
 }
 var MD_PALETTE = ["#f87171", "#fb923c", "#fbbf24", "#4ade80", "#60a5fa", "#a78bfa", "#f472b6"];
-function MarkdownEditor({ value, onChange, onCtrlEnter, placeholder, style, className, editorRef }) {
+function MarkdownEditor({ value, onChange, onCtrlEnter, placeholder, style, className, editorRef, mentionUsers }) {
   const inner = useRef(null);
   const ref = editorRef ?? inner;
-  const lastMd = useRef("");
+  const lastMd = useRef(null);
   const composing = useRef(false);
-  const [hovColor, setHovColor] = useState2(null);
+  const [hovColor, setHovColor] = useState(null);
+  const [mentionQuery, setMentionQuery] = useState("");
+  const [showMention, setShowMention] = useState(false);
+  const [mentionIndex, setMentionIndex] = useState(0);
+  const mentionAnchor = useRef(null);
+  const filteredMentions = useMemo(() => {
+    if (!showMention || !mentionUsers?.length) return [];
+    if (!mentionQuery) return mentionUsers;
+    const q = mentionQuery.toLowerCase();
+    return mentionUsers.filter((a) => a.toLowerCase().includes(q));
+  }, [showMention, mentionQuery, mentionUsers]);
+  const detectMention = () => {
+    const sel = window.getSelection();
+    if (!sel?.rangeCount) {
+      setShowMention(false);
+      return;
+    }
+    const range = sel.getRangeAt(0);
+    if (range.startContainer.nodeType !== Node.TEXT_NODE) {
+      setShowMention(false);
+      return;
+    }
+    const textNode = range.startContainer;
+    const textBefore = textNode.textContent.slice(0, range.startOffset);
+    const m = textBefore.match(/@([^\s@]*)$/);
+    if (m) {
+      mentionAnchor.current = { node: textNode, offset: range.startOffset - m[0].length };
+      setMentionQuery(m[1]);
+      setShowMention(true);
+      setMentionIndex(0);
+    } else {
+      setShowMention(false);
+      mentionAnchor.current = null;
+    }
+  };
+  const handleSelectMention = (author) => {
+    const anchor = mentionAnchor.current;
+    if (!anchor) {
+      setShowMention(false);
+      return;
+    }
+    const { node, offset: atOffset } = anchor;
+    const endOffset = atOffset + 1 + mentionQuery.length;
+    const text = node.textContent ?? "";
+    const c = getAvatarColor(author);
+    const span = document.createElement("span");
+    span.setAttribute("data-mention", author);
+    span.setAttribute("contenteditable", "false");
+    span.style.cssText = `display:inline-flex;align-items:center;padding:1px 5px;border-radius:3px;font-size:.9em;font-weight:600;background:${c}22;color:${c};border:1px solid ${c}44;white-space:nowrap;`;
+    span.textContent = `@${author}`;
+    const beforeNode = document.createTextNode(text.slice(0, atOffset));
+    const afterNode = document.createTextNode("\xA0" + text.slice(endOffset));
+    const parent = node.parentNode;
+    parent.insertBefore(beforeNode, node);
+    parent.insertBefore(span, node);
+    parent.insertBefore(afterNode, node);
+    parent.removeChild(node);
+    const range = document.createRange();
+    range.setStart(afterNode, 1);
+    range.collapse(true);
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(range);
+    setShowMention(false);
+    setMentionIndex(0);
+    mentionAnchor.current = null;
+    emit();
+    ref.current?.focus();
+  };
   useEffect(() => {
     const el = ref.current;
     if (!el || lastMd.current === value) return;
@@ -1459,6 +2253,27 @@ function MarkdownEditor({ value, onChange, onCtrlEnter, placeholder, style, clas
       return;
     }
     if (composing.current) return;
+    if (showMention && filteredMentions.length > 0) {
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setMentionIndex((i) => Math.min(i + 1, filteredMentions.length - 1));
+        return;
+      }
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setMentionIndex((i) => Math.max(i - 1, 0));
+        return;
+      }
+      if (e.key === "Enter" || e.key === "Tab") {
+        e.preventDefault();
+        handleSelectMention(filteredMentions[mentionIndex]);
+        return;
+      }
+      if (e.key === "Escape") {
+        setShowMention(false);
+        return;
+      }
+    }
     if (e.key === " ") {
       const block = getCaretBlock();
       const text = (block?.textContent ?? "").replace(/\u200B/g, "").trim();
@@ -1472,7 +2287,7 @@ function MarkdownEditor({ value, onChange, onCtrlEnter, placeholder, style, clas
         transformBlock(block, "h2");
         return;
       }
-      if (text === "-") {
+      if (text === "-" || text === "*") {
         e.preventDefault();
         transformBlock(block, "li");
         return;
@@ -1482,6 +2297,12 @@ function MarkdownEditor({ value, onChange, onCtrlEnter, placeholder, style, clas
         emit();
         return;
       }
+    }
+    if (e.key === "Enter" && e.shiftKey) {
+      e.preventDefault();
+      document.execCommand("insertParagraph");
+      emit();
+      return;
     }
     if (e.key === "Enter" && !e.shiftKey) {
       const block = getCaretBlock();
@@ -1508,8 +2329,8 @@ function MarkdownEditor({ value, onChange, onCtrlEnter, placeholder, style, clas
     }
   };
   const { overflowY, cursor, paddingBottom, lineHeight, padding: _padding, ...wrapperStyle } = style ?? {};
-  return /* @__PURE__ */ jsxs2("div", { style: { display: "flex", flexDirection: "column", ...wrapperStyle }, children: [
-    /* @__PURE__ */ jsxs2("div", { style: {
+  return /* @__PURE__ */ jsxs3("div", { style: { display: "flex", flexDirection: "column", ...wrapperStyle, position: "relative" }, children: [
+    /* @__PURE__ */ jsxs3("div", { style: {
       display: "flex",
       alignItems: "center",
       gap: 5,
@@ -1572,6 +2393,68 @@ function MarkdownEditor({ value, onChange, onCtrlEnter, placeholder, style, clas
         }
       )
     ] }),
+    showMention && filteredMentions.length > 0 && /* @__PURE__ */ jsx3(
+      "div",
+      {
+        className: "sb-scroll",
+        style: {
+          position: "absolute",
+          bottom: "100%",
+          left: 0,
+          right: 0,
+          marginBottom: 4,
+          background: "#242424",
+          border: `1px solid ${DARK.brd2}`,
+          borderRadius: 8,
+          boxShadow: "0 4px 16px rgba(0,0,0,.5)",
+          maxHeight: 160,
+          overflowY: "auto",
+          zIndex: 10003
+        },
+        children: filteredMentions.map((author, idx) => /* @__PURE__ */ jsxs3(
+          "button",
+          {
+            onMouseDown: (e) => {
+              e.preventDefault();
+              handleSelectMention(author);
+            },
+            style: {
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              width: "100%",
+              padding: "7px 10px",
+              background: idx === mentionIndex ? "rgba(255,255,255,.08)" : "transparent",
+              border: "none",
+              color: DARK.txt,
+              fontSize: 12,
+              cursor: "pointer",
+              textAlign: "left",
+              fontFamily: "inherit",
+              boxSizing: "border-box"
+            },
+            children: [
+              /* @__PURE__ */ jsx3("span", { style: {
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: 20,
+                height: 20,
+                borderRadius: 4,
+                fontSize: 10,
+                fontWeight: 700,
+                flexShrink: 0,
+                background: `${getAvatarColor(author)}22`,
+                color: getAvatarColor(author),
+                border: `1px solid ${getAvatarColor(author)}44`
+              }, children: author[0]?.toUpperCase() }),
+              /* @__PURE__ */ jsx3("span", { children: author })
+            ]
+          },
+          author
+        ))
+      }
+    ),
     /* @__PURE__ */ jsx3(
       "div",
       {
@@ -1580,7 +2463,10 @@ function MarkdownEditor({ value, onChange, onCtrlEnter, placeholder, style, clas
         suppressContentEditableWarning: true,
         className,
         onInput: () => {
-          if (!composing.current) emit();
+          if (!composing.current) {
+            emit();
+            detectMention();
+          }
         },
         onKeyDown: handleKeyDown,
         onPaste: handlePaste,
@@ -1613,9 +2499,9 @@ function getAvatarColor(name) {
   return palette[h % palette.length];
 }
 function CommentItem({ comment, canEdit, onUpdate, onDelete }) {
-  const [editing, setEditing] = useState2(false);
-  const [draft, setDraft] = useState2(comment.text);
-  const [hov, setHov] = useState2(false);
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(comment.text);
+  const [hov, setHov] = useState(false);
   const commit = () => {
     const t = draft.trim();
     if (t && t !== comment.text) onUpdate(t);
@@ -1623,7 +2509,7 @@ function CommentItem({ comment, canEdit, onUpdate, onDelete }) {
     setEditing(false);
   };
   const labelColor = getAvatarColor(comment.author);
-  return /* @__PURE__ */ jsxs2(
+  return /* @__PURE__ */ jsxs3(
     "div",
     {
       onMouseEnter: () => setHov(true),
@@ -1634,7 +2520,7 @@ function CommentItem({ comment, canEdit, onUpdate, onDelete }) {
         background: hov ? "rgba(255,255,255,.03)" : "transparent"
       },
       children: [
-        /* @__PURE__ */ jsxs2("div", { style: { display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }, children: [
+        /* @__PURE__ */ jsxs3("div", { style: { display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }, children: [
           /* @__PURE__ */ jsx3("span", { style: {
             display: "inline-flex",
             alignItems: "center",
@@ -1649,7 +2535,7 @@ function CommentItem({ comment, canEdit, onUpdate, onDelete }) {
           }, children: comment.author }),
           /* @__PURE__ */ jsx3("span", { style: { fontSize: 9, color: DARK.txL }, children: fmtTime(comment.createdAt) }),
           comment.updatedAt && /* @__PURE__ */ jsx3("span", { style: { fontSize: 9, color: DARK.txL }, children: "(\uC218\uC815\uB428)" }),
-          canEdit && !editing && hov && /* @__PURE__ */ jsxs2("div", { style: { display: "flex", gap: 3, marginLeft: "auto" }, children: [
+          canEdit && !editing && hov && /* @__PURE__ */ jsxs3("div", { style: { display: "flex", gap: 3, marginLeft: "auto" }, children: [
             /* @__PURE__ */ jsx3(
               "button",
               {
@@ -1673,7 +2559,7 @@ function CommentItem({ comment, canEdit, onUpdate, onDelete }) {
             )
           ] })
         ] }),
-        editing ? /* @__PURE__ */ jsxs2(Fragment3, { children: [
+        editing ? /* @__PURE__ */ jsxs3(Fragment2, { children: [
           /* @__PURE__ */ jsx3(
             "textarea",
             {
@@ -1692,7 +2578,7 @@ function CommentItem({ comment, canEdit, onUpdate, onDelete }) {
               }
             }
           ),
-          /* @__PURE__ */ jsxs2("div", { style: { display: "flex", gap: 4, marginTop: 4 }, children: [
+          /* @__PURE__ */ jsxs3("div", { style: { display: "flex", gap: 4, marginTop: 4 }, children: [
             /* @__PURE__ */ jsx3("button", { onClick: () => {
               setDraft(comment.text);
               setEditing(false);
@@ -1707,8 +2593,8 @@ function CommentItem({ comment, canEdit, onUpdate, onDelete }) {
 
 // src/AnnotPin.tsx
 import { createPortal } from "react-dom";
-import { useEffect as useEffect2, useState as useState3 } from "react";
-import { Fragment as Fragment4, jsx as jsx4, jsxs as jsxs3 } from "react/jsx-runtime";
+import { useEffect as useEffect2, useState as useState2 } from "react";
+import { Fragment as Fragment3, jsx as jsx4, jsxs as jsxs4 } from "react/jsx-runtime";
 function timeAgo(iso) {
   const diff = Date.now() - new Date(iso).getTime();
   if (diff < 6e4) return "\uBC29\uAE08";
@@ -1766,6 +2652,7 @@ function AnnotPin({
   num,
   label,
   layerId,
+  align,
   isSelected,
   isHovered,
   onSelect,
@@ -1779,17 +2666,13 @@ function AnnotPin({
   const expanded = !isSelected && !!isHovered;
   const hasNote = !!pin.note;
   const hasComments = pin.comments.length > 0;
-  const { containerX, containerY, containerH, viewportX, viewportY, expandLeft } = (() => {
+  const { viewportX, viewportY, expandLeft } = (() => {
     const el = document.getElementById(layerId);
     const r = el?.getBoundingClientRect() ?? { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight };
-    const cx = pin.x * r.width;
-    const cy = pin.y * r.height;
-    const vx = r.left + cx;
-    const vy = r.top + cy;
+    const rawX = align === "center" ? pin.x + r.width / 2 : align === "right" ? r.width - pin.x : pin.x;
+    const vx = r.left + rawX;
+    const vy = r.top + pin.y;
     return {
-      containerX: cx,
-      containerY: cy,
-      containerH: r.height,
       viewportX: vx,
       viewportY: vy,
       expandLeft: expanded && vx + EXPAND_W > window.innerWidth - 8
@@ -1799,7 +2682,7 @@ function AnnotPin({
   const MIN_UP = 120;
   const expandDown = expanded && viewportY + 28 - EDGE < MIN_UP;
   const maxExpandH = expanded ? expandDown ? Math.min(400, window.innerHeight - viewportY - EDGE) : Math.min(400, viewportY + 28 - EDGE) : 28;
-  const [contentReady, setContentReady] = useState3(false);
+  const [contentReady, setContentReady] = useState2(false);
   useEffect2(() => {
     if (!expanded) {
       setContentReady(false);
@@ -1820,15 +2703,16 @@ function AnnotPin({
     if (!container) return;
     const base = container.getBoundingClientRect();
     let moved = false;
-    const startX = e.clientX - base.left - pin.x * base.width;
-    const startY = e.clientY - base.top - pin.y * base.height;
+    const pinRawX = align === "center" ? pin.x + base.width / 2 : align === "right" ? base.width - pin.x : pin.x;
+    const startX = e.clientX - base.left - pinRawX;
+    const startY = e.clientY - base.top - pin.y;
     const onMoveHandler = (ev) => {
       moved = true;
       const newPx = ev.clientX - base.left - startX;
       const newPy = ev.clientY - base.top - startY;
       onMove({
-        x: Math.max(0, Math.min(1, newPx / base.width)),
-        y: Math.max(0, Math.min(1, newPy / base.height))
+        x: align === "center" ? Math.max(-base.width / 2, Math.min(base.width / 2, newPx - base.width / 2)) : align === "right" ? Math.max(0, Math.min(base.width, base.width - newPx)) : Math.max(0, Math.min(base.width, newPx)),
+        y: Math.max(0, Math.min(base.height, newPy))
       });
     };
     const onUp = () => {
@@ -1858,7 +2742,7 @@ function AnnotPin({
       children: /* @__PURE__ */ jsx4("span", { style: { color: "#fff", fontSize: 10, fontWeight: 700, lineHeight: 1 }, children: num })
     }
   );
-  return /* @__PURE__ */ jsxs3(Fragment4, { children: [
+  return /* @__PURE__ */ jsxs4(Fragment3, { children: [
     /* @__PURE__ */ jsx4(
       "div",
       {
@@ -1867,8 +2751,8 @@ function AnnotPin({
         onMouseLeave: () => onHoverLeave(pin.id),
         style: {
           position: "absolute",
-          left: containerX,
-          ...expandDown ? { top: containerY } : { bottom: containerH - containerY - 28 },
+          ...align === "center" ? { left: `calc(50% + ${pin.x}px)` } : align === "right" ? { right: `${pin.x}px` } : { left: `${pin.x}px` },
+          top: `${pin.y}px`,
           width: 28,
           height: 28,
           borderRadius: "80px 80px 80px 12px",
@@ -1890,7 +2774,7 @@ function AnnotPin({
       }
     ),
     expanded && typeof document !== "undefined" && createPortal(
-      /* @__PURE__ */ jsxs3(
+      /* @__PURE__ */ jsxs4(
         "div",
         {
           onMouseDown,
@@ -1922,7 +2806,7 @@ function AnnotPin({
           },
           children: [
             Badge,
-            /* @__PURE__ */ jsxs3(
+            /* @__PURE__ */ jsxs4(
               "div",
               {
                 style: {
@@ -1938,7 +2822,7 @@ function AnnotPin({
                   transition: "opacity 0.32s ease-out, transform 0.32s ease-out"
                 },
                 children: [
-                  /* @__PURE__ */ jsxs3("div", { style: { display: "flex", alignItems: "center", gap: 5, minWidth: 0 }, children: [
+                  /* @__PURE__ */ jsxs4("div", { style: { display: "flex", alignItems: "center", gap: 5, minWidth: 0 }, children: [
                     /* @__PURE__ */ jsx4(
                       "span",
                       {
@@ -2005,9 +2889,9 @@ function AnnotPin({
                       children: renderInlineMarkdown(pin.note)
                     }
                   ),
-                  hasComments && /* @__PURE__ */ jsxs3(Fragment4, { children: [
+                  hasComments && /* @__PURE__ */ jsxs4(Fragment3, { children: [
                     /* @__PURE__ */ jsx4("div", { style: { height: 1, background: "rgba(255,255,255,.08)", margin: "2px 0" } }),
-                    /* @__PURE__ */ jsxs3("div", { style: { display: "flex", alignItems: "center", gap: 5, color: "rgba(255,255,255,.45)" }, children: [
+                    /* @__PURE__ */ jsxs4("div", { style: { display: "flex", alignItems: "center", gap: 5, color: "rgba(255,255,255,.45)" }, children: [
                       /* @__PURE__ */ jsx4("svg", { width: "11", height: "11", viewBox: "0 0 16 16", fill: "none", style: { color: "#93c5fd" }, children: /* @__PURE__ */ jsx4("path", { d: "M13 1H3C2.45 1 2 1.45 2 2v8c0 .55.45 1 1 1h2.5l2.5 3 2.5-3H13c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1z", fill: "currentColor" }) }),
                       /* @__PURE__ */ jsx4("span", { style: { fontSize: 9, fontWeight: 600, color: "rgba(255,255,255,.55)" }, children: pin.comments.length })
                     ] })
@@ -2024,36 +2908,397 @@ function AnnotPin({
 }
 
 // src/AnnotationToolbar.tsx
-import { useEffect as useEffect3, useRef as useRef2, useState as useState4 } from "react";
+import { useEffect as useEffect4, useRef as useRef3, useState as useState4 } from "react";
 
-// src/version.ts
-var SDK_VERSION = true ? "0.7.15" : "0.7.15";
-
-// src/AnnotationToolbar.tsx
-import { Fragment as Fragment5, jsx as jsx5, jsxs as jsxs4 } from "react/jsx-runtime";
-var IPlus = () => /* @__PURE__ */ jsxs4("svg", { width: "14", height: "14", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2.2", strokeLinecap: "round", strokeLinejoin: "round", children: [
-  /* @__PURE__ */ jsx5("line", { x1: "12", y1: "5", x2: "12", y2: "19" }),
-  /* @__PURE__ */ jsx5("line", { x1: "5", y1: "12", x2: "19", y2: "12" })
+// src/SettingsPopover.tsx
+import { useEffect as useEffect3, useRef as useRef2, useState as useState3 } from "react";
+import { Fragment as Fragment4, jsx as jsx5, jsxs as jsxs5 } from "react/jsx-runtime";
+var IGear = () => /* @__PURE__ */ jsxs5("svg", { width: "13", height: "13", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: [
+  /* @__PURE__ */ jsx5("circle", { cx: "12", cy: "12", r: "3" }),
+  /* @__PURE__ */ jsx5("path", { d: "M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" })
 ] });
-var IClose = () => /* @__PURE__ */ jsxs4("svg", { width: "14", height: "14", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2.2", strokeLinecap: "round", strokeLinejoin: "round", children: [
-  /* @__PURE__ */ jsx5("line", { x1: "18", y1: "6", x2: "6", y2: "18" }),
-  /* @__PURE__ */ jsx5("line", { x1: "6", y1: "6", x2: "18", y2: "18" })
-] });
-var IList = () => /* @__PURE__ */ jsxs4("svg", { width: "14", height: "14", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
-  /* @__PURE__ */ jsx5("line", { x1: "8", y1: "6", x2: "21", y2: "6" }),
-  /* @__PURE__ */ jsx5("line", { x1: "8", y1: "12", x2: "21", y2: "12" }),
-  /* @__PURE__ */ jsx5("line", { x1: "8", y1: "18", x2: "21", y2: "18" }),
-  /* @__PURE__ */ jsx5("line", { x1: "3", y1: "6", x2: "3.01", y2: "6" }),
-  /* @__PURE__ */ jsx5("line", { x1: "3", y1: "12", x2: "3.01", y2: "12" }),
-  /* @__PURE__ */ jsx5("line", { x1: "3", y1: "18", x2: "3.01", y2: "18" })
-] });
-var IDownload = () => /* @__PURE__ */ jsxs4("svg", { width: "14", height: "14", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
+var IDownload = () => /* @__PURE__ */ jsxs5("svg", { width: "12", height: "12", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
   /* @__PURE__ */ jsx5("path", { d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" }),
   /* @__PURE__ */ jsx5("polyline", { points: "7 10 12 15 17 10" }),
   /* @__PURE__ */ jsx5("line", { x1: "12", y1: "15", x2: "12", y2: "3" })
 ] });
-function TBtn({ icon, label, active, activeColor = "#3B82F6", badge, disabled, onClick, title, dataGuide }) {
-  return /* @__PURE__ */ jsxs4(
+var IZip = () => /* @__PURE__ */ jsxs5("svg", { width: "12", height: "12", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
+  /* @__PURE__ */ jsx5("path", { d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" }),
+  /* @__PURE__ */ jsx5("polyline", { points: "7 10 12 15 17 10" }),
+  /* @__PURE__ */ jsx5("line", { x1: "12", y1: "15", x2: "12", y2: "3" }),
+  /* @__PURE__ */ jsx5("line", { x1: "12", y1: "3", x2: "12", y2: "3" }),
+  /* @__PURE__ */ jsx5("path", { d: "M9 3h2v2H9zm2 2h2v2h-2zm-2 2h2v2H9z" })
+] });
+function ExportBtn({ label, icon, onClick }) {
+  return /* @__PURE__ */ jsxs5(
+    "button",
+    {
+      onClick,
+      style: {
+        width: "100%",
+        padding: "7px 0",
+        border: "1px solid rgba(255,255,255,.12)",
+        borderRadius: 3,
+        background: "transparent",
+        color: "rgba(255,255,255,.5)",
+        fontSize: 11,
+        cursor: "pointer",
+        fontFamily: FONT_FAMILY,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 6,
+        transition: "all .12s"
+      },
+      onMouseEnter: (e) => {
+        e.currentTarget.style.background = "rgba(255,255,255,.07)";
+        e.currentTarget.style.color = "rgba(255,255,255,.85)";
+        e.currentTarget.style.borderColor = "rgba(255,255,255,.25)";
+      },
+      onMouseLeave: (e) => {
+        e.currentTarget.style.background = "transparent";
+        e.currentTarget.style.color = "rgba(255,255,255,.5)";
+        e.currentTarget.style.borderColor = "rgba(255,255,255,.12)";
+      },
+      children: [
+        icon,
+        label
+      ]
+    }
+  );
+}
+function SectionTitle({ children }) {
+  return /* @__PURE__ */ jsx5("div", { style: { fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,.3)", letterSpacing: ".5px", textTransform: "uppercase", marginBottom: 8, fontFamily: FONT_FAMILY }, children });
+}
+function SettingsPopover({ settings, onChangeSetting, author, labels, defaultLabelId, onSaveAuthor, onExportJson, onExportMarkdown }) {
+  const [open, setOpen] = useState3(false);
+  const [nameInput, setNameInput] = useState3(author);
+  const [selectedLabelId, setSelectedLabelId] = useState3(defaultLabelId);
+  const ref = useRef2(null);
+  useEffect3(() => {
+    if (open) {
+      setNameInput(author);
+      setSelectedLabelId(defaultLabelId);
+    }
+  }, [open, author, defaultLabelId]);
+  useEffect3(() => {
+    if (!open) return;
+    const handler = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
+  const handleSaveAuthor = () => {
+    const trimmed = nameInput.trim();
+    if (!trimmed) return;
+    onSaveAuthor(trimmed, selectedLabelId);
+    setOpen(false);
+  };
+  const hasAuthorChange = nameInput.trim() !== author || selectedLabelId !== defaultLabelId;
+  return /* @__PURE__ */ jsxs5("div", { ref, "data-sb-ui": "true", style: { position: "relative", flexShrink: 0 }, children: [
+    /* @__PURE__ */ jsxs5(
+      "button",
+      {
+        onClick: () => setOpen((v) => !v),
+        title: author ? `\uC124\uC815 (\uC791\uC131\uC790: ${author})` : "\uC124\uC815 \u2014 \uC791\uC131\uC790 \uBBF8\uB4F1\uB85D",
+        "data-guide": "sb-settings",
+        style: {
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: 30,
+          height: 26,
+          border: `1px solid ${open ? "rgba(255,255,255,.2)" : !author ? "rgba(251,191,36,.4)" : "rgba(255,255,255,.07)"}`,
+          borderRadius: 2,
+          background: open ? "rgba(255,255,255,.1)" : !author ? "rgba(251,191,36,.1)" : "transparent",
+          color: open ? "rgba(255,255,255,.9)" : !author ? "#fbbf24" : "rgba(255,255,255,.45)",
+          cursor: "pointer",
+          transition: "all .15s",
+          flexShrink: 0,
+          position: "relative"
+        },
+        onMouseEnter: (e) => {
+          if (!open) {
+            e.currentTarget.style.background = "rgba(255,255,255,.07)";
+            e.currentTarget.style.color = "rgba(255,255,255,.8)";
+            e.currentTarget.style.borderColor = "rgba(255,255,255,.15)";
+          }
+        },
+        onMouseLeave: (e) => {
+          if (!open) {
+            e.currentTarget.style.background = !author ? "rgba(251,191,36,.1)" : "transparent";
+            e.currentTarget.style.color = !author ? "#fbbf24" : "rgba(255,255,255,.45)";
+            e.currentTarget.style.borderColor = !author ? "rgba(251,191,36,.4)" : "rgba(255,255,255,.07)";
+          }
+        },
+        children: [
+          /* @__PURE__ */ jsx5(IGear, {}),
+          !author && /* @__PURE__ */ jsx5("span", { style: {
+            position: "absolute",
+            top: -4,
+            right: -4,
+            width: 8,
+            height: 8,
+            borderRadius: "50%",
+            background: "#ef4444",
+            border: "1.5px solid rgba(0,0,0,.8)"
+          } })
+        ]
+      }
+    ),
+    open && /* @__PURE__ */ jsxs5(
+      "div",
+      {
+        style: {
+          position: "absolute",
+          bottom: "calc(100% + 8px)",
+          right: 0,
+          width: 240,
+          background: "rgba(10,10,10,.97)",
+          backdropFilter: "blur(24px)",
+          WebkitBackdropFilter: "blur(24px)",
+          border: "1px solid rgba(255,255,255,.1)",
+          borderRadius: 6,
+          boxShadow: "0 -8px 40px rgba(0,0,0,.55)",
+          zIndex: 2e4,
+          fontFamily: FONT_FAMILY,
+          overflow: "hidden"
+        },
+        children: [
+          /* @__PURE__ */ jsx5("div", { style: { padding: "10px 14px 8px", fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,.3)", letterSpacing: ".5px", textTransform: "uppercase" }, children: "\uC124\uC815" }),
+          /* @__PURE__ */ jsx5("div", { style: { height: 1, background: "rgba(255,255,255,.07)" } }),
+          /* @__PURE__ */ jsxs5("div", { style: { padding: "12px 14px 0" }, children: [
+            /* @__PURE__ */ jsx5(SectionTitle, { children: "\uC791\uC131\uC790" }),
+            /* @__PURE__ */ jsx5(
+              "input",
+              {
+                value: nameInput,
+                onChange: (e) => setNameInput(e.target.value),
+                onKeyDown: (e) => {
+                  if (e.key === "Enter") handleSaveAuthor();
+                },
+                placeholder: "\uC774\uB984 \uC785\uB825...",
+                style: {
+                  width: "100%",
+                  boxSizing: "border-box",
+                  background: "rgba(255,255,255,.06)",
+                  border: `1px solid ${!author ? "rgba(251,191,36,.3)" : "rgba(255,255,255,.12)"}`,
+                  borderRadius: 3,
+                  padding: "6px 9px",
+                  color: "#fff",
+                  fontSize: 12,
+                  fontFamily: FONT_FAMILY,
+                  outline: "none",
+                  marginBottom: 8
+                },
+                onFocus: (e) => {
+                  e.currentTarget.style.borderColor = "rgba(99,102,241,.5)";
+                },
+                onBlur: (e) => {
+                  e.currentTarget.style.borderColor = !author ? "rgba(251,191,36,.3)" : "rgba(255,255,255,.12)";
+                }
+              }
+            ),
+            labels.length > 0 && /* @__PURE__ */ jsxs5("div", { style: { marginBottom: 10 }, children: [
+              /* @__PURE__ */ jsx5("div", { style: { fontSize: 10, color: "rgba(255,255,255,.3)", marginBottom: 5, fontFamily: FONT_FAMILY }, children: "\uAE30\uBCF8 \uB808\uC774\uBE14" }),
+              /* @__PURE__ */ jsx5("div", { style: { display: "flex", flexWrap: "wrap", gap: 4 }, children: labels.map((l) => {
+                const color = l.color || FALLBACK_LABEL_COLOR;
+                const active = selectedLabelId === l.id;
+                return /* @__PURE__ */ jsxs5(
+                  "button",
+                  {
+                    onClick: () => setSelectedLabelId(active ? null : l.id),
+                    style: {
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 4,
+                      padding: "3px 8px",
+                      borderRadius: 3,
+                      fontSize: 11,
+                      border: `1px solid ${active ? `${color}88` : "rgba(255,255,255,.1)"}`,
+                      background: active ? `${color}22` : "transparent",
+                      color: active ? color : "rgba(255,255,255,.4)",
+                      cursor: "pointer",
+                      fontFamily: FONT_FAMILY,
+                      transition: "all .12s"
+                    },
+                    onMouseEnter: (e) => {
+                      if (!active) {
+                        e.currentTarget.style.borderColor = `${color}55`;
+                        e.currentTarget.style.color = color;
+                      }
+                    },
+                    onMouseLeave: (e) => {
+                      if (!active) {
+                        e.currentTarget.style.borderColor = "rgba(255,255,255,.1)";
+                        e.currentTarget.style.color = "rgba(255,255,255,.4)";
+                      }
+                    },
+                    children: [
+                      /* @__PURE__ */ jsx5("span", { style: { width: 5, height: 5, borderRadius: "50%", background: color, flexShrink: 0 } }),
+                      l.name
+                    ]
+                  },
+                  l.id
+                );
+              }) })
+            ] }),
+            /* @__PURE__ */ jsx5(
+              "button",
+              {
+                onClick: handleSaveAuthor,
+                disabled: !nameInput.trim() || !hasAuthorChange,
+                style: {
+                  width: "100%",
+                  padding: "6px 0",
+                  border: "none",
+                  borderRadius: 3,
+                  background: nameInput.trim() && hasAuthorChange ? "rgba(99,102,241,.7)" : "rgba(255,255,255,.07)",
+                  color: nameInput.trim() && hasAuthorChange ? "#fff" : "rgba(255,255,255,.25)",
+                  fontSize: 11,
+                  fontWeight: 600,
+                  cursor: nameInput.trim() && hasAuthorChange ? "pointer" : "not-allowed",
+                  fontFamily: FONT_FAMILY,
+                  transition: "all .12s",
+                  marginBottom: 12
+                },
+                children: "\uC800\uC7A5"
+              }
+            )
+          ] }),
+          /* @__PURE__ */ jsx5("div", { style: { height: 1, background: "rgba(255,255,255,.07)" } }),
+          /* @__PURE__ */ jsxs5("div", { style: { padding: "12px 14px" }, children: [
+            /* @__PURE__ */ jsx5(SectionTitle, { children: "\uD328\uB110 \uD45C\uC2DC \uBC29\uC2DD" }),
+            /* @__PURE__ */ jsx5("div", { style: { display: "flex", gap: 5 }, children: [
+              { mode: "overlay", label: "\uC624\uBC84\uB808\uC774", desc: "\uC704\uC5D0 \uD45C\uC2DC" },
+              { mode: "push", label: "\uBC00\uAE30", desc: "\uCF58\uD150\uCE20 \uC774\uB3D9" }
+            ].map(({ mode, label, desc }) => {
+              const active = settings.panelMode === mode;
+              return /* @__PURE__ */ jsxs5(
+                "button",
+                {
+                  onClick: () => onChangeSetting("panelMode", mode),
+                  style: {
+                    flex: 1,
+                    padding: "6px 0",
+                    border: `1px solid ${active ? "rgba(59,130,246,.5)" : "rgba(255,255,255,.12)"}`,
+                    borderRadius: 3,
+                    background: active ? "rgba(59,130,246,.18)" : "transparent",
+                    color: active ? "#60a5fa" : "rgba(255,255,255,.45)",
+                    fontSize: 11,
+                    fontWeight: active ? 600 : 400,
+                    cursor: "pointer",
+                    fontFamily: FONT_FAMILY,
+                    transition: "all .12s",
+                    textAlign: "center"
+                  },
+                  onMouseEnter: (e) => {
+                    if (!active) {
+                      e.currentTarget.style.borderColor = "rgba(255,255,255,.25)";
+                      e.currentTarget.style.color = "rgba(255,255,255,.75)";
+                    }
+                  },
+                  onMouseLeave: (e) => {
+                    if (!active) {
+                      e.currentTarget.style.borderColor = "rgba(255,255,255,.12)";
+                      e.currentTarget.style.color = "rgba(255,255,255,.45)";
+                    }
+                  },
+                  children: [
+                    /* @__PURE__ */ jsx5("div", { children: label }),
+                    /* @__PURE__ */ jsx5("div", { style: { fontSize: 9, color: active ? "rgba(96,165,250,.6)" : "rgba(255,255,255,.2)", marginTop: 2 }, children: desc })
+                  ]
+                },
+                mode
+              );
+            }) })
+          ] }),
+          /* @__PURE__ */ jsx5("div", { style: { height: 1, background: "rgba(255,255,255,.07)" } }),
+          /* @__PURE__ */ jsxs5("div", { style: { padding: "12px 14px" }, children: [
+            /* @__PURE__ */ jsx5(SectionTitle, { children: "\uD654\uBA74 \uB9C8\uCEE4 \uAE30\uC900" }),
+            /* @__PURE__ */ jsx5("div", { style: { display: "flex", gap: 5 }, children: [
+              { align: "left", label: "\uC67C\uCABD" },
+              { align: "center", label: "\uC911\uC559" },
+              { align: "right", label: "\uC624\uB978\uCABD" }
+            ].map(({ align, label }) => {
+              const active = settings.markerAlign === align;
+              return /* @__PURE__ */ jsx5(
+                "button",
+                {
+                  onClick: () => onChangeSetting("markerAlign", align),
+                  style: {
+                    flex: 1,
+                    padding: "6px 0",
+                    border: `1px solid ${active ? "rgba(59,130,246,.5)" : "rgba(255,255,255,.12)"}`,
+                    borderRadius: 3,
+                    background: active ? "rgba(59,130,246,.18)" : "transparent",
+                    color: active ? "#60a5fa" : "rgba(255,255,255,.45)",
+                    fontSize: 11,
+                    fontWeight: active ? 600 : 400,
+                    cursor: "pointer",
+                    fontFamily: FONT_FAMILY,
+                    transition: "all .12s",
+                    textAlign: "center"
+                  },
+                  onMouseEnter: (e) => {
+                    if (!active) {
+                      e.currentTarget.style.borderColor = "rgba(255,255,255,.25)";
+                      e.currentTarget.style.color = "rgba(255,255,255,.75)";
+                    }
+                  },
+                  onMouseLeave: (e) => {
+                    if (!active) {
+                      e.currentTarget.style.borderColor = "rgba(255,255,255,.12)";
+                      e.currentTarget.style.color = "rgba(255,255,255,.45)";
+                    }
+                  },
+                  children: label
+                },
+                align
+              );
+            }) })
+          ] }),
+          (onExportJson || onExportMarkdown) && /* @__PURE__ */ jsxs5(Fragment4, { children: [
+            /* @__PURE__ */ jsx5("div", { style: { height: 1, background: "rgba(255,255,255,.07)", margin: "2px 0 10px" } }),
+            /* @__PURE__ */ jsxs5("div", { style: { padding: "0 14px 10px", display: "flex", flexDirection: "column", gap: 6 }, children: [
+              onExportJson && /* @__PURE__ */ jsx5(
+                ExportBtn,
+                {
+                  label: "\uC2A4\uD399 \uB0B4\uBCF4\uB0B4\uAE30 (JSON)",
+                  icon: /* @__PURE__ */ jsx5(IDownload, {}),
+                  onClick: () => {
+                    onExportJson();
+                    setOpen(false);
+                  }
+                }
+              ),
+              onExportMarkdown && /* @__PURE__ */ jsx5(
+                ExportBtn,
+                {
+                  label: "\uC2A4\uD399 \uB0B4\uBCF4\uB0B4\uAE30 (MD \xB7 ZIP)",
+                  icon: /* @__PURE__ */ jsx5(IZip, {}),
+                  onClick: () => {
+                    onExportMarkdown();
+                    setOpen(false);
+                  }
+                }
+              )
+            ] })
+          ] })
+        ]
+      }
+    )
+  ] });
+}
+
+// src/version.ts
+var SDK_VERSION = true ? "0.8.12" : "0.8.12";
+
+// src/AnnotationToolbar.tsx
+import { Fragment as Fragment5, jsx as jsx6, jsxs as jsxs6 } from "react/jsx-runtime";
+function TBtn({ icon, label, active, activeColor = "#3B82F6", badge, disabled, onClick, title, dataGuide, shortcut }) {
+  return /* @__PURE__ */ jsxs6(
     "button",
     {
       onClick,
@@ -2093,16 +3338,28 @@ function TBtn({ icon, label, active, activeColor = "#3B82F6", badge, disabled, o
         }
       },
       children: [
-        icon,
-        label && /* @__PURE__ */ jsx5("span", { style: { fontSize: 11, fontWeight: 500, whiteSpace: "nowrap" }, children: label }),
-        badge != null && badge > 0 && /* @__PURE__ */ jsx5(
+        icon && icon,
+        label && /* @__PURE__ */ jsx6("span", { style: { fontSize: 11, fontWeight: 500, whiteSpace: "nowrap" }, children: label }),
+        shortcut && /* @__PURE__ */ jsx6("span", { style: {
+          fontSize: 9,
+          padding: "1px 4px",
+          borderRadius: 2,
+          lineHeight: 1.4,
+          border: "1px solid rgba(255,255,255,.2)",
+          color: "rgba(255,255,255,.35)",
+          background: "rgba(255,255,255,.06)",
+          fontFamily: "monospace",
+          flexShrink: 0,
+          marginLeft: 4
+        }, children: shortcut }),
+        badge != null && badge > 0 && /* @__PURE__ */ jsx6(
           "span",
           {
             style: {
               minWidth: 14,
               height: 14,
               borderRadius: 3,
-              background: active ? "rgba(255,255,255,.25)" : "rgba(255,255,255,.18)",
+              background: "#3b82f6",
               color: "#fff",
               fontSize: 9,
               fontWeight: 700,
@@ -2146,7 +3403,7 @@ function UpdateModal({
   };
   const gitCmd = `pnpm add git+https://github.com/knowsol/specBridge.git#v${latestVersion}`;
   const npmCmd = `npm install git+https://github.com/knowsol/specBridge.git#v${latestVersion}`;
-  return /* @__PURE__ */ jsx5(
+  return /* @__PURE__ */ jsx6(
     "div",
     {
       onClick: onClose,
@@ -2160,7 +3417,7 @@ function UpdateModal({
         zIndex: 2e4,
         fontFamily: FONT_FAMILY
       },
-      children: /* @__PURE__ */ jsxs4(
+      children: /* @__PURE__ */ jsxs6(
         "div",
         {
           onClick: (e) => e.stopPropagation(),
@@ -2173,23 +3430,23 @@ function UpdateModal({
             boxShadow: "0 24px 64px rgba(0,0,0,.6)"
           },
           children: [
-            /* @__PURE__ */ jsxs4("div", { style: { display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 18 }, children: [
-              /* @__PURE__ */ jsxs4("div", { children: [
-                /* @__PURE__ */ jsx5("div", { style: { fontSize: 15, fontWeight: 700, color: "#fbbf24", marginBottom: 4 }, children: "\u{1F680} \uC0C8 \uBC84\uC804 \uC5C5\uB370\uC774\uD2B8 \uC548\uB0B4" }),
-                /* @__PURE__ */ jsxs4("div", { style: { fontSize: 12, color: "rgba(255,255,255,.5)" }, children: [
+            /* @__PURE__ */ jsxs6("div", { style: { display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 18 }, children: [
+              /* @__PURE__ */ jsxs6("div", { children: [
+                /* @__PURE__ */ jsx6("div", { style: { fontSize: 15, fontWeight: 700, color: "#fbbf24", marginBottom: 4 }, children: "\u{1F680} \uC0C8 \uBC84\uC804 \uC5C5\uB370\uC774\uD2B8 \uC548\uB0B4" }),
+                /* @__PURE__ */ jsxs6("div", { style: { fontSize: 12, color: "rgba(255,255,255,.5)" }, children: [
                   "\uD604\uC7AC\xA0",
-                  /* @__PURE__ */ jsxs4("span", { style: { fontFamily: "monospace", color: "rgba(255,255,255,.75)" }, children: [
+                  /* @__PURE__ */ jsxs6("span", { style: { fontFamily: "monospace", color: "rgba(255,255,255,.75)" }, children: [
                     "v",
                     currentVersion
                   ] }),
                   "\xA0\u2192\xA0\uCD5C\uC2E0\xA0",
-                  /* @__PURE__ */ jsxs4("span", { style: { fontFamily: "monospace", color: "#34d399", fontWeight: 700 }, children: [
+                  /* @__PURE__ */ jsxs6("span", { style: { fontFamily: "monospace", color: "#34d399", fontWeight: 700 }, children: [
                     "v",
                     latestVersion
                   ] })
                 ] })
               ] }),
-              /* @__PURE__ */ jsx5(
+              /* @__PURE__ */ jsx6(
                 "button",
                 {
                   onClick: onClose,
@@ -2198,11 +3455,11 @@ function UpdateModal({
                 }
               )
             ] }),
-            /* @__PURE__ */ jsx5("div", { style: { fontSize: 11, color: "rgba(255,255,255,.4)", marginBottom: 8 }, children: "\uC544\uB798 \uBA85\uB839\uC5B4\uB85C \uC5C5\uADF8\uB808\uC774\uB4DC \uD6C4 \uC571\uC744 \uC7AC\uBC30\uD3EC\uD558\uC138\uC694:" }),
-            [{ label: "pnpm", cmd: gitCmd }, { label: "npm", cmd: npmCmd }].map(({ label, cmd }) => /* @__PURE__ */ jsxs4("div", { style: { background: "#1e293b", borderRadius: 4, padding: "10px 12px", marginBottom: 8, display: "flex", alignItems: "center", gap: 8, border: "1px solid rgba(255,255,255,.06)" }, children: [
-              /* @__PURE__ */ jsx5("span", { style: { fontSize: 9, fontWeight: 700, color: "#64748b", width: 30, flexShrink: 0, textTransform: "uppercase" }, children: label }),
-              /* @__PURE__ */ jsx5("code", { style: { flex: 1, fontSize: 11, color: "#a5f3fc", fontFamily: "monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, children: cmd }),
-              /* @__PURE__ */ jsx5(
+            /* @__PURE__ */ jsx6("div", { style: { fontSize: 11, color: "rgba(255,255,255,.4)", marginBottom: 8 }, children: "\uC544\uB798 \uBA85\uB839\uC5B4\uB85C \uC5C5\uADF8\uB808\uC774\uB4DC \uD6C4 \uC571\uC744 \uC7AC\uBC30\uD3EC\uD558\uC138\uC694:" }),
+            [{ label: "pnpm", cmd: gitCmd }, { label: "npm", cmd: npmCmd }].map(({ label, cmd }) => /* @__PURE__ */ jsxs6("div", { style: { background: "#1e293b", borderRadius: 4, padding: "10px 12px", marginBottom: 8, display: "flex", alignItems: "center", gap: 8, border: "1px solid rgba(255,255,255,.06)" }, children: [
+              /* @__PURE__ */ jsx6("span", { style: { fontSize: 9, fontWeight: 700, color: "#64748b", width: 30, flexShrink: 0, textTransform: "uppercase" }, children: label }),
+              /* @__PURE__ */ jsx6("code", { style: { flex: 1, fontSize: 11, color: "#a5f3fc", fontFamily: "monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, children: cmd }),
+              /* @__PURE__ */ jsx6(
                 "button",
                 {
                   onClick: () => copyCmd(cmd),
@@ -2211,7 +3468,7 @@ function UpdateModal({
                 }
               )
             ] }, label)),
-            /* @__PURE__ */ jsx5("div", { style: { fontSize: 10, color: "rgba(255,255,255,.25)", marginTop: 12 }, children: "\uC5C5\uADF8\uB808\uC774\uB4DC \uD6C4 SDK\uB97C \uC7AC\uBE4C\uB4DC\uD558\uACE0 \uC571\uC744 \uC7AC\uBC30\uD3EC\uD574\uC57C \uC801\uC6A9\uB429\uB2C8\uB2E4." })
+            /* @__PURE__ */ jsx6("div", { style: { fontSize: 10, color: "rgba(255,255,255,.25)", marginTop: 12 }, children: "\uC5C5\uADF8\uB808\uC774\uB4DC \uD6C4 SDK\uB97C \uC7AC\uBE4C\uB4DC\uD558\uACE0 \uC571\uC744 \uC7AC\uBC30\uD3EC\uD574\uC57C \uC801\uC6A9\uB429\uB2C8\uB2E4." })
           ]
         }
       )
@@ -2219,28 +3476,28 @@ function UpdateModal({
   );
 }
 var STATUS_CYCLE = ["active", "done", "pending"];
-var IEdit = () => /* @__PURE__ */ jsxs4("svg", { width: "10", height: "10", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
-  /* @__PURE__ */ jsx5("path", { d: "M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" }),
-  /* @__PURE__ */ jsx5("path", { d: "M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" })
+var IEdit = () => /* @__PURE__ */ jsxs6("svg", { width: "10", height: "10", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
+  /* @__PURE__ */ jsx6("path", { d: "M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" }),
+  /* @__PURE__ */ jsx6("path", { d: "M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" })
 ] });
-var IBookmark = ({ size = 13 }) => /* @__PURE__ */ jsx5("svg", { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: /* @__PURE__ */ jsx5("path", { d: "M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" }) });
-var IDesktop = ({ size = 12 }) => /* @__PURE__ */ jsxs4("svg", { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
-  /* @__PURE__ */ jsx5("rect", { x: "2", y: "3", width: "20", height: "14", rx: "2" }),
-  /* @__PURE__ */ jsx5("line", { x1: "8", y1: "21", x2: "16", y2: "21" }),
-  /* @__PURE__ */ jsx5("line", { x1: "12", y1: "17", x2: "12", y2: "21" })
+var IBookmark = ({ size = 13 }) => /* @__PURE__ */ jsx6("svg", { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: /* @__PURE__ */ jsx6("path", { d: "M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" }) });
+var IDesktop = ({ size = 12 }) => /* @__PURE__ */ jsxs6("svg", { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
+  /* @__PURE__ */ jsx6("rect", { x: "2", y: "3", width: "20", height: "14", rx: "2" }),
+  /* @__PURE__ */ jsx6("line", { x1: "8", y1: "21", x2: "16", y2: "21" }),
+  /* @__PURE__ */ jsx6("line", { x1: "12", y1: "17", x2: "12", y2: "21" })
 ] });
-var ITablet = ({ size = 12 }) => /* @__PURE__ */ jsxs4("svg", { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
-  /* @__PURE__ */ jsx5("rect", { x: "4", y: "2", width: "16", height: "20", rx: "2" }),
-  /* @__PURE__ */ jsx5("line", { x1: "12", y1: "18", x2: "12.01", y2: "18" })
+var ITablet = ({ size = 12 }) => /* @__PURE__ */ jsxs6("svg", { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
+  /* @__PURE__ */ jsx6("rect", { x: "4", y: "2", width: "16", height: "20", rx: "2" }),
+  /* @__PURE__ */ jsx6("line", { x1: "12", y1: "18", x2: "12.01", y2: "18" })
 ] });
-var IMobile = ({ size = 12 }) => /* @__PURE__ */ jsxs4("svg", { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
-  /* @__PURE__ */ jsx5("rect", { x: "5", y: "2", width: "14", height: "20", rx: "2" }),
-  /* @__PURE__ */ jsx5("line", { x1: "12", y1: "18", x2: "12.01", y2: "18" })
+var IMobile = ({ size = 12 }) => /* @__PURE__ */ jsxs6("svg", { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
+  /* @__PURE__ */ jsx6("rect", { x: "5", y: "2", width: "14", height: "20", rx: "2" }),
+  /* @__PURE__ */ jsx6("line", { x1: "12", y1: "18", x2: "12.01", y2: "18" })
 ] });
 var VIEWPORT_ICON = {
-  desktop: /* @__PURE__ */ jsx5(IDesktop, {}),
-  tablet: /* @__PURE__ */ jsx5(ITablet, {}),
-  mobile: /* @__PURE__ */ jsx5(IMobile, {})
+  desktop: /* @__PURE__ */ jsx6(IDesktop, {}),
+  tablet: /* @__PURE__ */ jsx6(ITablet, {}),
+  mobile: /* @__PURE__ */ jsx6(IMobile, {})
 };
 function SessionPickerItem({
   session,
@@ -2281,7 +3538,7 @@ function SessionPickerItem({
   const sc = SESSION_STATUS_CONFIG[status];
   const vp = session.viewport ? SESSION_VIEWPORT_CONFIG[session.viewport] : null;
   const pct = progress && progress.total > 0 ? Math.round(progress.resolved / progress.total * 100) : 0;
-  return /* @__PURE__ */ jsxs4(
+  return /* @__PURE__ */ jsxs6(
     "div",
     {
       onClick,
@@ -2299,11 +3556,11 @@ function SessionPickerItem({
         transition: "background .12s"
       },
       children: [
-        /* @__PURE__ */ jsxs4("div", { style: { display: "flex", alignItems: "center", gap: 6 }, children: [
-          /* @__PURE__ */ jsx5("span", { style: { fontSize: 10, color: isActive ? "rgba(255,255,255,.5)" : "rgba(255,255,255,.18)", flexShrink: 0, width: 12, textAlign: "center" }, children: isActive ? "\u2713" : "" }),
-          vp && /* @__PURE__ */ jsx5("span", { style: { color: "rgba(255,255,255,.45)", flexShrink: 0, display: "flex", alignItems: "center" }, title: vp.label, children: VIEWPORT_ICON[session.viewport ?? ""] ?? null }),
-          /* @__PURE__ */ jsx5("span", { style: { flex: 1, fontSize: 12, color: isActive ? "rgba(255,255,255,.88)" : "rgba(255,255,255,.55)", fontWeight: isActive ? 600 : 400, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontFamily: FONT_FAMILY }, children: session.name }),
-          /* @__PURE__ */ jsx5(
+        /* @__PURE__ */ jsxs6("div", { style: { display: "flex", alignItems: "center", gap: 6 }, children: [
+          /* @__PURE__ */ jsx6("span", { style: { fontSize: 10, color: isActive ? "rgba(255,255,255,.5)" : "rgba(255,255,255,.18)", flexShrink: 0, width: 12, textAlign: "center" }, children: isActive ? "\u2713" : "" }),
+          vp && /* @__PURE__ */ jsx6("span", { style: { color: "rgba(255,255,255,.45)", flexShrink: 0, display: "flex", alignItems: "center" }, title: vp.label, children: VIEWPORT_ICON[session.viewport ?? ""] ?? null }),
+          /* @__PURE__ */ jsx6("span", { style: { flex: 1, fontSize: 12, color: isActive ? "rgba(255,255,255,.88)" : "rgba(255,255,255,.55)", fontWeight: isActive ? 600 : 400, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontFamily: FONT_FAMILY }, children: session.name }),
+          /* @__PURE__ */ jsx6(
             "button",
             {
               onClick: (e) => {
@@ -2329,7 +3586,7 @@ function SessionPickerItem({
               children: sc.label
             }
           ),
-          hov && !confirming && !editing && onEdit && /* @__PURE__ */ jsx5(
+          hov && !confirming && !editing && onEdit && /* @__PURE__ */ jsx6(
             "button",
             {
               onClick: startEdit,
@@ -2345,10 +3602,10 @@ function SessionPickerItem({
                 e.currentTarget.style.borderColor = "rgba(255,255,255,.12)";
                 e.currentTarget.style.color = "rgba(255,255,255,.3)";
               },
-              children: /* @__PURE__ */ jsx5(IEdit, {})
+              children: /* @__PURE__ */ jsx6(IEdit, {})
             }
           ),
-          hov && !confirming && !editing && /* @__PURE__ */ jsx5(
+          hov && !confirming && !editing && /* @__PURE__ */ jsx6(
             "button",
             {
               onClick: (e) => {
@@ -2370,9 +3627,9 @@ function SessionPickerItem({
               children: "\uC0AD\uC81C"
             }
           ),
-          confirming && /* @__PURE__ */ jsxs4("div", { onClick: (e) => e.stopPropagation(), style: { display: "flex", gap: 4, alignItems: "center", flexShrink: 0 }, children: [
-            /* @__PURE__ */ jsx5("span", { style: { fontSize: 9, color: "#f87171", fontFamily: FONT_FAMILY, whiteSpace: "nowrap" }, children: "\uC0AD\uC81C\uD560\uAE4C\uC694?" }),
-            /* @__PURE__ */ jsx5(
+          confirming && /* @__PURE__ */ jsxs6("div", { onClick: (e) => e.stopPropagation(), style: { display: "flex", gap: 4, alignItems: "center", flexShrink: 0 }, children: [
+            /* @__PURE__ */ jsx6("span", { style: { fontSize: 9, color: "#f87171", fontFamily: FONT_FAMILY, whiteSpace: "nowrap" }, children: "\uC0AD\uC81C\uD560\uAE4C\uC694?" }),
+            /* @__PURE__ */ jsx6(
               "button",
               {
                 onClick: (e) => {
@@ -2383,7 +3640,7 @@ function SessionPickerItem({
                 children: "\uCDE8\uC18C"
               }
             ),
-            /* @__PURE__ */ jsx5(
+            /* @__PURE__ */ jsx6(
               "button",
               {
                 onClick: onDelete,
@@ -2393,16 +3650,16 @@ function SessionPickerItem({
             )
           ] })
         ] }),
-        progress && progress.total > 0 && /* @__PURE__ */ jsx5("div", { style: { marginTop: 6, paddingLeft: 18 }, children: /* @__PURE__ */ jsxs4("div", { style: { display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }, children: [
-          /* @__PURE__ */ jsx5("div", { style: { flex: 1, height: 3, background: "rgba(255,255,255,.18)", borderRadius: 2, overflow: "hidden" }, children: /* @__PURE__ */ jsx5("div", { style: { width: `${pct}%`, height: "100%", background: pct === 100 ? "#16a34a" : COLORS.pri, borderRadius: 2, transition: "width .3s" } }) }),
-          /* @__PURE__ */ jsxs4("span", { style: { fontSize: 9, color: "rgba(255,255,255,.3)", flexShrink: 0, fontFamily: FONT_FAMILY }, children: [
+        progress && progress.total > 0 && /* @__PURE__ */ jsx6("div", { style: { marginTop: 6, paddingLeft: 18 }, children: /* @__PURE__ */ jsxs6("div", { style: { display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }, children: [
+          /* @__PURE__ */ jsx6("div", { style: { flex: 1, height: 3, background: "rgba(255,255,255,.18)", borderRadius: 2, overflow: "hidden" }, children: /* @__PURE__ */ jsx6("div", { style: { width: `${pct}%`, height: "100%", background: pct === 100 ? "#16a34a" : COLORS.pri, borderRadius: 2, transition: "width .3s" } }) }),
+          /* @__PURE__ */ jsxs6("span", { style: { fontSize: 9, color: "rgba(255,255,255,.3)", flexShrink: 0, fontFamily: FONT_FAMILY }, children: [
             progress.resolved,
             "/",
             progress.total
           ] })
         ] }) }),
-        editing && /* @__PURE__ */ jsxs4("div", { onClick: (e) => e.stopPropagation(), style: { marginTop: 8, paddingLeft: 18 }, children: [
-          /* @__PURE__ */ jsx5(
+        editing && /* @__PURE__ */ jsxs6("div", { onClick: (e) => e.stopPropagation(), style: { marginTop: 8, paddingLeft: 18 }, children: [
+          /* @__PURE__ */ jsx6(
             "input",
             {
               autoFocus: true,
@@ -2430,9 +3687,9 @@ function SessionPickerItem({
               }
             }
           ),
-          /* @__PURE__ */ jsx5("div", { style: { display: "flex", gap: 4, marginBottom: 6 }, children: Object.entries(SESSION_VIEWPORT_CONFIG).map(([vp2, cfg]) => {
+          /* @__PURE__ */ jsx6("div", { style: { display: "flex", gap: 4, marginBottom: 6 }, children: Object.entries(SESSION_VIEWPORT_CONFIG).map(([vp2, cfg]) => {
             const isVpActive = editViewport === vp2;
-            return /* @__PURE__ */ jsxs4(
+            return /* @__PURE__ */ jsxs6(
               "button",
               {
                 onClick: (e) => {
@@ -2456,15 +3713,15 @@ function SessionPickerItem({
                   transition: "all .12s"
                 },
                 children: [
-                  /* @__PURE__ */ jsx5("span", { style: { display: "flex", alignItems: "center" }, children: VIEWPORT_ICON[vp2] }),
-                  /* @__PURE__ */ jsx5("span", { children: cfg.label })
+                  /* @__PURE__ */ jsx6("span", { style: { display: "flex", alignItems: "center" }, children: VIEWPORT_ICON[vp2] }),
+                  /* @__PURE__ */ jsx6("span", { children: cfg.label })
                 ]
               },
               vp2
             );
           }) }),
-          /* @__PURE__ */ jsxs4("div", { style: { display: "flex", gap: 5 }, children: [
-            /* @__PURE__ */ jsx5(
+          /* @__PURE__ */ jsxs6("div", { style: { display: "flex", gap: 5 }, children: [
+            /* @__PURE__ */ jsx6(
               "button",
               {
                 onClick: cancelEdit,
@@ -2472,7 +3729,7 @@ function SessionPickerItem({
                 children: "\uCDE8\uC18C"
               }
             ),
-            /* @__PURE__ */ jsx5(
+            /* @__PURE__ */ jsx6(
               "button",
               {
                 onClick: saveEdit,
@@ -2494,14 +3751,15 @@ function SessionPicker({
   onCreateSession,
   onDeleteSession,
   onSetSessionStatus,
-  onUpdateSession
+  onUpdateSession,
+  placement = "top"
 }) {
   const [open, setOpen] = useState4(false);
   const [creating, setCreating] = useState4(false);
   const [newName, setNewName] = useState4("");
   const [newViewport, setNewViewport] = useState4(null);
-  const ref = useRef2(null);
-  useEffect3(() => {
+  const ref = useRef3(null);
+  useEffect4(() => {
     if (!open) return;
     const handler = (e) => {
       if (ref.current && !ref.current.contains(e.target)) {
@@ -2526,8 +3784,8 @@ function SessionPicker({
     setCreating(false);
     setOpen(false);
   };
-  return /* @__PURE__ */ jsxs4("div", { ref, style: { position: "relative", flexShrink: 0 }, children: [
-    /* @__PURE__ */ jsxs4(
+  return /* @__PURE__ */ jsxs6("div", { ref, style: { position: "relative", flexShrink: 0 }, children: [
+    /* @__PURE__ */ jsxs6(
       "button",
       {
         onClick: () => setOpen((v) => !v),
@@ -2562,18 +3820,18 @@ function SessionPicker({
           e.currentTarget.style.borderColor = "rgba(255,255,255,.07)";
         },
         children: [
-          /* @__PURE__ */ jsx5("span", { style: { color: "rgba(255,255,255,.6)", display: "flex", alignItems: "center" }, children: triggerVp ? VIEWPORT_ICON[currentSession?.viewport ?? ""] : /* @__PURE__ */ jsx5(IBookmark, {}) }),
-          /* @__PURE__ */ jsx5("span", { style: { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 110 }, children: triggerLabel }),
-          /* @__PURE__ */ jsx5("span", { style: { fontSize: 8, opacity: 0.6, marginLeft: 1 }, children: "\u25BE" })
+          /* @__PURE__ */ jsx6("span", { style: { color: "rgba(255,255,255,.6)", display: "flex", alignItems: "center" }, children: triggerVp ? VIEWPORT_ICON[currentSession?.viewport ?? ""] : /* @__PURE__ */ jsx6(IBookmark, {}) }),
+          /* @__PURE__ */ jsx6("span", { style: { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 110 }, children: triggerLabel }),
+          /* @__PURE__ */ jsx6("span", { style: { fontSize: 8, opacity: 0.6, marginLeft: 1 }, children: "\u25BE" })
         ]
       }
     ),
-    open && /* @__PURE__ */ jsxs4(
+    open && /* @__PURE__ */ jsxs6(
       "div",
       {
         style: {
           position: "absolute",
-          bottom: "calc(100% + 8px)",
+          ...placement === "bottom" ? { top: "calc(100% + 4px)" } : { bottom: "calc(100% + 8px)" },
           left: 0,
           minWidth: 260,
           background: "rgba(10,10,10,.97)",
@@ -2587,9 +3845,9 @@ function SessionPicker({
           fontFamily: FONT_FAMILY
         },
         children: [
-          /* @__PURE__ */ jsx5("div", { style: { padding: "8px 12px 6px", fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,.3)", letterSpacing: ".5px", textTransform: "uppercase" }, children: "\uAC80\uD1A0 \uD68C\uCC28" }),
-          /* @__PURE__ */ jsx5("div", { style: { height: 1, background: "rgba(255,255,255,.07)" } }),
-          /* @__PURE__ */ jsxs4(
+          /* @__PURE__ */ jsx6("div", { style: { padding: "8px 12px 6px", fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,.3)", letterSpacing: ".5px", textTransform: "uppercase" }, children: "\uAC80\uD1A0 \uD68C\uCC28" }),
+          /* @__PURE__ */ jsx6("div", { style: { height: 1, background: "rgba(255,255,255,.07)" } }),
+          /* @__PURE__ */ jsxs6(
             "div",
             {
               onClick: () => {
@@ -2612,13 +3870,13 @@ function SessionPicker({
                 if (currentSessionId !== null) e.currentTarget.style.background = "transparent";
               },
               children: [
-                /* @__PURE__ */ jsx5("span", { style: { fontSize: 10, color: currentSessionId === null ? "rgba(255,255,255,.5)" : "transparent", width: 12, textAlign: "center", flexShrink: 0 }, children: "\u2713" }),
-                /* @__PURE__ */ jsx5("span", { style: { fontSize: 12, color: currentSessionId === null ? "rgba(255,255,255,.88)" : "rgba(255,255,255,.45)", fontWeight: currentSessionId === null ? 600 : 400, fontFamily: FONT_FAMILY }, children: "\uC804\uCCB4 (\uBAA8\uB4E0 \uD68C\uCC28)" })
+                /* @__PURE__ */ jsx6("span", { style: { fontSize: 10, color: currentSessionId === null ? "rgba(255,255,255,.5)" : "transparent", width: 12, textAlign: "center", flexShrink: 0 }, children: "\u2713" }),
+                /* @__PURE__ */ jsx6("span", { style: { fontSize: 12, color: currentSessionId === null ? "rgba(255,255,255,.88)" : "rgba(255,255,255,.45)", fontWeight: currentSessionId === null ? 600 : 400, fontFamily: FONT_FAMILY }, children: "\uC804\uCCB4 (\uBAA8\uB4E0 \uD68C\uCC28)" })
               ]
             }
           ),
-          sessions.length > 0 && /* @__PURE__ */ jsx5("div", { style: { height: 1, background: "rgba(255,255,255,.06)", margin: "2px 0" } }),
-          sessions.map((s) => /* @__PURE__ */ jsx5(
+          sessions.length > 0 && /* @__PURE__ */ jsx6("div", { style: { height: 1, background: "rgba(255,255,255,.06)", margin: "2px 0" } }),
+          sessions.map((s) => /* @__PURE__ */ jsx6(
             SessionPickerItem,
             {
               session: s,
@@ -2637,9 +3895,9 @@ function SessionPicker({
             },
             s.id
           )),
-          /* @__PURE__ */ jsx5("div", { style: { height: 1, background: "rgba(255,255,255,.07)", margin: "2px 0" } }),
-          creating ? /* @__PURE__ */ jsxs4("div", { style: { padding: "8px 10px" }, children: [
-            /* @__PURE__ */ jsx5(
+          /* @__PURE__ */ jsx6("div", { style: { height: 1, background: "rgba(255,255,255,.07)", margin: "2px 0" } }),
+          creating ? /* @__PURE__ */ jsxs6("div", { style: { padding: "8px 10px" }, children: [
+            /* @__PURE__ */ jsx6(
               "input",
               {
                 autoFocus: true,
@@ -2672,9 +3930,9 @@ function SessionPicker({
                 }
               }
             ),
-            /* @__PURE__ */ jsx5("div", { style: { display: "flex", gap: 4, marginBottom: 8 }, children: Object.entries(SESSION_VIEWPORT_CONFIG).map(([vp, cfg]) => {
+            /* @__PURE__ */ jsx6("div", { style: { display: "flex", gap: 4, marginBottom: 8 }, children: Object.entries(SESSION_VIEWPORT_CONFIG).map(([vp, cfg]) => {
               const isVpActive = newViewport === vp;
-              return /* @__PURE__ */ jsxs4(
+              return /* @__PURE__ */ jsxs6(
                 "button",
                 {
                   onClick: () => setNewViewport(isVpActive ? null : vp),
@@ -2695,15 +3953,15 @@ function SessionPicker({
                     transition: "all .12s"
                   },
                   children: [
-                    /* @__PURE__ */ jsx5("span", { style: { display: "flex", alignItems: "center" }, children: VIEWPORT_ICON[vp] }),
-                    /* @__PURE__ */ jsx5("span", { children: cfg.label })
+                    /* @__PURE__ */ jsx6("span", { style: { display: "flex", alignItems: "center" }, children: VIEWPORT_ICON[vp] }),
+                    /* @__PURE__ */ jsx6("span", { children: cfg.label })
                   ]
                 },
                 vp
               );
             }) }),
-            /* @__PURE__ */ jsxs4("div", { style: { display: "flex", gap: 6 }, children: [
-              /* @__PURE__ */ jsx5(
+            /* @__PURE__ */ jsxs6("div", { style: { display: "flex", gap: 6 }, children: [
+              /* @__PURE__ */ jsx6(
                 "button",
                 {
                   onClick: () => {
@@ -2715,7 +3973,7 @@ function SessionPicker({
                   children: "\uCDE8\uC18C"
                 }
               ),
-              /* @__PURE__ */ jsx5(
+              /* @__PURE__ */ jsx6(
                 "button",
                 {
                   onClick: handleCreate,
@@ -2724,7 +3982,7 @@ function SessionPicker({
                 }
               )
             ] })
-          ] }) : /* @__PURE__ */ jsxs4(
+          ] }) : /* @__PURE__ */ jsxs6(
             "button",
             {
               onClick: () => setCreating(true),
@@ -2752,8 +4010,8 @@ function SessionPicker({
                 e.currentTarget.style.color = "rgba(255,255,255,.38)";
               },
               children: [
-                /* @__PURE__ */ jsx5("span", { style: { fontSize: 13 }, children: "\uFF0B" }),
-                /* @__PURE__ */ jsx5("span", { children: "\uC0C8 \uAC80\uD1A0 \uD68C\uCC28" })
+                /* @__PURE__ */ jsx6("span", { style: { fontSize: 13 }, children: "\uFF0B" }),
+                /* @__PURE__ */ jsx6("span", { children: "\uC0C8 \uAC80\uD1A0 \uD68C\uCC28" })
               ]
             }
           )
@@ -2763,63 +4021,87 @@ function SessionPicker({
   ] });
 }
 function SBLogo({ size = 28 }) {
-  return /* @__PURE__ */ jsxs4("svg", { width: size, height: size, viewBox: "-10 -10 170 172", fill: "none", style: { display: "block", flexShrink: 0 }, children: [
-    /* @__PURE__ */ jsx5("path", { opacity: "0.69", d: "M111.309 79.6218C116.002 96.9372 100.191 112.84 82.8489 108.247L21.3533 91.961C4.01096 87.3681 -1.85607 65.7239 10.7927 53.0015L55.6448 7.88791C68.2936 -4.83456 89.9715 0.906559 94.6651 18.2219L111.309 79.6218Z", fill: "#3078FF" }),
-    /* @__PURE__ */ jsx5("path", { opacity: "0.5", d: "M101.327 142.828C86.0562 152.245 66.3188 141.599 65.7993 123.666L64.723 86.5136C64.2035 68.5809 83.2915 56.8106 99.0814 65.3271L131.795 82.9713C147.585 91.4877 148.234 113.904 132.964 123.32L101.327 142.828Z", fill: "#4CD3FF" })
+  return /* @__PURE__ */ jsxs6("svg", { width: size, height: size, viewBox: "-10 -10 170 172", fill: "none", style: { display: "block", flexShrink: 0 }, children: [
+    /* @__PURE__ */ jsx6("path", { opacity: "0.69", d: "M111.309 79.6218C116.002 96.9372 100.191 112.84 82.8489 108.247L21.3533 91.961C4.01096 87.3681 -1.85607 65.7239 10.7927 53.0015L55.6448 7.88791C68.2936 -4.83456 89.9715 0.906559 94.6651 18.2219L111.309 79.6218Z", fill: "#3078FF" }),
+    /* @__PURE__ */ jsx6("path", { opacity: "0.5", d: "M101.327 142.828C86.0562 152.245 66.3188 141.599 65.7993 123.666L64.723 86.5136C64.2035 68.5809 83.2915 56.8106 99.0814 65.3271L131.795 82.9713C147.585 91.4877 148.234 113.904 132.964 123.32L101.327 142.828Z", fill: "#4CD3FF" })
   ] });
 }
 function AnnotationToolbar({
   enabled,
   onToggleEnabled,
   author,
-  onEditAuthor,
+  defaultLabelId = null,
+  onSaveAuthor,
   adding,
   onToggleAdd,
   pinCount,
   showList,
   onToggleList,
-  onExport,
+  onExportJson,
+  onExportMarkdown,
   labels,
-  filterLabelIds,
-  onToggleLabelFilter,
-  onClearLabelFilter,
   latestSdkVersion,
   onShowGuide,
   showLogoTip,
-  sessions,
-  currentSessionId,
-  sessionProgress,
-  onSelectSession,
-  onCreateSession,
-  onDeleteSession,
-  onSetSessionStatus,
-  onUpdateSession
+  onAddSpec,
+  addingSpec = false,
+  currentViewport,
+  onViewportChange,
+  settings,
+  onChangeSetting
 }) {
   const [showUpdateModal, setShowUpdateModal] = useState4(false);
   const hasUpdate = isNewer(latestSdkVersion ?? null, SDK_VERSION);
-  return /* @__PURE__ */ jsxs4("div", { style: { position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 1e4, fontFamily: FONT_FAMILY }, children: [
-    enabled && adding && /* @__PURE__ */ jsxs4("div", { style: { display: "flex", justifyContent: "center", marginBottom: 6, pointerEvents: "none" }, children: [
-      /* @__PURE__ */ jsx5(
+  return /* @__PURE__ */ jsxs6("div", { "data-sb-ui": "true", style: { position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 1e4, fontFamily: FONT_FAMILY }, children: [
+    enabled && adding && /* @__PURE__ */ jsxs6("div", { style: { display: "flex", justifyContent: "center", marginBottom: 6, pointerEvents: "none" }, children: [
+      /* @__PURE__ */ jsxs6(
         "div",
         {
           style: {
-            background: "rgba(180,83,9,.95)",
+            background: "rgba(30,58,138,.95)",
             backdropFilter: "blur(8px)",
             borderRadius: 20,
             padding: "6px 18px",
             fontSize: 12,
-            color: "#fef3c7",
+            color: "#bfdbfe",
             fontWeight: 500,
             boxShadow: "0 4px 16px rgba(0,0,0,.3)",
-            border: "1px solid rgba(251,191,36,.3)",
+            border: "1px solid rgba(59,130,246,.3)",
             animation: "specbridgeTbHint .15s ease"
           },
-          children: "\u{1F4CC} \uD654\uBA74 \uC544\uBB34 \uACF3\uC774\uB098 \uD074\uB9AD\uD558\uBA74 \uBC88\uD638\uAC00 \uBC30\uCE58\uB429\uB2C8\uB2E4 \u2014 ESC / N / \uCDE8\uC18C \uBC84\uD2BC\uC73C\uB85C \uC911\uB2E8"
+          children: [
+            /* @__PURE__ */ jsx6(IconChat, { size: 11, color: "rgba(147,197,253,.8)", style: { marginRight: 4 } }),
+            " \uD654\uBA74 \uC544\uBB34 \uACF3\uC774\uB098 \uD074\uB9AD\uD558\uBA74 \uCF54\uBA58\uD2B8\uAC00 \uBC30\uCE58\uB429\uB2C8\uB2E4 \u2014 ESC \uB610\uB294 \uCDE8\uC18C\uB85C \uC911\uB2E8"
+          ]
         }
       ),
-      /* @__PURE__ */ jsx5("style", { children: `@keyframes specbridgeTbHint{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}` })
+      /* @__PURE__ */ jsx6("style", { children: `@keyframes specbridgeTbHint{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}` })
     ] }),
-    /* @__PURE__ */ jsxs4(
+    enabled && addingSpec && /* @__PURE__ */ jsx6("div", { style: { display: "flex", justifyContent: "center", marginBottom: 6, pointerEvents: "none" }, children: /* @__PURE__ */ jsxs6(
+      "div",
+      {
+        style: {
+          background: "rgba(127,29,29,.95)",
+          backdropFilter: "blur(8px)",
+          borderRadius: 20,
+          padding: "6px 18px",
+          fontSize: 12,
+          color: "#fecaca",
+          fontWeight: 500,
+          boxShadow: "0 4px 16px rgba(0,0,0,.3)",
+          border: "1px solid rgba(239,68,68,.3)",
+          animation: "specbridgeTbHint .15s ease"
+        },
+        children: [
+          /* @__PURE__ */ jsxs6("svg", { width: 11, height: 11, viewBox: "0 0 24 24", fill: "none", stroke: "rgba(252,165,165,.8)", strokeWidth: 2.5, strokeLinecap: "round", strokeLinejoin: "round", style: { marginRight: 4, display: "inline-block", verticalAlign: "middle" }, children: [
+            /* @__PURE__ */ jsx6("path", { d: "M9 11l3 3L22 4" }),
+            /* @__PURE__ */ jsx6("path", { d: "M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" })
+          ] }),
+          "\uD654\uBA74 \uC694\uC18C\uB97C \uD074\uB9AD\uD558\uBA74 \uC2A4\uD399\uC774 \uB4F1\uB85D\uB429\uB2C8\uB2E4 \u2014 ESC \uB85C \uC911\uB2E8"
+        ]
+      }
+    ) }),
+    /* @__PURE__ */ jsxs6(
       "div",
       {
         style: {
@@ -2835,7 +4117,7 @@ function AnnotationToolbar({
           gap: 0
         },
         children: [
-          /* @__PURE__ */ jsxs4(
+          /* @__PURE__ */ jsxs6(
             "div",
             {
               style: {
@@ -2845,8 +4127,8 @@ function AnnotationToolbar({
                 gap: 7
               },
               children: [
-                /* @__PURE__ */ jsxs4("div", { style: { position: "relative", flexShrink: 0 }, children: [
-                  /* @__PURE__ */ jsx5(
+                /* @__PURE__ */ jsxs6("div", { style: { position: "relative", flexShrink: 0 }, children: [
+                  /* @__PURE__ */ jsx6(
                     "div",
                     {
                       onClick: onShowGuide,
@@ -2864,10 +4146,10 @@ function AnnotationToolbar({
                       onMouseLeave: (e) => {
                         e.currentTarget.style.opacity = "1";
                       },
-                      children: /* @__PURE__ */ jsx5(SBLogo, { size: 28 })
+                      children: /* @__PURE__ */ jsx6(SBLogo, { size: 28 })
                     }
                   ),
-                  showLogoTip && /* @__PURE__ */ jsxs4(
+                  showLogoTip && /* @__PURE__ */ jsxs6(
                     "div",
                     {
                       style: {
@@ -2890,7 +4172,7 @@ function AnnotationToolbar({
                       },
                       children: [
                         "\uB85C\uACE0\uB97C \uD074\uB9AD\uD558\uBA74 \uAC00\uC774\uB4DC\uB97C \uB2E4\uC2DC \uBCFC \uC218 \uC788\uC5B4\uC694 \u{1F446}",
-                        /* @__PURE__ */ jsx5(
+                        /* @__PURE__ */ jsx6(
                           "div",
                           {
                             style: {
@@ -2910,18 +4192,18 @@ function AnnotationToolbar({
                     }
                   )
                 ] }),
-                /* @__PURE__ */ jsxs4(
+                /* @__PURE__ */ jsxs6(
                   "button",
                   {
                     onClick: hasUpdate ? () => setShowUpdateModal(true) : void 0,
                     title: hasUpdate ? `\uC5C5\uB370\uC774\uD2B8 \uAC00\uB2A5: ${shortVer(latestSdkVersion ?? "")} \u2014 \uD074\uB9AD\uD558\uC5EC \uC548\uB0B4 \uBCF4\uAE30` : `SpecBridge SDK ${shortVer(SDK_VERSION)}`,
                     style: { background: "transparent", border: "none", padding: 0, cursor: hasUpdate ? "pointer" : "default", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 3 },
                     children: [
-                      /* @__PURE__ */ jsx5("span", { style: { fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,.7)", letterSpacing: ".2px", lineHeight: 1, whiteSpace: "nowrap" }, children: "SpecBridge" }),
-                      /* @__PURE__ */ jsxs4("div", { style: { display: "flex", alignItems: "center", gap: 1 }, children: [
-                        /* @__PURE__ */ jsx5("span", { style: { fontSize: 9, fontWeight: 700, color: COLORS.pri, lineHeight: 1 }, children: "Beta" }),
-                        /* @__PURE__ */ jsx5("span", { style: { fontSize: 9, fontFamily: "monospace", color: hasUpdate ? "#fbbf24" : "rgba(255,255,255,.55)", lineHeight: 1 }, children: shortVer(SDK_VERSION) }),
-                        hasUpdate && /* @__PURE__ */ jsxs4("span", { style: { fontSize: 7, fontWeight: 700, background: "#f59e0b", color: "#0f172a", borderRadius: 3, padding: "1px 3px", lineHeight: 1.4, whiteSpace: "nowrap" }, children: [
+                      /* @__PURE__ */ jsx6("span", { style: { fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,.7)", letterSpacing: ".2px", lineHeight: 1, whiteSpace: "nowrap" }, children: "SpecBridge" }),
+                      /* @__PURE__ */ jsxs6("div", { style: { display: "flex", alignItems: "center", gap: 1 }, children: [
+                        /* @__PURE__ */ jsx6("span", { style: { fontSize: 9, fontWeight: 700, color: COLORS.pri, lineHeight: 1 }, children: "Beta" }),
+                        /* @__PURE__ */ jsx6("span", { style: { fontSize: 9, fontFamily: "monospace", color: hasUpdate ? "#fbbf24" : "rgba(255,255,255,.55)", lineHeight: 1 }, children: shortVer(SDK_VERSION) }),
+                        hasUpdate && /* @__PURE__ */ jsxs6("span", { style: { fontSize: 7, fontWeight: 700, background: "#f59e0b", color: "#0f172a", borderRadius: 3, padding: "1px 3px", lineHeight: 1.4, whiteSpace: "nowrap" }, children: [
                           "\u2191 ",
                           shortVer(latestSdkVersion ?? "")
                         ] })
@@ -2929,166 +4211,108 @@ function AnnotationToolbar({
                     ]
                   }
                 ),
-                enabled && sessions && onSelectSession && onCreateSession && onDeleteSession && /* @__PURE__ */ jsxs4(Fragment5, { children: [
-                  /* @__PURE__ */ jsx5("div", { style: { width: 1, height: 22, background: "rgba(255,255,255,.18)", flexShrink: 0, marginLeft: 4 } }),
-                  /* @__PURE__ */ jsx5(
-                    SessionPicker,
-                    {
-                      sessions,
-                      currentSessionId: currentSessionId ?? null,
-                      sessionProgress,
-                      onSelectSession,
-                      onCreateSession,
-                      onDeleteSession,
-                      onSetSessionStatus,
-                      onUpdateSession
-                    }
-                  )
+                onViewportChange && /* @__PURE__ */ jsxs6(Fragment5, { children: [
+                  /* @__PURE__ */ jsx6("div", { style: { width: 1, height: 22, background: "rgba(255,255,255,.18)", flexShrink: 0, marginLeft: 4 } }),
+                  /* @__PURE__ */ jsx6("div", { "data-guide": "sb-viewport", style: { display: "flex", gap: 2, alignItems: "center" }, children: ["desktop", "tablet", "mobile"].map((vp) => {
+                    const icons = { desktop: /* @__PURE__ */ jsx6(IDesktop, {}), tablet: /* @__PURE__ */ jsx6(ITablet, {}), mobile: /* @__PURE__ */ jsx6(IMobile, {}) };
+                    const labels2 = { desktop: "PC", tablet: "\uD0DC\uBE14\uB9BF", mobile: "\uBAA8\uBC14\uC77C" };
+                    const isActive = (currentViewport ?? "desktop") === vp;
+                    return /* @__PURE__ */ jsx6(
+                      "button",
+                      {
+                        onClick: () => onViewportChange(vp),
+                        title: labels2[vp],
+                        style: {
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          width: 26,
+                          height: 26,
+                          borderRadius: 2,
+                          border: `1px solid ${isActive ? "rgba(255,255,255,.4)" : "rgba(255,255,255,.07)"}`,
+                          background: isActive ? "rgba(255,255,255,.12)" : "transparent",
+                          color: isActive ? "rgba(255,255,255,.9)" : "rgba(255,255,255,.45)",
+                          cursor: "pointer",
+                          transition: "all .15s",
+                          flexShrink: 0
+                        },
+                        onMouseEnter: (e) => {
+                          if (!isActive) {
+                            e.currentTarget.style.background = "rgba(255,255,255,.07)";
+                            e.currentTarget.style.color = "rgba(255,255,255,.8)";
+                          }
+                        },
+                        onMouseLeave: (e) => {
+                          if (!isActive) {
+                            e.currentTarget.style.background = "transparent";
+                            e.currentTarget.style.color = "rgba(255,255,255,.45)";
+                          }
+                        },
+                        children: icons[vp]
+                      },
+                      vp
+                    );
+                  }) })
                 ] })
               ]
             }
           ),
-          /* @__PURE__ */ jsx5("div", { "data-guide": "sb-label-filter", style: { flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", gap: 3 }, children: enabled && labels && labels.length > 0 && (() => {
-            const allActive = !filterLabelIds || filterLabelIds.size === 0;
-            return /* @__PURE__ */ jsxs4(Fragment5, { children: [
-              /* @__PURE__ */ jsx5(
-                "button",
-                {
-                  onClick: onClearLabelFilter,
-                  title: "\uC804\uCCB4 \uBCF4\uAE30",
-                  style: {
-                    display: "flex",
-                    alignItems: "center",
-                    padding: "2px 10px",
-                    borderRadius: 1,
-                    border: `1px solid ${allActive ? "rgba(255,255,255,.4)" : "rgba(255,255,255,.15)"}`,
-                    background: allActive ? "rgba(255,255,255,.12)" : "transparent",
-                    color: allActive ? "rgba(255,255,255,.9)" : "rgba(255,255,255,.45)",
-                    fontSize: 11,
-                    fontWeight: 500,
-                    cursor: "pointer",
-                    height: 20,
-                    transition: "all .15s",
-                    whiteSpace: "nowrap",
-                    flexShrink: 0,
-                    fontFamily: FONT_FAMILY
-                  },
-                  onMouseEnter: (e) => {
-                    if (!allActive) {
-                      e.currentTarget.style.borderColor = "rgba(255,255,255,.3)";
-                      e.currentTarget.style.color = "rgba(255,255,255,.75)";
-                    }
-                  },
-                  onMouseLeave: (e) => {
-                    if (!allActive) {
-                      e.currentTarget.style.borderColor = "rgba(255,255,255,.15)";
-                      e.currentTarget.style.color = "rgba(255,255,255,.45)";
-                    }
-                  },
-                  children: "\uC804\uCCB4"
-                }
-              ),
-              labels.map((l) => {
-                const active = filterLabelIds?.has(l.id) ?? false;
-                const color = l.color || FALLBACK_LABEL_COLOR;
-                return /* @__PURE__ */ jsxs4(
-                  "button",
-                  {
-                    onClick: () => onToggleLabelFilter?.(l.id),
-                    title: active ? `${l.name} \uD544\uD130 \uD574\uC81C` : `${l.name}\uB9CC \uBCF4\uAE30`,
-                    style: {
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 4,
-                      padding: "2px 10px",
-                      borderRadius: 1,
-                      border: `1px solid ${active ? `${color}99` : "rgba(255,255,255,.15)"}`,
-                      background: active ? `${color}22` : "transparent",
-                      color: active ? color : "rgba(255,255,255,.45)",
-                      fontSize: 11,
-                      fontWeight: 500,
-                      cursor: "pointer",
-                      height: 20,
-                      transition: "all .15s",
-                      whiteSpace: "nowrap",
-                      flexShrink: 0,
-                      fontFamily: FONT_FAMILY
-                    },
-                    onMouseEnter: (e) => {
-                      if (!active) {
-                        e.currentTarget.style.borderColor = `${color}66`;
-                        e.currentTarget.style.color = color;
-                      }
-                    },
-                    onMouseLeave: (e) => {
-                      if (!active) {
-                        e.currentTarget.style.borderColor = "rgba(255,255,255,.15)";
-                        e.currentTarget.style.color = "rgba(255,255,255,.45)";
-                      }
-                    },
-                    children: [
-                      /* @__PURE__ */ jsx5("span", { style: { width: 5, height: 5, borderRadius: "50%", background: active ? color : "rgba(255,255,255,.3)", flexShrink: 0 } }),
-                      l.name
-                    ]
-                  },
-                  l.id
-                );
-              })
-            ] });
-          })() }),
-          /* @__PURE__ */ jsxs4("div", { style: { flex: 1, display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 3 }, children: [
-            enabled && /* @__PURE__ */ jsxs4(Fragment5, { children: [
-              /* @__PURE__ */ jsx5(
+          /* @__PURE__ */ jsx6("div", { style: { flex: 1 } }),
+          /* @__PURE__ */ jsxs6("div", { style: { flex: 1, display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 3 }, children: [
+            enabled && /* @__PURE__ */ jsxs6(Fragment5, { children: [
+              onAddSpec && /* @__PURE__ */ jsx6(
                 TBtn,
                 {
-                  icon: adding ? /* @__PURE__ */ jsx5(IClose, {}) : /* @__PURE__ */ jsx5(IPlus, {}),
-                  label: adding ? "\uCDE8\uC18C" : "\uCD94\uAC00",
+                  label: "\uC2A4\uD399 \uCD94\uAC00",
+                  activeColor: "#3b82f6",
+                  onClick: onAddSpec,
+                  title: "\uD654\uBA74 \uC694\uC18C \uC2A4\uD399 \uCD94\uAC00 \u2014 \uB2E8\uCD95\uD0A4 S",
+                  dataGuide: "sb-add-spec",
+                  shortcut: "S"
+                }
+              ),
+              /* @__PURE__ */ jsx6(
+                TBtn,
+                {
+                  label: adding ? "\uCDE8\uC18C" : "\uCF54\uBA58\uD2B8 \uCD94\uAC00",
                   active: adding,
                   activeColor: COLORS.pri,
                   onClick: onToggleAdd,
-                  title: adding ? "\uBC88\uD638 \uBC30\uCE58 \uCDE8\uC18C (ESC)" : "\uBC88\uD638 \uCD94\uAC00 \u2014 \uB2E8\uCD95\uD0A4 N",
-                  dataGuide: "sb-add-pin"
+                  title: adding ? "\uCF54\uBA58\uD2B8 \uBC30\uCE58 \uCDE8\uC18C (ESC)" : "\uCF54\uBA58\uD2B8 \uCD94\uAC00 \u2014 \uB2E8\uCD95\uD0A4 C",
+                  dataGuide: "sb-add-pin",
+                  shortcut: adding ? void 0 : "C"
                 }
               ),
-              /* @__PURE__ */ jsx5(
+              /* @__PURE__ */ jsx6(
                 TBtn,
                 {
-                  icon: /* @__PURE__ */ jsx5(IList, {}),
                   label: "\uBAA9\uB85D",
                   active: showList,
                   activeColor: COLORS.pri,
                   badge: pinCount,
                   onClick: onToggleList,
-                  title: "\uD604\uC7AC \uD398\uC774\uC9C0 \uBC88\uD638 \uBAA9\uB85D \u2014 \uB2E8\uCD95\uD0A4 L",
+                  title: "\uD604\uC7AC \uD398\uC774\uC9C0 \uBAA9\uB85D \u2014 \uB2E8\uCD95\uD0A4 L",
                   dataGuide: "sb-pin-list"
                 }
               ),
-              /* @__PURE__ */ jsx5(
-                TBtn,
-                {
-                  icon: /* @__PURE__ */ jsx5(IDownload, {}),
-                  label: "JSON",
-                  onClick: onExport,
-                  title: "\uC804\uCCB4 \uC5B4\uB178\uD14C\uC774\uC158 JSON \uB0B4\uBCF4\uB0B4\uAE30"
-                }
-              )
+              /* @__PURE__ */ jsx6("div", { style: { width: 1, height: 22, background: "rgba(255,255,255,.12)", flexShrink: 0, margin: "0 2px" } })
             ] }),
-            /* @__PURE__ */ jsxs4(
+            /* @__PURE__ */ jsxs6(
               "button",
               {
                 onClick: onToggleEnabled,
-                title: enabled ? "Annotation \uB044\uAE30 \u2014 \uB2E8\uCD95\uD0A4 A" : "Annotation \uCF1C\uAE30 \u2014 \uB2E8\uCD95\uD0A4 A",
-                "data-guide": "sb-annotation",
+                title: enabled ? "\uC124\uACC4 \uBAA8\uB4DC \uC885\uB8CC \u2014 \uB2E8\uCD95\uD0A4 A" : "\uC124\uACC4 \uBAA8\uB4DC \uC2DC\uC791 \u2014 \uB2E8\uCD95\uD0A4 A",
+                "data-guide": "sb-design-mode",
                 style: {
                   display: "flex",
                   alignItems: "center",
-                  gap: 3,
-                  padding: "5px 8px",
-                  border: `1px solid ${enabled ? `${COLORS.pri}66` : "rgba(255,255,255,.07)"}`,
+                  gap: 5,
+                  padding: "5px 10px",
+                  border: `1px solid ${enabled ? "rgba(99,102,241,.5)" : "rgba(255,255,255,.15)"}`,
                   borderRadius: 2,
                   cursor: "pointer",
-                  background: enabled ? `${COLORS.pri}25` : "transparent",
-                  color: enabled ? COLORS.pri : "rgba(255,255,255,.7)",
+                  background: enabled ? "rgba(99,102,241,.2)" : "rgba(255,255,255,.06)",
+                  color: enabled ? "#a5b4fc" : "rgba(255,255,255,.6)",
                   fontSize: 11,
                   fontWeight: 600,
                   height: 26,
@@ -3097,62 +4321,64 @@ function AnnotationToolbar({
                   flexShrink: 0,
                   fontFamily: FONT_FAMILY
                 },
+                onMouseEnter: (e) => {
+                  if (!enabled) {
+                    e.currentTarget.style.background = "rgba(99,102,241,.15)";
+                    e.currentTarget.style.borderColor = "rgba(99,102,241,.4)";
+                    e.currentTarget.style.color = "#a5b4fc";
+                  }
+                },
+                onMouseLeave: (e) => {
+                  if (!enabled) {
+                    e.currentTarget.style.background = "rgba(255,255,255,.06)";
+                    e.currentTarget.style.borderColor = "rgba(255,255,255,.15)";
+                    e.currentTarget.style.color = "rgba(255,255,255,.6)";
+                  }
+                },
                 children: [
-                  /* @__PURE__ */ jsxs4("svg", { width: "13", height: "13", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", style: { flexShrink: 0 }, children: [
-                    /* @__PURE__ */ jsx5("path", { d: "M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0Z" }),
-                    /* @__PURE__ */ jsx5("circle", { cx: "12", cy: "10", r: "3" })
-                  ] }),
-                  /* @__PURE__ */ jsx5("span", { children: "Annotation" })
+                  /* @__PURE__ */ jsx6("span", { style: {
+                    width: 6,
+                    height: 6,
+                    borderRadius: "50%",
+                    flexShrink: 0,
+                    background: enabled ? "#6ee7b7" : "rgba(255,255,255,.25)",
+                    boxShadow: enabled ? "0 0 6px #6ee7b7" : "none",
+                    transition: "all .2s"
+                  } }),
+                  /* @__PURE__ */ jsx6("span", { children: "\uC124\uACC4\uBAA8\uB4DC" }),
+                  /* @__PURE__ */ jsx6("span", { style: {
+                    fontSize: 9,
+                    padding: "1px 4px",
+                    borderRadius: 2,
+                    lineHeight: 1.4,
+                    border: "1px solid rgba(255,255,255,.2)",
+                    color: "rgba(255,255,255,.35)",
+                    background: "rgba(255,255,255,.06)",
+                    fontFamily: "monospace",
+                    flexShrink: 0,
+                    marginLeft: 4
+                  }, children: "A" })
                 ]
               }
             ),
-            /* @__PURE__ */ jsxs4(
-              "button",
+            settings && onChangeSetting && onSaveAuthor && /* @__PURE__ */ jsx6(
+              SettingsPopover,
               {
-                onClick: onEditAuthor,
-                title: author ? `\uC791\uC131\uC790: ${author}` : "\uC791\uC131\uC790 \uC124\uC815",
-                "data-guide": "sb-author",
-                style: {
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 3,
-                  padding: "5px 8px",
-                  borderRadius: 2,
-                  background: author ? "transparent" : "rgba(251,191,36,.15)",
-                  color: author ? "rgba(255,255,255,.7)" : "#fbbf24",
-                  fontSize: 11,
-                  cursor: "pointer",
-                  height: 26,
-                  border: author ? "1px solid rgba(255,255,255,.07)" : "1px solid rgba(251,191,36,.4)",
-                  maxWidth: 130,
-                  flexShrink: 0,
-                  transition: "all .15s",
-                  fontFamily: FONT_FAMILY
-                },
-                onMouseEnter: (e) => {
-                  e.currentTarget.style.background = "rgba(255,255,255,.07)";
-                  e.currentTarget.style.color = "rgba(255,255,255,1)";
-                  e.currentTarget.style.borderColor = "rgba(255,255,255,.15)";
-                },
-                onMouseLeave: (e) => {
-                  e.currentTarget.style.background = author ? "transparent" : "rgba(251,191,36,.15)";
-                  e.currentTarget.style.color = author ? "rgba(255,255,255,.7)" : "#fbbf24";
-                  e.currentTarget.style.borderColor = author ? "rgba(255,255,255,.07)" : "rgba(251,191,36,.4)";
-                },
-                children: [
-                  /* @__PURE__ */ jsxs4("svg", { width: "13", height: "13", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", style: { flexShrink: 0 }, children: [
-                    /* @__PURE__ */ jsx5("path", { d: "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" }),
-                    /* @__PURE__ */ jsx5("circle", { cx: "12", cy: "7", r: "4" })
-                  ] }),
-                  !author && /* @__PURE__ */ jsx5("span", { style: { fontSize: 9, background: "#dc2626", color: "#fff", borderRadius: 3, padding: "1px 3px", flexShrink: 0, fontWeight: 700 }, children: "!" })
-                ]
+                settings,
+                onChangeSetting,
+                author,
+                labels: labels ?? [],
+                defaultLabelId,
+                onSaveAuthor,
+                onExportJson,
+                onExportMarkdown
               }
             )
           ] })
         ]
       }
     ),
-    showUpdateModal && latestSdkVersion && /* @__PURE__ */ jsx5(
+    showUpdateModal && latestSdkVersion && /* @__PURE__ */ jsx6(
       UpdateModal,
       {
         currentVersion: SDK_VERSION,
@@ -3164,8 +4390,8 @@ function AnnotationToolbar({
 }
 
 // src/AuthorModal.tsx
-import { useEffect as useEffect4, useRef as useRef3, useState as useState5 } from "react";
-import { jsx as jsx6, jsxs as jsxs5 } from "react/jsx-runtime";
+import { useEffect as useEffect5, useRef as useRef4, useState as useState5 } from "react";
+import { jsx as jsx7, jsxs as jsxs7 } from "react/jsx-runtime";
 function AuthorModal({
   currentAuthor,
   currentDefaultLabelId,
@@ -3177,12 +4403,12 @@ function AuthorModal({
   const [selectedLabelId, setSelectedLabelId] = useState5(
     currentDefaultLabelId ?? labels[0]?.id ?? null
   );
-  const inputRef = useRef3(null);
-  useEffect4(() => {
+  const inputRef = useRef4(null);
+  useEffect5(() => {
     const id = window.setTimeout(() => inputRef.current?.focus(), 50);
     return () => window.clearTimeout(id);
   }, []);
-  useEffect4(() => {
+  useEffect5(() => {
     if (!selectedLabelId && labels.length > 0) {
       setSelectedLabelId(labels[0].id);
     }
@@ -3192,7 +4418,7 @@ function AuthorModal({
     onSave(name.trim(), selectedLabelId);
   };
   const activeLabel = labels.find((l) => l.id === selectedLabelId);
-  return /* @__PURE__ */ jsx6(
+  return /* @__PURE__ */ jsx7(
     "div",
     {
       style: {
@@ -3205,7 +4431,7 @@ function AuthorModal({
         background: "rgba(0,0,0,.55)",
         fontFamily: FONT_FAMILY
       },
-      children: /* @__PURE__ */ jsxs5(
+      children: /* @__PURE__ */ jsxs7(
         "div",
         {
           style: {
@@ -3217,10 +4443,10 @@ function AuthorModal({
             boxShadow: "0 20px 60px rgba(0,0,0,.5)"
           },
           children: [
-            /* @__PURE__ */ jsx6("div", { style: { fontSize: 16, fontWeight: 700, marginBottom: 5, color: DARK.txt }, children: "\uC791\uC131\uC790 \uB4F1\uB85D" }),
-            /* @__PURE__ */ jsx6("div", { style: { fontSize: 12, color: DARK.txS, marginBottom: 20 }, children: "\uC774\uB984\uACFC \uAE30\uBCF8 \uB808\uC774\uBE14\uC740 \uC774 \uBE0C\uB77C\uC6B0\uC800\uC5D0\uC11C \uACC4\uC18D \uC720\uC9C0\uB429\uB2C8\uB2E4." }),
-            /* @__PURE__ */ jsx6("label", { style: { display: "block", fontSize: 11, fontWeight: 600, color: DARK.txS, marginBottom: 5 }, children: "\uC774\uB984" }),
-            /* @__PURE__ */ jsx6(
+            /* @__PURE__ */ jsx7("div", { style: { fontSize: 16, fontWeight: 700, marginBottom: 5, color: DARK.txt }, children: "\uC791\uC131\uC790 \uB4F1\uB85D" }),
+            /* @__PURE__ */ jsx7("div", { style: { fontSize: 12, color: DARK.txS, marginBottom: 20 }, children: "\uC774\uB984\uACFC \uAE30\uBCF8 \uB808\uC774\uBE14\uC740 \uC774 \uBE0C\uB77C\uC6B0\uC800\uC5D0\uC11C \uACC4\uC18D \uC720\uC9C0\uB429\uB2C8\uB2E4." }),
+            /* @__PURE__ */ jsx7("label", { style: { display: "block", fontSize: 11, fontWeight: 600, color: DARK.txS, marginBottom: 5 }, children: "\uC774\uB984" }),
+            /* @__PURE__ */ jsx7(
               "input",
               {
                 ref: inputRef,
@@ -3250,14 +4476,14 @@ function AuthorModal({
                 }
               }
             ),
-            /* @__PURE__ */ jsxs5("label", { style: { display: "block", fontSize: 11, fontWeight: 600, color: DARK.txS, marginBottom: 8 }, children: [
+            /* @__PURE__ */ jsxs7("label", { style: { display: "block", fontSize: 11, fontWeight: 600, color: DARK.txS, marginBottom: 8 }, children: [
               "\uAE30\uBCF8 \uB808\uC774\uBE14",
-              /* @__PURE__ */ jsx6("span", { style: { fontWeight: 400, color: DARK.txL, marginLeft: 6 }, children: "(\uBC88\uD638 \uCD94\uAC00 \uC2DC \uC790\uB3D9 \uC120\uD0DD)" })
+              /* @__PURE__ */ jsx7("span", { style: { fontWeight: 400, color: DARK.txL, marginLeft: 6 }, children: "(\uBC88\uD638 \uCD94\uAC00 \uC2DC \uC790\uB3D9 \uC120\uD0DD)" })
             ] }),
-            /* @__PURE__ */ jsx6("div", { style: { display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 16 }, children: labels.map((l) => {
+            /* @__PURE__ */ jsx7("div", { style: { display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 16 }, children: labels.map((l) => {
               const active = selectedLabelId === l.id;
               const color = l.color || FALLBACK_LABEL_COLOR;
-              return /* @__PURE__ */ jsxs5(
+              return /* @__PURE__ */ jsxs7(
                 "button",
                 {
                   onClick: () => setSelectedLabelId(l.id),
@@ -3276,15 +4502,15 @@ function AuthorModal({
                     transition: "all .12s"
                   },
                   children: [
-                    /* @__PURE__ */ jsx6("span", { style: { width: 8, height: 8, borderRadius: "50%", background: color, flexShrink: 0 } }),
+                    /* @__PURE__ */ jsx7("span", { style: { width: 8, height: 8, borderRadius: "50%", background: color, flexShrink: 0 } }),
                     l.name,
-                    active && /* @__PURE__ */ jsx6("span", { style: { fontSize: 11 }, children: "\u2713" })
+                    active && /* @__PURE__ */ jsx7("span", { style: { fontSize: 11 }, children: "\u2713" })
                   ]
                 },
                 l.id
               );
             }) }),
-            activeLabel && /* @__PURE__ */ jsxs5(
+            activeLabel && /* @__PURE__ */ jsxs7(
               "div",
               {
                 style: {
@@ -3300,15 +4526,15 @@ function AuthorModal({
                   gap: 6
                 },
                 children: [
-                  /* @__PURE__ */ jsx6("span", { style: { width: 8, height: 8, borderRadius: "50%", background: activeLabel.color, flexShrink: 0 } }),
+                  /* @__PURE__ */ jsx7("span", { style: { width: 8, height: 8, borderRadius: "50%", background: activeLabel.color, flexShrink: 0 } }),
                   "\uBC88\uD638 \uCD94\uAC00 \uC2DC \uAE30\uBCF8\uC73C\uB85C\xA0",
-                  /* @__PURE__ */ jsx6("span", { style: { color: activeLabel.color, fontWeight: 700 }, children: activeLabel.name }),
+                  /* @__PURE__ */ jsx7("span", { style: { color: activeLabel.color, fontWeight: 700 }, children: activeLabel.name }),
                   "\xA0\uB808\uC774\uBE14\uC774 \uC120\uD0DD\uB429\uB2C8\uB2E4."
                 ]
               }
             ),
-            /* @__PURE__ */ jsxs5("div", { style: { display: "flex", gap: 8 }, children: [
-              /* @__PURE__ */ jsx6(
+            /* @__PURE__ */ jsxs7("div", { style: { display: "flex", gap: 8 }, children: [
+              /* @__PURE__ */ jsx7(
                 "button",
                 {
                   onClick: onCancel,
@@ -3326,7 +4552,7 @@ function AuthorModal({
                   children: "\uCDE8\uC18C"
                 }
               ),
-              /* @__PURE__ */ jsx6(
+              /* @__PURE__ */ jsx7(
                 "button",
                 {
                   onClick: handleSave,
@@ -3356,8 +4582,8 @@ function AuthorModal({
 }
 
 // src/LabelManagerModal.tsx
-import { useState as useState6, useEffect as useEffect5 } from "react";
-import { Fragment as Fragment6, jsx as jsx7, jsxs as jsxs6 } from "react/jsx-runtime";
+import { useState as useState6, useEffect as useEffect6 } from "react";
+import { Fragment as Fragment6, jsx as jsx8, jsxs as jsxs8 } from "react/jsx-runtime";
 function LabelManagerModal({ labels, pinUsage, onAdd, onUpdate, onDelete, onClose }) {
   const [newName, setNewName] = useState6("");
   const [newColor, setNewColor] = useState6(LABEL_COLOR_PRESETS[0]);
@@ -3379,7 +4605,7 @@ function LabelManagerModal({ labels, pinUsage, onAdd, onUpdate, onDelete, onClos
     background: DARK.bg3,
     color: DARK.txt
   };
-  useEffect5(() => {
+  useEffect6(() => {
     const handler = (e) => {
       if (e.key === "Escape") {
         e.stopPropagation();
@@ -3389,7 +4615,7 @@ function LabelManagerModal({ labels, pinUsage, onAdd, onUpdate, onDelete, onClos
     window.addEventListener("keydown", handler, true);
     return () => window.removeEventListener("keydown", handler, true);
   }, [onClose]);
-  return /* @__PURE__ */ jsx7(
+  return /* @__PURE__ */ jsx8(
     "div",
     {
       style: {
@@ -3402,7 +4628,7 @@ function LabelManagerModal({ labels, pinUsage, onAdd, onUpdate, onDelete, onClos
         background: "rgba(0,0,0,.55)"
       },
       onClick: onClose,
-      children: /* @__PURE__ */ jsxs6(
+      children: /* @__PURE__ */ jsxs8(
         "div",
         {
           onClick: (e) => e.stopPropagation(),
@@ -3418,7 +4644,7 @@ function LabelManagerModal({ labels, pinUsage, onAdd, onUpdate, onDelete, onClos
             overflow: "hidden"
           },
           children: [
-            /* @__PURE__ */ jsxs6(
+            /* @__PURE__ */ jsxs8(
               "div",
               {
                 style: {
@@ -3431,11 +4657,11 @@ function LabelManagerModal({ labels, pinUsage, onAdd, onUpdate, onDelete, onClos
                   flexShrink: 0
                 },
                 children: [
-                  /* @__PURE__ */ jsxs6("div", { children: [
-                    /* @__PURE__ */ jsx7("div", { style: { fontSize: 13, fontWeight: 700, color: DARK.txt }, children: "\u{1F3F7}\uFE0F \uB808\uC774\uBE14 \uAD00\uB9AC" }),
-                    /* @__PURE__ */ jsx7("div", { style: { fontSize: 10, color: DARK.txL, marginTop: 2 }, children: "\uC804\uCCB4 \uD398\uC774\uC9C0\uC5D0 \uACF5\uD1B5 \uC801\uC6A9\uB429\uB2C8\uB2E4" })
+                  /* @__PURE__ */ jsxs8("div", { children: [
+                    /* @__PURE__ */ jsx8("div", { style: { fontSize: 13, fontWeight: 700, color: DARK.txt }, children: "\u{1F3F7}\uFE0F \uB808\uC774\uBE14 \uAD00\uB9AC" }),
+                    /* @__PURE__ */ jsx8("div", { style: { fontSize: 10, color: DARK.txL, marginTop: 2 }, children: "\uC804\uCCB4 \uD398\uC774\uC9C0\uC5D0 \uACF5\uD1B5 \uC801\uC6A9\uB429\uB2C8\uB2E4" })
                   ] }),
-                  /* @__PURE__ */ jsx7(
+                  /* @__PURE__ */ jsx8(
                     "button",
                     {
                       onClick: onClose,
@@ -3455,7 +4681,7 @@ function LabelManagerModal({ labels, pinUsage, onAdd, onUpdate, onDelete, onClos
                 ]
               }
             ),
-            /* @__PURE__ */ jsx7("div", { className: "sb-scroll", style: { flex: 1, overflowY: "auto", padding: "14px 18px" }, children: labels.length === 0 ? /* @__PURE__ */ jsx7("div", { style: { padding: "24px 0", textAlign: "center", color: DARK.txL, fontSize: 12 }, children: "\uB4F1\uB85D\uB41C \uB808\uC774\uBE14\uC774 \uC5C6\uC2B5\uB2C8\uB2E4. \uC544\uB798\uC5D0\uC11C \uCD94\uAC00\uD558\uC138\uC694." }) : labels.map((label) => /* @__PURE__ */ jsx7(
+            /* @__PURE__ */ jsx8("div", { className: "sb-scroll", style: { flex: 1, overflowY: "auto", padding: "14px 18px" }, children: labels.length === 0 ? /* @__PURE__ */ jsx8("div", { style: { padding: "24px 0", textAlign: "center", color: DARK.txL, fontSize: 12 }, children: "\uB4F1\uB85D\uB41C \uB808\uC774\uBE14\uC774 \uC5C6\uC2B5\uB2C8\uB2E4. \uC544\uB798\uC5D0\uC11C \uCD94\uAC00\uD558\uC138\uC694." }) : labels.map((label) => /* @__PURE__ */ jsx8(
               LabelRow,
               {
                 label,
@@ -3465,7 +4691,7 @@ function LabelManagerModal({ labels, pinUsage, onAdd, onUpdate, onDelete, onClos
               },
               label.id
             )) }),
-            /* @__PURE__ */ jsxs6(
+            /* @__PURE__ */ jsxs8(
               "div",
               {
                 style: {
@@ -3475,10 +4701,10 @@ function LabelManagerModal({ labels, pinUsage, onAdd, onUpdate, onDelete, onClos
                   flexShrink: 0
                 },
                 children: [
-                  /* @__PURE__ */ jsx7("div", { style: { fontSize: 11, fontWeight: 600, color: DARK.txS, marginBottom: 6 }, children: "+ \uB808\uC774\uBE14 \uCD94\uAC00" }),
-                  /* @__PURE__ */ jsxs6("div", { style: { display: "flex", gap: 6, alignItems: "center" }, children: [
-                    /* @__PURE__ */ jsx7(ColorDot, { color: newColor, onChange: setNewColor, title: "\uC0C9\uC0C1 \uC120\uD0DD" }),
-                    /* @__PURE__ */ jsx7(
+                  /* @__PURE__ */ jsx8("div", { style: { fontSize: 11, fontWeight: 600, color: DARK.txS, marginBottom: 6 }, children: "+ \uB808\uC774\uBE14 \uCD94\uAC00" }),
+                  /* @__PURE__ */ jsxs8("div", { style: { display: "flex", gap: 6, alignItems: "center" }, children: [
+                    /* @__PURE__ */ jsx8(ColorDot, { color: newColor, onChange: setNewColor, title: "\uC0C9\uC0C1 \uC120\uD0DD" }),
+                    /* @__PURE__ */ jsx8(
                       "input",
                       {
                         value: newName,
@@ -3490,7 +4716,7 @@ function LabelManagerModal({ labels, pinUsage, onAdd, onUpdate, onDelete, onClos
                         style: { ...inp, flex: 1 }
                       }
                     ),
-                    /* @__PURE__ */ jsx7(
+                    /* @__PURE__ */ jsx8(
                       "button",
                       {
                         onClick: handleAdd,
@@ -3537,7 +4763,7 @@ function LabelRow({ label, usage, onUpdate, onDelete }) {
     }
     onDelete();
   };
-  return /* @__PURE__ */ jsxs6(
+  return /* @__PURE__ */ jsxs8(
     "div",
     {
       style: {
@@ -3548,8 +4774,8 @@ function LabelRow({ label, usage, onUpdate, onDelete }) {
         borderBottom: `1px solid ${DARK.brd}`
       },
       children: [
-        /* @__PURE__ */ jsx7(ColorDot, { color: label.color, onChange: (c) => onUpdate({ color: c }), title: "\uC0C9\uC0C1 \uBCC0\uACBD" }),
-        editing ? /* @__PURE__ */ jsx7(
+        /* @__PURE__ */ jsx8(ColorDot, { color: label.color, onChange: (c) => onUpdate({ color: c }), title: "\uC0C9\uC0C1 \uBCC0\uACBD" }),
+        editing ? /* @__PURE__ */ jsx8(
           "input",
           {
             autoFocus: true,
@@ -3575,7 +4801,7 @@ function LabelRow({ label, usage, onUpdate, onDelete }) {
               color: DARK.txt
             }
           }
-        ) : /* @__PURE__ */ jsx7(
+        ) : /* @__PURE__ */ jsx8(
           "div",
           {
             onClick: () => setEditing(true),
@@ -3584,11 +4810,11 @@ function LabelRow({ label, usage, onUpdate, onDelete }) {
             children: label.name
           }
         ),
-        /* @__PURE__ */ jsxs6("span", { style: { fontSize: 10, color: usage > 0 ? DARK.txS : DARK.txL, minWidth: 40, textAlign: "right" }, children: [
+        /* @__PURE__ */ jsxs8("span", { style: { fontSize: 10, color: usage > 0 ? DARK.txS : DARK.txL, minWidth: 40, textAlign: "right" }, children: [
           usage,
           "\uAC1C \uC0AC\uC6A9"
         ] }),
-        /* @__PURE__ */ jsx7(
+        /* @__PURE__ */ jsx8(
           "button",
           {
             onClick: handleDelete,
@@ -3611,8 +4837,8 @@ function LabelRow({ label, usage, onUpdate, onDelete }) {
 }
 function ColorDot({ color, onChange, title }) {
   const [open, setOpen] = useState6(false);
-  return /* @__PURE__ */ jsxs6("div", { style: { position: "relative" }, children: [
-    /* @__PURE__ */ jsx7(
+  return /* @__PURE__ */ jsxs8("div", { style: { position: "relative" }, children: [
+    /* @__PURE__ */ jsx8(
       "button",
       {
         onClick: () => setOpen((v) => !v),
@@ -3629,9 +4855,9 @@ function ColorDot({ color, onChange, title }) {
         }
       }
     ),
-    open && /* @__PURE__ */ jsxs6(Fragment6, { children: [
-      /* @__PURE__ */ jsx7("div", { onClick: () => setOpen(false), style: { position: "fixed", inset: 0, zIndex: 1 } }),
-      /* @__PURE__ */ jsx7(
+    open && /* @__PURE__ */ jsxs8(Fragment6, { children: [
+      /* @__PURE__ */ jsx8("div", { onClick: () => setOpen(false), style: { position: "fixed", inset: 0, zIndex: 1 } }),
+      /* @__PURE__ */ jsx8(
         "div",
         {
           style: {
@@ -3648,7 +4874,7 @@ function ColorDot({ color, onChange, title }) {
             gridTemplateColumns: "repeat(4, 22px)",
             gap: 6
           },
-          children: LABEL_COLOR_PRESETS.map((c) => /* @__PURE__ */ jsx7(
+          children: LABEL_COLOR_PRESETS.map((c) => /* @__PURE__ */ jsx8(
             "button",
             {
               onClick: () => {
@@ -3674,16 +4900,16 @@ function ColorDot({ color, onChange, title }) {
 }
 
 // src/OnboardingGuide.tsx
-import { useEffect as useEffect6, useState as useState7 } from "react";
-import { Fragment as Fragment7, jsx as jsx8, jsxs as jsxs7 } from "react/jsx-runtime";
-var SB_LOGO_PATHS = /* @__PURE__ */ jsxs7(Fragment7, { children: [
-  /* @__PURE__ */ jsx8("path", { opacity: "0.69", d: "M111.309 79.6218C116.002 96.9372 100.191 112.84 82.8489 108.247L21.3533 91.961C4.01096 87.3681 -1.85607 65.7239 10.7927 53.0015L55.6448 7.88791C68.2936 -4.83456 89.9715 0.906559 94.6651 18.2219L111.309 79.6218Z", fill: "#3078FF" }),
-  /* @__PURE__ */ jsx8("path", { opacity: "0.5", d: "M101.327 142.828C86.0562 152.245 66.3188 141.599 65.7993 123.666L64.723 86.5136C64.2035 68.5809 83.2915 56.8106 99.0814 65.3271L131.795 82.9713C147.585 91.4877 148.234 113.904 132.964 123.32L101.327 142.828Z", fill: "#4CD3FF" })
+import { useEffect as useEffect7, useState as useState7 } from "react";
+import { Fragment as Fragment7, jsx as jsx9, jsxs as jsxs9 } from "react/jsx-runtime";
+var SB_LOGO_PATHS = /* @__PURE__ */ jsxs9(Fragment7, { children: [
+  /* @__PURE__ */ jsx9("path", { opacity: "0.69", d: "M111.309 79.6218C116.002 96.9372 100.191 112.84 82.8489 108.247L21.3533 91.961C4.01096 87.3681 -1.85607 65.7239 10.7927 53.0015L55.6448 7.88791C68.2936 -4.83456 89.9715 0.906559 94.6651 18.2219L111.309 79.6218Z", fill: "#3078FF" }),
+  /* @__PURE__ */ jsx9("path", { opacity: "0.5", d: "M101.327 142.828C86.0562 152.245 66.3188 141.599 65.7993 123.666L64.723 86.5136C64.2035 68.5809 83.2915 56.8106 99.0814 65.3271L131.795 82.9713C147.585 91.4877 148.234 113.904 132.964 123.32L101.327 142.828Z", fill: "#4CD3FF" })
 ] });
 var SB_LOGO_VIEWBOX = "-10 -10 170 172";
-var GIcon = ({ children, size = 32 }) => /* @__PURE__ */ jsx8("div", { style: { display: "flex", justifyContent: "center" }, children: /* @__PURE__ */ jsx8("svg", { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "rgba(255,255,255,.75)", strokeWidth: "1.75", strokeLinecap: "round", strokeLinejoin: "round", children }) });
+var GIcon = ({ children, size = 32 }) => /* @__PURE__ */ jsx9("div", { style: { display: "flex", justifyContent: "center" }, children: /* @__PURE__ */ jsx9("svg", { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "rgba(255,255,255,.75)", strokeWidth: "1.75", strokeLinecap: "round", strokeLinejoin: "round", children }) });
 function IntroLogo() {
-  return /* @__PURE__ */ jsx8("svg", { width: 54, height: 54, viewBox: SB_LOGO_VIEWBOX, fill: "none", style: { display: "block", margin: "0 auto", position: "relative", left: -3 }, children: SB_LOGO_PATHS });
+  return /* @__PURE__ */ jsx9("svg", { width: 54, height: 54, viewBox: SB_LOGO_VIEWBOX, fill: "none", style: { display: "block", margin: "0 auto", position: "relative", left: -3 }, children: SB_LOGO_PATHS });
 }
 var GUIDE_KEY = "cs_annot_guide_v1";
 function hasDismissedForever() {
@@ -3701,88 +4927,70 @@ function markDismissedForever() {
 }
 var STEPS = [
   {
-    icon: /* @__PURE__ */ jsx8(IntroLogo, {}),
+    icon: /* @__PURE__ */ jsx9(IntroLogo, {}),
     title: "SpecBridge",
-    badge: "\uC5B4\uB178\uD14C\uC774\uC158 \uD611\uC5C5 \uD234",
-    desc: "\uAE30\uD68D\uC790\xB7\uB514\uC790\uC774\uB108\xB7\uAC1C\uBC1C\uC790\uAC00 \uD654\uBA74\uC5D0 \uC9C1\uC811 \uBC88\uD638(\uD540)\uB97C \uB0A8\uAE30\uACE0, \uCF54\uBA58\uD2B8\uC640 \uAC80\uD1A0 \uD68C\uCC28\uB97C \uD300\uC6D0\uACFC \uD568\uAED8 \uAD00\uB9AC\uD558\uB294 \uD611\uC5C5 \uC5B4\uB178\uD14C\uC774\uC158 \uD234\uC785\uB2C8\uB2E4. \uC544\uB798 \uAC00\uC774\uB4DC\uB85C \uD575\uC2EC \uAE30\uB2A5\uC744 \uC0B4\uD3B4\uBCF4\uC138\uC694.",
+    badge: "\uD654\uBA74 \uC2A4\uD399 \uD611\uC5C5 \uD234",
+    desc: "\uC2A4\uD399\uBE0C\uB9BF\uC9C0\uB294 \uD654\uBA74 \uC694\uC18C \uBCC4 \uC2A4\uD399\uC744 \uC815\uC758\uD558\uACE0,\n\uD540\uC73C\uB85C \uCF54\uBA58\uD2B8\xB7\uAC80\uD1A0\uB97C \uD300\uC6D0\uACFC \uD568\uAED8 \uAD00\uB9AC\uD558\uB294 \uD611\uC5C5 \uD234\uC785\uB2C8\uB2E4.\n\uC544\uB798 \uAC00\uC774\uB4DC\uB85C \uD575\uC2EC \uAE30\uB2A5\uC744 \uC0B4\uD3B4\uBCF4\uC138\uC694.",
     target: null
   },
   {
-    icon: /* @__PURE__ */ jsxs7(GIcon, { children: [
-      /* @__PURE__ */ jsx8("path", { d: "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" }),
-      /* @__PURE__ */ jsx8("circle", { cx: "12", cy: "7", r: "4" })
+    icon: /* @__PURE__ */ jsxs9(GIcon, { children: [
+      /* @__PURE__ */ jsx9("path", { d: "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" }),
+      /* @__PURE__ */ jsx9("circle", { cx: "12", cy: "7", r: "4" })
     ] }),
     title: "\uC774\uB984 \uC124\uC815",
     badge: "\uAE30\uBCF8 \uC124\uC815",
-    desc: "\uC6B0\uCE21 '\uC791\uC131\uC790' \uBC84\uD2BC\uC744 \uD074\uB9AD\uD574 \uC774\uB984\uC744 \uC785\uB825\uD558\uC138\uC694. \uD540\uC5D0 \uC791\uC131\uC790 \uC815\uBCF4\uAC00 \uD45C\uC2DC\uB429\uB2C8\uB2E4.",
-    target: "sb-author"
+    desc: "\uC6B0\uCE21 \uD234\uBC14\uC758 \uC124\uC815(\u2699) \uBC84\uD2BC\uC744 \uD074\uB9AD\uD574 \uC774\uB984\uC744 \uC785\uB825\uD558\uC138\uC694.\n\uD540\uACFC \uC2A4\uD399\uC5D0 \uC791\uC131\uC790 \uC815\uBCF4\uAC00 \uD45C\uC2DC\uB429\uB2C8\uB2E4.",
+    target: "sb-settings"
   },
   {
-    icon: /* @__PURE__ */ jsxs7(GIcon, { children: [
-      /* @__PURE__ */ jsx8("path", { d: "M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0Z" }),
-      /* @__PURE__ */ jsx8("circle", { cx: "12", cy: "10", r: "3" })
+    icon: /* @__PURE__ */ jsxs9(GIcon, { children: [
+      /* @__PURE__ */ jsx9("circle", { cx: "12", cy: "12", r: "10" }),
+      /* @__PURE__ */ jsx9("polyline", { points: "12 6 12 12 16 14" })
     ] }),
-    title: "\uC5B4\uB178\uD14C\uC774\uC158 \uBAA8\uB4DC",
+    title: "\uC124\uACC4 \uBAA8\uB4DC",
     badge: "\uAE30\uBCF8 \uC124\uC815",
-    desc: "Annotation \uBC84\uD2BC\uC73C\uB85C \uC5B4\uB178\uD14C\uC774\uC158 \uBAA8\uB4DC\uB97C ON/OFF \uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4. \uB2E8\uCD95\uD0A4 A",
-    target: "sb-annotation"
+    desc: "\uC124\uACC4 \uBAA8\uB4DC \uBC84\uD2BC\uC73C\uB85C \uC2A4\uD399 \uC791\uC5C5\uC744 ON/OFF\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4.\n\uC124\uACC4 \uBAA8\uB4DC\uC5D0\uC11C\uB9CC \uD540 \uCD94\uAC00\xB7\uC2A4\uD399 \uD3B8\uC9D1\uC774 \uAC00\uB2A5\uD569\uB2C8\uB2E4.\n\uB2E8\uCD95\uD0A4 A",
+    target: "sb-design-mode"
   },
   {
-    icon: /* @__PURE__ */ jsxs7(GIcon, { children: [
-      /* @__PURE__ */ jsx8("line", { x1: "12", y1: "5", x2: "12", y2: "19" }),
-      /* @__PURE__ */ jsx8("line", { x1: "5", y1: "12", x2: "19", y2: "12" })
+    icon: /* @__PURE__ */ jsxs9(GIcon, { children: [
+      /* @__PURE__ */ jsx9("path", { d: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" }),
+      /* @__PURE__ */ jsx9("polyline", { points: "14 2 14 8 20 8" }),
+      /* @__PURE__ */ jsx9("line", { x1: "9", y1: "13", x2: "15", y2: "13" }),
+      /* @__PURE__ */ jsx9("line", { x1: "9", y1: "17", x2: "13", y2: "17" })
     ] }),
-    title: "\uD540 \uB4F1\uB85D",
-    badge: "\uD540 \uAD00\uB9AC",
-    desc: "+ \uBC84\uD2BC \uB610\uB294 N\uD0A4\uB97C \uB20C\uB7EC \uD540 \uBC30\uCE58 \uBAA8\uB4DC\uB97C \uC2DC\uC791\uD558\uC138\uC694. \uD654\uBA74\uC758 \uC6D0\uD558\uB294 \uC704\uCE58\uB97C \uD074\uB9AD\uD558\uBA74 \uBC88\uD638\uAC00 \uCC0D\uD799\uB2C8\uB2E4.",
+    title: "\uC2A4\uD399 \uCD94\uAC00",
+    badge: "\uC2A4\uD399 \uAD00\uB9AC",
+    desc: '\uC124\uACC4 \uBAA8\uB4DC\uC5D0\uC11C "\uC2A4\uD399 \uCD94\uAC00" \uBC84\uD2BC\uC73C\uB85C\n\uD654\uBA74 \uC694\uC18C\uB97C \uD074\uB9AD\uD574 \uC2A4\uD399\uC744 \uB4F1\uB85D\uD569\uB2C8\uB2E4.\n\uC6B0\uCE21 \uD328\uB110\uC5D0\uC11C \uB0B4\uC6A9\uC744 \uD3B8\uC9D1\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4.\n\uB2E8\uCD95\uD0A4 S',
+    target: "sb-add-spec"
+  },
+  {
+    icon: /* @__PURE__ */ jsx9(GIcon, { children: /* @__PURE__ */ jsx9("path", { d: "m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z" }) }),
+    title: "\uCF54\uBA58\uD2B8 \uCD94\uAC00",
+    badge: "\uD611\uC5C5",
+    desc: "\uD540 \uCD94\uAC00 \uBC84\uD2BC\uC73C\uB85C \uD654\uBA74\uC758 \uC6D0\uD558\uB294 \uC704\uCE58\uC5D0 \uD540\uC744 \uCC0D\uACE0\n\uCF54\uBA58\uD2B8\uB97C \uB0A8\uAE30\uC138\uC694.\n\uD540\uC744 \uD074\uB9AD\uD558\uBA74 \uC2A4\uB808\uB4DC \uB313\uAE00\xB7\uD574\uACB0 \uCC98\uB9AC\uAC00 \uAC00\uB2A5\uD569\uB2C8\uB2E4.\n\uB2E8\uCD95\uD0A4 C",
     target: "sb-add-pin"
   },
   {
-    icon: /* @__PURE__ */ jsxs7(GIcon, { children: [
-      /* @__PURE__ */ jsx8("line", { x1: "8", y1: "6", x2: "21", y2: "6" }),
-      /* @__PURE__ */ jsx8("line", { x1: "8", y1: "12", x2: "21", y2: "12" }),
-      /* @__PURE__ */ jsx8("line", { x1: "8", y1: "18", x2: "21", y2: "18" }),
-      /* @__PURE__ */ jsx8("line", { x1: "3", y1: "6", x2: "3.01", y2: "6" }),
-      /* @__PURE__ */ jsx8("line", { x1: "3", y1: "12", x2: "3.01", y2: "12" }),
-      /* @__PURE__ */ jsx8("line", { x1: "3", y1: "18", x2: "3.01", y2: "18" })
+    icon: /* @__PURE__ */ jsxs9(GIcon, { children: [
+      /* @__PURE__ */ jsx9("rect", { width: "18", height: "14", x: "3", y: "4", rx: "2" }),
+      /* @__PURE__ */ jsx9("path", { d: "M3 10h18" }),
+      /* @__PURE__ */ jsx9("path", { d: "M8 20h8M12 14v6" })
     ] }),
-    title: "\uBC88\uD638 \uD655\uC778",
-    badge: "\uBAA9\uB85D & \uD544\uD130",
-    desc: "\uBAA9\uB85D \uBC84\uD2BC\uC744 \uD074\uB9AD\uD558\uBA74 \uD604\uC7AC \uD398\uC774\uC9C0\uC758 \uBAA8\uB4E0 \uD540 \uBAA9\uB85D\uC744 \uD655\uC778\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4.",
-    target: "sb-pin-list"
+    title: "\uB808\uC774\uC544\uC6C3 \uC804\uD658",
+    badge: "\uD654\uBA74 \uC124\uC815",
+    desc: "\uB85C\uACE0 \uC624\uB978\uCABD\uC758 \uBDF0\uD3EC\uD2B8 \uC544\uC774\uCF58\uC73C\uB85C\nPC \xB7 \uD0DC\uBE14\uB9BF \xB7 \uBAA8\uBC14\uC77C \uB808\uC774\uC544\uC6C3\uC744 \uC804\uD658\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4.\n\uC124\uC815(\u2699) \uBC84\uD2BC\uC5D0\uC11C \uD328\uB110 \uD45C\uC2DC \uBC29\uC2DD\uB3C4 \uBCC0\uACBD\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4.",
+    target: "sb-viewport"
   },
   {
-    icon: /* @__PURE__ */ jsxs7(GIcon, { children: [
-      /* @__PURE__ */ jsx8("path", { d: "M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z" }),
-      /* @__PURE__ */ jsx8("path", { d: "M7 7h.01" })
+    icon: /* @__PURE__ */ jsxs9(GIcon, { children: [
+      /* @__PURE__ */ jsx9("rect", { width: "20", height: "16", x: "2", y: "4", rx: "2" }),
+      /* @__PURE__ */ jsx9("path", { d: "M6 8h.001M10 8h.001M14 8h.001M18 8h.001M8 12h.001M12 12h.001M16 12h.001M7 16h10" })
     ] }),
-    title: "\uB808\uC774\uBE14 \uD544\uD130",
-    badge: "\uBAA9\uB85D & \uD544\uD130",
-    desc: "\uC911\uC559\uC758 \uB808\uC774\uBE14 \uBC84\uD2BC\uC73C\uB85C \uD2B9\uC815 \uB808\uC774\uBE14\uC758 \uD540\uB9CC \uACE8\uB77C\uBCFC \uC218 \uC788\uC2B5\uB2C8\uB2E4. \uB808\uC774\uBE14\uBCC4\uB85C \uD3EC\uC778\uD2B8\uB97C \uBD84\uB958\xB7\uAD00\uB9AC\uD558\uC138\uC694.",
-    target: "sb-label-filter"
-  },
-  {
-    icon: /* @__PURE__ */ jsx8(GIcon, { children: /* @__PURE__ */ jsx8("path", { d: "m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" }) }),
-    title: "\uAC80\uD1A0 \uD68C\uCC28",
-    badge: "\uAC80\uD1A0 \uD68C\uCC28",
-    desc: "\uAC80\uD1A0 \uD68C\uCC28 \uBC84\uD2BC\uC73C\uB85C \uD68C\uCC28\uB97C \uB098\uB20C \uC218 \uC788\uC2B5\uB2C8\uB2E4. \uD654\uBA74\uC774 \uBCC0\uACBD\uB3FC\uB3C4 \uC774\uC804 \uD68C\uCC28\uAC00 \uBCF4\uC874\uB429\uB2C8\uB2E4.",
-    target: "sb-session"
-  },
-  {
-    icon: /* @__PURE__ */ jsx8(GIcon, { children: /* @__PURE__ */ jsx8("path", { d: "m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z" }) }),
-    title: "\uCF54\uBA58\uD2B8 & \uC2A4\uB808\uB4DC",
-    badge: "\uD611\uC5C5",
-    desc: "\uD540\uC744 \uD074\uB9AD\uD558\uBA74 \uB178\uD2B8 \uC791\uC131\uACFC \uD300\uC6D0 \uC2A4\uB808\uB4DC \uB313\uAE00, \uD574\uACB0 \uCC98\uB9AC\uAC00 \uAC00\uB2A5\uD569\uB2C8\uB2E4.",
-    target: null
-  },
-  {
-    icon: /* @__PURE__ */ jsxs7(GIcon, { children: [
-      /* @__PURE__ */ jsx8("rect", { width: "20", height: "16", x: "2", y: "4", rx: "2" }),
-      /* @__PURE__ */ jsx8("path", { d: "M6 8h.001M10 8h.001M14 8h.001M18 8h.001M8 12h.001M12 12h.001M16 12h.001M7 16h10" })
-    ] }),
-    title: "\uB2E8\uCD95\uD0A4",
+    title: "\uB2E8\uCD95\uD0A4 \uC548\uB0B4",
     badge: "\uB2E8\uCD95\uD0A4",
-    desc: "A \u2014 Annotation ON/OFF  \xB7  N \u2014 \uD540 \uCD94\uAC00  \xB7  L \u2014 \uBAA9\uB85D  \xB7  D \u2014 \uD540 \uC0AD\uC81C  \xB7  C \u2014 \uD574\uACB0/\uBBF8\uD574\uACB0",
+    desc: "[A] \uC124\uACC4 \uBAA8\uB4DC ON/OFF\n[C] \uCF54\uBA58\uD2B8 \uCD94\uAC00\n[S] \uC2A4\uD399 \uCD94\uAC00\n[L] \uBAA9\uB85D",
     target: null
   }
 ];
@@ -3800,13 +5008,13 @@ function OnboardingGuide({ onClose }) {
   const [spotRect, setSpotRect] = useState7(null);
   const isLast = step === STEPS.length - 1;
   const current = STEPS[step];
-  useEffect6(() => {
+  useEffect7(() => {
     const raf = requestAnimationFrame(() => {
       setSpotRect(getSpotRect(current.target));
     });
     return () => cancelAnimationFrame(raf);
   }, [step, current.target]);
-  useEffect6(() => {
+  useEffect7(() => {
     const onResize = () => setSpotRect(getSpotRect(current.target));
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
@@ -3823,8 +5031,8 @@ function OnboardingGuide({ onClose }) {
     setStep((v) => v + 1);
   };
   const handlePrev = () => setStep((v) => v - 1);
-  return /* @__PURE__ */ jsxs7(Fragment7, { children: [
-    /* @__PURE__ */ jsx8(
+  return /* @__PURE__ */ jsxs9(Fragment7, { children: [
+    /* @__PURE__ */ jsx9(
       "div",
       {
         onClick: handleClose,
@@ -3837,7 +5045,7 @@ function OnboardingGuide({ onClose }) {
         }
       }
     ),
-    spotRect && /* @__PURE__ */ jsx8(
+    spotRect && /* @__PURE__ */ jsx9(
       "div",
       {
         style: {
@@ -3855,7 +5063,7 @@ function OnboardingGuide({ onClose }) {
         }
       }
     ),
-    /* @__PURE__ */ jsxs7(
+    /* @__PURE__ */ jsxs9(
       "div",
       {
         onClick: (e) => e.stopPropagation(),
@@ -3879,7 +5087,7 @@ function OnboardingGuide({ onClose }) {
           fontFamily: FONT_FAMILY
         },
         children: [
-          /* @__PURE__ */ jsx8(
+          /* @__PURE__ */ jsx9(
             "button",
             {
               onClick: handleClose,
@@ -3898,7 +5106,7 @@ function OnboardingGuide({ onClose }) {
               children: "\u2715"
             }
           ),
-          /* @__PURE__ */ jsx8("div", { style: { display: "flex", gap: 5, justifyContent: "center", marginBottom: 14, flexShrink: 0 }, children: STEPS.map((_, i) => /* @__PURE__ */ jsx8(
+          /* @__PURE__ */ jsx9("div", { style: { display: "flex", gap: 5, justifyContent: "center", marginBottom: 14, flexShrink: 0 }, children: STEPS.map((_, i) => /* @__PURE__ */ jsx9(
             "div",
             {
               onClick: () => setStep(i),
@@ -3913,8 +5121,8 @@ function OnboardingGuide({ onClose }) {
             },
             i
           )) }),
-          /* @__PURE__ */ jsx8("div", { style: { height: 68, marginTop: 20, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }, children: current.icon }),
-          /* @__PURE__ */ jsx8("div", { style: {
+          /* @__PURE__ */ jsx9("div", { style: { height: 68, marginTop: 20, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }, children: current.icon }),
+          /* @__PURE__ */ jsx9("div", { style: {
             textAlign: "center",
             fontSize: step === 0 ? 20 : 16,
             fontWeight: 700,
@@ -3923,7 +5131,7 @@ function OnboardingGuide({ onClose }) {
             lineHeight: 1.3,
             flexShrink: 0
           }, children: current.title }),
-          /* @__PURE__ */ jsx8("div", { style: { display: "flex", justifyContent: "center", marginBottom: 8, flexShrink: 0 }, children: step === 0 ? /* @__PURE__ */ jsx8("span", { style: {
+          /* @__PURE__ */ jsx9("div", { style: { display: "flex", justifyContent: "center", marginBottom: 8, flexShrink: 0 }, children: step === 0 ? /* @__PURE__ */ jsx9("span", { style: {
             fontSize: 10,
             fontWeight: 600,
             letterSpacing: ".6px",
@@ -3933,7 +5141,7 @@ function OnboardingGuide({ onClose }) {
             borderRadius: 20,
             padding: "3px 10px",
             fontFamily: FONT_FAMILY
-          }, children: current.badge }) : /* @__PURE__ */ jsx8("span", { style: {
+          }, children: current.badge }) : /* @__PURE__ */ jsx9("span", { style: {
             fontSize: 10,
             fontWeight: 500,
             letterSpacing: ".4px",
@@ -3944,7 +5152,7 @@ function OnboardingGuide({ onClose }) {
             padding: "3px 10px",
             fontFamily: FONT_FAMILY
           }, children: current.badge }) }),
-          /* @__PURE__ */ jsx8("div", { style: {
+          /* @__PURE__ */ jsx9("div", { style: {
             flex: 1,
             display: "flex",
             alignItems: "center",
@@ -3952,15 +5160,16 @@ function OnboardingGuide({ onClose }) {
             textAlign: "center",
             fontSize: 12.5,
             color: "rgba(255,255,255,.48)",
-            lineHeight: 1.75
+            lineHeight: 1.75,
+            whiteSpace: "pre-line"
           }, children: current.desc }),
-          /* @__PURE__ */ jsxs7("div", { style: { textAlign: "center", fontSize: 10, color: "rgba(255,255,255,.22)", marginBottom: 10, flexShrink: 0 }, children: [
+          /* @__PURE__ */ jsxs9("div", { style: { textAlign: "center", fontSize: 10, color: "rgba(255,255,255,.22)", marginBottom: 10, flexShrink: 0 }, children: [
             step + 1,
             " / ",
             STEPS.length
           ] }),
-          /* @__PURE__ */ jsxs7("div", { style: { display: "flex", gap: 8, marginBottom: 10, flexShrink: 0 }, children: [
-            step > 0 && /* @__PURE__ */ jsx8(
+          /* @__PURE__ */ jsxs9("div", { style: { display: "flex", gap: 8, marginBottom: 10, flexShrink: 0 }, children: [
+            step > 0 && /* @__PURE__ */ jsx9(
               "button",
               {
                 onClick: handlePrev,
@@ -3978,7 +5187,7 @@ function OnboardingGuide({ onClose }) {
                 children: "\uC774\uC804"
               }
             ),
-            /* @__PURE__ */ jsx8(
+            /* @__PURE__ */ jsx9(
               "button",
               {
                 onClick: handleNext,
@@ -4005,7 +5214,7 @@ function OnboardingGuide({ onClose }) {
               }
             )
           ] }),
-          /* @__PURE__ */ jsxs7(
+          /* @__PURE__ */ jsxs9(
             "label",
             {
               style: {
@@ -4018,7 +5227,7 @@ function OnboardingGuide({ onClose }) {
                 flexShrink: 0
               },
               children: [
-                /* @__PURE__ */ jsx8(
+                /* @__PURE__ */ jsx9(
                   "input",
                   {
                     type: "checkbox",
@@ -4027,12 +5236,2855 @@ function OnboardingGuide({ onClose }) {
                     style: { width: 13, height: 13, cursor: "pointer", accentColor: "#3B82F6" }
                   }
                 ),
-                /* @__PURE__ */ jsx8("span", { style: { fontSize: 11, color: "rgba(255,255,255,.28)", fontFamily: FONT_FAMILY }, children: "\uC55E\uC73C\uB85C \uBCF4\uC774\uC9C0 \uC54A\uC74C" })
+                /* @__PURE__ */ jsx9("span", { style: { fontSize: 11, color: "rgba(255,255,255,.28)", fontFamily: FONT_FAMILY }, children: "\uC55E\uC73C\uB85C \uBCF4\uC774\uC9C0 \uC54A\uC74C" })
               ]
             }
           )
         ]
       }
+    )
+  ] });
+}
+
+// src/ElementPicker.tsx
+import { useCallback, useEffect as useEffect8, useRef as useRef5, useState as useState8 } from "react";
+import { Fragment as Fragment8, jsx as jsx10, jsxs as jsxs10 } from "react/jsx-runtime";
+var EXCLUDED_IDS = [
+  "specbridge-annot-layer",
+  "specbridge-pin-layer",
+  "sb-element-picker-highlight",
+  "sb-element-picker-popup",
+  "sb-spec-drawer"
+  // SpecDrawer
+];
+function isExcluded(el) {
+  let cur = el;
+  while (cur && cur !== document.body) {
+    if (EXCLUDED_IDS.includes(cur.id)) return true;
+    if (cur.dataset?.sbUi) return true;
+    cur = cur.parentElement;
+  }
+  return false;
+}
+function NamingPopup({
+  rect,
+  initialName,
+  onConfirm,
+  onCancel
+}) {
+  const [name, setName] = useState8(initialName);
+  const inputRef = useRef5(null);
+  useEffect8(() => {
+    inputRef.current?.focus();
+    inputRef.current?.select();
+  }, []);
+  const popW = 240;
+  const popH = 96;
+  const margin = 8;
+  let left = rect.left;
+  let top = rect.bottom + margin;
+  if (left + popW > window.innerWidth - margin) left = window.innerWidth - popW - margin;
+  if (left < margin) left = margin;
+  if (top + popH > window.innerHeight - 50) top = rect.top - popH - margin;
+  const handleConfirm = () => {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    onConfirm(trimmed);
+  };
+  return /* @__PURE__ */ jsxs10(
+    "div",
+    {
+      id: "sb-element-picker-popup",
+      style: {
+        position: "fixed",
+        top,
+        left,
+        width: popW,
+        background: "rgba(8,12,24,.97)",
+        backdropFilter: "blur(20px)",
+        WebkitBackdropFilter: "blur(20px)",
+        border: "1px solid rgba(99,102,241,.4)",
+        borderRadius: 6,
+        boxShadow: "0 8px 32px rgba(0,0,0,.5)",
+        padding: "10px 12px",
+        zIndex: 19999,
+        fontFamily: FONT_FAMILY
+      },
+      onClick: (e) => e.stopPropagation(),
+      children: [
+        /* @__PURE__ */ jsx10("div", { style: { fontSize: 10, color: "rgba(255,255,255,.4)", marginBottom: 6, letterSpacing: ".3px", fontWeight: 600 }, children: "\uC694\uC18C \uC774\uB984 \uC9C0\uC815" }),
+        /* @__PURE__ */ jsx10(
+          "input",
+          {
+            ref: inputRef,
+            value: name,
+            onChange: (e) => setName(e.target.value),
+            onKeyDown: (e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                handleConfirm();
+              }
+              if (e.key === "Escape") onCancel();
+            },
+            placeholder: "\uC608: \uC800\uC7A5 \uBC84\uD2BC, \uD68C\uC6D0 \uD14C\uC774\uBE14...",
+            style: {
+              width: "100%",
+              boxSizing: "border-box",
+              background: "rgba(255,255,255,.07)",
+              border: "1px solid rgba(99,102,241,.4)",
+              borderRadius: 4,
+              padding: "6px 9px",
+              color: "#fff",
+              fontSize: 12,
+              fontFamily: FONT_FAMILY,
+              outline: "none",
+              marginBottom: 8
+            }
+          }
+        ),
+        /* @__PURE__ */ jsxs10("div", { style: { display: "flex", gap: 6 }, children: [
+          /* @__PURE__ */ jsx10(
+            "button",
+            {
+              onClick: onCancel,
+              style: {
+                flex: 1,
+                padding: "5px 0",
+                borderRadius: 3,
+                background: "transparent",
+                border: "1px solid rgba(255,255,255,.12)",
+                color: "rgba(255,255,255,.45)",
+                fontSize: 11,
+                cursor: "pointer",
+                fontFamily: FONT_FAMILY
+              },
+              children: "\uCDE8\uC18C"
+            }
+          ),
+          /* @__PURE__ */ jsx10(
+            "button",
+            {
+              onClick: handleConfirm,
+              disabled: !name.trim(),
+              style: {
+                flex: 2,
+                padding: "5px 0",
+                borderRadius: 3,
+                background: name.trim() ? "rgba(99,102,241,.7)" : "rgba(255,255,255,.07)",
+                border: "none",
+                color: name.trim() ? "#fff" : "rgba(255,255,255,.25)",
+                fontSize: 11,
+                fontWeight: 600,
+                cursor: name.trim() ? "pointer" : "not-allowed",
+                fontFamily: FONT_FAMILY
+              },
+              children: "\uD655\uC778 \u2192"
+            }
+          )
+        ] })
+      ]
+    }
+  );
+}
+function ElementPicker({ active, align, onSelectElement }) {
+  const [hovered, setHovered] = useState8(null);
+  const [naming, setNaming] = useState8(null);
+  const frameRef = useRef5(null);
+  const hoveredRef = useRef5(null);
+  const onMove = useCallback((e) => {
+    if (naming) return;
+    if (frameRef.current) cancelAnimationFrame(frameRef.current);
+    frameRef.current = requestAnimationFrame(() => {
+      const target = e.target;
+      if (!target || isExcluded(target)) {
+        setHovered(null);
+        hoveredRef.current = null;
+        return;
+      }
+      const el = target.closest("[id], button, a, input, select, textarea, [role], h1, h2, h3, h4, li, td, th, label, img, form, section, article, nav, header, footer, main, aside") ?? target;
+      if (isExcluded(el)) {
+        setHovered(null);
+        hoveredRef.current = null;
+        return;
+      }
+      const rect = el.getBoundingClientRect();
+      const next = { el, rect };
+      hoveredRef.current = next;
+      setHovered(next);
+    });
+  }, [naming]);
+  const onClick = useCallback((e) => {
+    const clickTarget = e.target;
+    if (!clickTarget || isExcluded(clickTarget)) return;
+    const pinLayer = document.getElementById("specbridge-pin-layer");
+    const layerRect = pinLayer?.getBoundingClientRect();
+    if (!layerRect || layerRect.width === 0 || layerRect.height === 0) return;
+    e.preventDefault();
+    e.stopPropagation();
+    if (hoveredRef.current && !isExcluded(hoveredRef.current.el)) {
+      const { el, rect } = hoveredRef.current;
+      hoveredRef.current = null;
+      const rawX = rect.left - layerRect.left;
+      const pinX = align === "center" ? rawX - layerRect.width / 2 : align === "right" ? layerRect.width - rawX : rawX;
+      const pinY = rect.top - layerRect.top;
+      setNaming({ rect, initialName: el.dataset?.specLabel ?? "", pinX, pinY });
+    } else {
+      hoveredRef.current = null;
+      const rawX = e.clientX - layerRect.left;
+      const rawY = e.clientY - layerRect.top;
+      const pinX = align === "center" ? rawX - layerRect.width / 2 : align === "right" ? layerRect.width - rawX : rawX;
+      const fakeRect = new DOMRect(e.clientX, e.clientY, 0, 0);
+      setNaming({ rect: fakeRect, initialName: "", pinX, pinY: rawY });
+    }
+    setHovered(null);
+  }, [align]);
+  useEffect8(() => {
+    if (!active) {
+      setHovered(null);
+      setNaming(null);
+      return;
+    }
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("click", onClick, true);
+    return () => {
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("click", onClick, true);
+      if (frameRef.current) cancelAnimationFrame(frameRef.current);
+    };
+  }, [active, onMove, onClick]);
+  useEffect8(() => {
+    if (!active) return;
+    document.body.style.cursor = "crosshair";
+    return () => {
+      document.body.style.cursor = "";
+    };
+  }, [active]);
+  useEffect8(() => {
+    if (!naming) return;
+    const onKey = (e) => {
+      if (e.key === "Escape") setNaming(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [naming]);
+  if (!active) return null;
+  return /* @__PURE__ */ jsxs10(Fragment8, { children: [
+    hovered && !naming && (() => {
+      const { rect } = hovered;
+      const PAD = 2;
+      return /* @__PURE__ */ jsx10(
+        "div",
+        {
+          id: "sb-element-picker-highlight",
+          style: {
+            position: "fixed",
+            top: rect.top - PAD,
+            left: rect.left - PAD,
+            width: rect.width + PAD * 2,
+            height: rect.height + PAD * 2,
+            border: "2px solid rgba(99,102,241,.75)",
+            borderRadius: 3,
+            background: "rgba(99,102,241,.06)",
+            pointerEvents: "none",
+            zIndex: 9800,
+            boxShadow: "0 0 0 1px rgba(99,102,241,.15)"
+          },
+          children: /* @__PURE__ */ jsx10("div", { style: {
+            position: "absolute",
+            bottom: "calc(100% + 4px)",
+            left: 0,
+            background: "rgba(99,102,241,.9)",
+            color: "#fff",
+            fontSize: 10,
+            fontWeight: 600,
+            padding: "2px 8px",
+            borderRadius: "3px 3px 3px 0",
+            whiteSpace: "nowrap",
+            fontFamily: FONT_FAMILY,
+            pointerEvents: "none"
+          }, children: "\uD074\uB9AD\uD558\uC5EC \uC2A4\uD399 \uC791\uC131" })
+        }
+      );
+    })(),
+    naming && /* @__PURE__ */ jsx10(
+      NamingPopup,
+      {
+        rect: naming.rect,
+        initialName: naming.initialName,
+        onConfirm: (name) => {
+          const { pinX, pinY } = naming;
+          setNaming(null);
+          onSelectElement(name, name, pinX, pinY);
+        },
+        onCancel: () => setNaming(null)
+      }
+    )
+  ] });
+}
+
+// src/SpecDrawer.tsx
+import { useCallback as useCallback2, useEffect as useEffect9, useMemo as useMemo2, useRef as useRef6, useState as useState9 } from "react";
+import { Fragment as Fragment9, jsx as jsx11, jsxs as jsxs11 } from "react/jsx-runtime";
+var DRAWER_W = 350;
+var SCREEN_LIST_W = 280;
+var STATUS_CFG = {
+  planned: { label: "\uC608\uC815", color: "#94a3b8" },
+  draft: { label: "\uC791\uC131", color: "#60a5fa" },
+  review: { label: "\uAC80\uD1A0", color: "#a78bfa" },
+  changed: { label: "\uBCC0\uACBD", color: "#fb923c" },
+  confirmed: { label: "\uD655\uC815", color: "#4ade80" },
+  deprecated: { label: "\uD3D0\uAE30", color: "#f87171" }
+};
+var ALL_STATUSES = ["planned", "draft", "review", "changed", "confirmed", "deprecated"];
+var SPEC_COLOR = "#3b82f6";
+var BADGE_COLOR = "#ef4444";
+var CHANGELOG_COLORS = [
+  { bg: "rgba(59,130,246,.20)", fg: "#93c5fd", bd: "rgba(59,130,246,.30)" },
+  // blue
+  { bg: "rgba(16,185,129,.20)", fg: "#6ee7b7", bd: "rgba(16,185,129,.30)" },
+  // emerald
+  { bg: "rgba(245,158,11,.20)", fg: "#fcd34d", bd: "rgba(245,158,11,.30)" },
+  // amber
+  { bg: "rgba(239,68,68,.20)", fg: "#fca5a5", bd: "rgba(239,68,68,.30)" },
+  // red
+  { bg: "rgba(168,85,247,.20)", fg: "#c4b5fd", bd: "rgba(168,85,247,.30)" },
+  // violet
+  { bg: "rgba(236,72,153,.20)", fg: "#f9a8d4", bd: "rgba(236,72,153,.30)" },
+  // pink
+  { bg: "rgba(20,184,166,.20)", fg: "#5eead4", bd: "rgba(20,184,166,.30)" },
+  // teal
+  { bg: "rgba(249,115,22,.20)", fg: "#fdba74", bd: "rgba(249,115,22,.30)" },
+  // orange
+  { bg: "rgba(99,102,241,.20)", fg: "#a5b4fc", bd: "rgba(99,102,241,.30)" },
+  // indigo
+  { bg: "rgba(234,179,8,.20)", fg: "#fde047", bd: "rgba(234,179,8,.30)" }
+  // yellow
+];
+function fmtDate(iso) {
+  const d = new Date(iso);
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  const hh = String(d.getHours()).padStart(2, "0");
+  const mi = String(d.getMinutes()).padStart(2, "0");
+  return `${mm}.${dd} ${hh}:${mi}`;
+}
+function fmtDateOnly(iso) {
+  const d = new Date(iso);
+  const yy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yy}.${mm}.${dd}`;
+}
+function todayIso() {
+  const d = /* @__PURE__ */ new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+function ScreenSelector({ screens, currentPageId, onSelect }) {
+  const [open, setOpen] = useState9(false);
+  const ref = useRef6(null);
+  const current = screens.find((s) => s.pageId === currentPageId);
+  useEffect9(() => {
+    if (!open) return;
+    const h = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener("mousedown", h);
+    return () => document.removeEventListener("mousedown", h);
+  }, [open]);
+  if (screens.length <= 1) return /* @__PURE__ */ jsx11("span", { style: { fontSize: 11, fontWeight: 700, color: DARK.txt, fontFamily: FONT_FAMILY }, children: current?.title || currentPageId });
+  return /* @__PURE__ */ jsxs11("div", { ref, style: { position: "relative" }, children: [
+    /* @__PURE__ */ jsxs11("button", { onClick: () => setOpen((v) => !v), style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 4,
+      background: DARK.bg3,
+      border: `1px solid ${DARK.brd}`,
+      borderRadius: 2,
+      padding: "3px 8px",
+      cursor: "pointer",
+      color: DARK.txt,
+      fontSize: 11,
+      fontWeight: 700,
+      fontFamily: FONT_FAMILY
+    }, children: [
+      /* @__PURE__ */ jsx11("span", { style: { maxWidth: 130, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, children: current?.title || currentPageId }),
+      /* @__PURE__ */ jsx11("span", { style: { fontSize: 7, opacity: 0.5 }, children: "\u25BE" })
+    ] }),
+    open && /* @__PURE__ */ jsx11("div", { style: {
+      position: "absolute",
+      top: "calc(100% + 4px)",
+      left: 0,
+      zIndex: 100,
+      background: DARK.bg2,
+      border: `1px solid ${DARK.brd}`,
+      borderRadius: 3,
+      overflow: "hidden",
+      minWidth: 180,
+      boxShadow: "0 8px 24px rgba(0,0,0,.5)"
+    }, children: screens.map((s) => /* @__PURE__ */ jsx11(
+      "button",
+      {
+        onClick: () => {
+          onSelect(s.pageId);
+          setOpen(false);
+        },
+        style: {
+          display: "block",
+          width: "100%",
+          textAlign: "left",
+          padding: "8px 12px",
+          border: "none",
+          background: s.pageId === currentPageId ? `${SPEC_COLOR}18` : "transparent",
+          color: s.pageId === currentPageId ? SPEC_COLOR : DARK.txS,
+          fontSize: 11,
+          cursor: "pointer",
+          fontFamily: FONT_FAMILY,
+          fontWeight: s.pageId === currentPageId ? 700 : 400
+        },
+        onMouseEnter: (e) => {
+          if (s.pageId !== currentPageId) e.currentTarget.style.background = DARK.bg3;
+        },
+        onMouseLeave: (e) => {
+          if (s.pageId !== currentPageId) e.currentTarget.style.background = "transparent";
+        },
+        children: s.title || s.pageId
+      },
+      s.pageId
+    )) })
+  ] });
+}
+function ChangelogEntryCard({ entry, canDelete, onDelete, isLast }) {
+  const [hovered, setHovered] = useState9(false);
+  const [confirming, setConfirming] = useState9(false);
+  return /* @__PURE__ */ jsxs11(
+    "div",
+    {
+      onMouseEnter: () => setHovered(true),
+      onMouseLeave: () => {
+        setHovered(false);
+        setConfirming(false);
+      },
+      style: {
+        padding: "8px 14px",
+        borderBottom: isLast ? "none" : "1px solid rgba(255,255,255,.05)",
+        background: confirming ? "rgba(239,68,68,.06)" : hovered ? "rgba(255,255,255,.02)" : "transparent",
+        transition: "background .1s"
+      },
+      children: [
+        /* @__PURE__ */ jsxs11("div", { style: { display: "flex", alignItems: "center", gap: 5, marginBottom: 3 }, children: [
+          entry.version && (() => {
+            const idx = (entry.seq > 0 ? entry.seq - 1 : 0) % 10;
+            const c = CHANGELOG_COLORS[idx];
+            return /* @__PURE__ */ jsx11("span", { style: {
+              fontSize: 9,
+              fontWeight: 700,
+              fontFamily: FONT_FAMILY,
+              padding: "1px 6px",
+              borderRadius: 3,
+              flexShrink: 0,
+              background: c.bg,
+              color: c.fg,
+              border: `1px solid ${c.bd}`
+            }, children: entry.version });
+          })(),
+          /* @__PURE__ */ jsx11("span", { style: { fontSize: 9, color: "rgba(255,255,255,.28)", fontFamily: FONT_FAMILY }, children: fmtDateOnly(entry.createdAt) }),
+          /* @__PURE__ */ jsx11("span", { style: { flex: 1 } }),
+          entry.author && !confirming && /* @__PURE__ */ jsx11("span", { style: { fontSize: 9, color: "rgba(255,255,255,.28)", fontFamily: FONT_FAMILY }, children: entry.author }),
+          canDelete && !confirming && /* @__PURE__ */ jsx11(
+            "button",
+            {
+              onClick: () => setConfirming(true),
+              title: "\uC0AD\uC81C",
+              style: {
+                opacity: hovered ? 1 : 0,
+                transition: "opacity .15s",
+                background: "transparent",
+                border: "none",
+                color: "rgba(255,255,255,.4)",
+                cursor: "pointer",
+                fontSize: 11,
+                lineHeight: 1,
+                padding: "0 2px",
+                fontFamily: FONT_FAMILY
+              },
+              onMouseEnter: (e) => {
+                e.currentTarget.style.color = "#f87171";
+              },
+              onMouseLeave: (e) => {
+                e.currentTarget.style.color = "rgba(255,255,255,.4)";
+              },
+              children: "\xD7"
+            }
+          ),
+          confirming && /* @__PURE__ */ jsxs11("div", { style: { display: "flex", alignItems: "center", gap: 5 }, children: [
+            /* @__PURE__ */ jsx11("span", { style: { fontSize: 9, color: "rgba(255,255,255,.45)", fontFamily: FONT_FAMILY }, children: "\uC0AD\uC81C\uD560\uAE4C\uC694?" }),
+            /* @__PURE__ */ jsx11(
+              "button",
+              {
+                onClick: onDelete,
+                style: {
+                  fontSize: 9,
+                  fontWeight: 700,
+                  padding: "2px 8px",
+                  borderRadius: 3,
+                  cursor: "pointer",
+                  background: "rgba(239,68,68,.25)",
+                  border: "1px solid rgba(239,68,68,.4)",
+                  color: "#fca5a5",
+                  fontFamily: FONT_FAMILY
+                },
+                children: "\uC0AD\uC81C"
+              }
+            ),
+            /* @__PURE__ */ jsx11(
+              "button",
+              {
+                onClick: () => setConfirming(false),
+                style: {
+                  fontSize: 9,
+                  padding: "2px 8px",
+                  borderRadius: 3,
+                  cursor: "pointer",
+                  background: "transparent",
+                  border: "1px solid rgba(255,255,255,.15)",
+                  color: "rgba(255,255,255,.45)",
+                  fontFamily: FONT_FAMILY
+                },
+                children: "\uCDE8\uC18C"
+              }
+            )
+          ] })
+        ] }),
+        /* @__PURE__ */ jsx11("div", { style: {
+          fontSize: 11,
+          color: "rgba(255,255,255,.6)",
+          fontFamily: FONT_FAMILY,
+          lineHeight: 1.55,
+          whiteSpace: "pre-wrap",
+          wordBreak: "break-word"
+        }, children: entry.content })
+      ]
+    }
+  );
+}
+var INPUT_STYLE = {
+  width: "100%",
+  boxSizing: "border-box",
+  background: DARK.bg3,
+  border: `1px solid rgba(255,255,255,.12)`,
+  borderRadius: 3,
+  padding: "5px 8px",
+  color: DARK.txt,
+  fontSize: 11,
+  fontFamily: FONT_FAMILY,
+  outline: "none"
+};
+function ChangelogSection({ storage, currentAuthor }) {
+  const [entries, setEntries] = useState9([]);
+  const [open, setOpen] = useState9(false);
+  const [adding, setAdding] = useState9(false);
+  const [formDate, setFormDate] = useState9("");
+  const [formVersion, setFormVersion] = useState9("");
+  const [formContent, setFormContent] = useState9("");
+  const [formAuthor, setFormAuthor] = useState9("");
+  const [saving, setSaving] = useState9(false);
+  const [saveError, setSaveError] = useState9(null);
+  useEffect9(() => {
+    if (!storage.loadChangelog) return;
+    storage.loadChangelog().then((e) => {
+      setEntries(e);
+    }).catch(() => {
+    });
+  }, [storage]);
+  const openForm = () => {
+    setFormDate(todayIso());
+    setFormVersion("");
+    setFormContent("");
+    setFormAuthor(currentAuthor || "");
+    setSaveError(null);
+    setAdding(true);
+    setOpen(true);
+  };
+  const closeForm = () => {
+    setAdding(false);
+    setSaveError(null);
+  };
+  const handleAdd = async () => {
+    if (!formContent.trim() || !storage.addChangelogEntry) return;
+    setSaving(true);
+    setSaveError(null);
+    try {
+      const entry = await storage.addChangelogEntry(
+        formContent.trim(),
+        formAuthor.trim() || null,
+        formDate || null,
+        formVersion.trim() || null
+      );
+      setEntries((prev) => [entry, ...prev]);
+      closeForm();
+      setOpen(true);
+    } catch (e) {
+      console.error("[SpecBridge] changelog save error:", e);
+      setSaveError(e instanceof Error ? e.message : String(e) || "\uC800\uC7A5\uC5D0 \uC2E4\uD328\uD588\uC2B5\uB2C8\uB2E4");
+    } finally {
+      setSaving(false);
+    }
+  };
+  const handleDelete = async (id) => {
+    if (!storage.deleteChangelogEntry) return;
+    try {
+      await storage.deleteChangelogEntry(id);
+      setEntries((prev) => prev.filter((e) => e.id !== id));
+    } catch {
+    }
+  };
+  if (!storage.loadChangelog) return null;
+  return /* @__PURE__ */ jsxs11("div", { style: { flexShrink: 0, borderTop: "1px solid rgba(255,255,255,.08)" }, children: [
+    /* @__PURE__ */ jsxs11("div", { style: { display: "flex", alignItems: "center", padding: "9px 14px 8px", gap: 6 }, children: [
+      /* @__PURE__ */ jsxs11(
+        "button",
+        {
+          onClick: () => setOpen((v) => !v),
+          style: { flex: 1, display: "flex", alignItems: "center", gap: 5, background: "transparent", border: "none", cursor: "pointer", padding: 0, textAlign: "left", minWidth: 0 },
+          children: [
+            entries.length > 0 ? /* @__PURE__ */ jsxs11(Fragment9, { children: [
+              entries[0].version && (() => {
+                const idx = (entries[0].seq > 0 ? entries[0].seq - 1 : 0) % 10;
+                const c = CHANGELOG_COLORS[idx];
+                return /* @__PURE__ */ jsx11("span", { style: {
+                  fontSize: 10,
+                  fontWeight: 700,
+                  fontFamily: FONT_FAMILY,
+                  flexShrink: 0,
+                  padding: "1px 6px",
+                  borderRadius: 3,
+                  background: c.bg,
+                  color: c.fg,
+                  border: `1px solid ${c.bd}`
+                }, children: entries[0].version });
+              })(),
+              /* @__PURE__ */ jsx11("span", { style: { fontSize: 10, color: "rgba(255,255,255,.45)", fontFamily: FONT_FAMILY, flexShrink: 0 }, children: fmtDateOnly(entries[0].createdAt) })
+            ] }) : /* @__PURE__ */ jsx11("span", { style: { fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,.4)", textTransform: "uppercase", letterSpacing: ".4px", fontFamily: FONT_FAMILY }, children: "\uBCC0\uACBD \uC774\uB825" }),
+            /* @__PURE__ */ jsx11("span", { style: { fontSize: 8, color: "rgba(255,255,255,.22)", marginLeft: 2 }, children: open ? "\u25B2" : "\u25BC" })
+          ]
+        }
+      ),
+      storage.addChangelogEntry && /* @__PURE__ */ jsx11(
+        "button",
+        {
+          onClick: () => adding ? closeForm() : openForm(),
+          title: adding ? "\uC785\uB825 \uCDE8\uC18C" : "\uC774\uB825 \uCD94\uAC00",
+          style: {
+            width: 20,
+            height: 20,
+            borderRadius: 3,
+            fontSize: 14,
+            lineHeight: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: adding ? `${SPEC_COLOR}22` : "transparent",
+            border: `1px solid ${adding ? SPEC_COLOR : "rgba(255,255,255,.12)"}`,
+            color: adding ? SPEC_COLOR : "rgba(255,255,255,.4)",
+            cursor: "pointer",
+            transition: "all .15s"
+          },
+          onMouseEnter: (e) => {
+            if (!adding) {
+              e.currentTarget.style.borderColor = SPEC_COLOR;
+              e.currentTarget.style.color = SPEC_COLOR;
+            }
+          },
+          onMouseLeave: (e) => {
+            if (!adding) {
+              e.currentTarget.style.borderColor = "rgba(255,255,255,.12)";
+              e.currentTarget.style.color = "rgba(255,255,255,.4)";
+            }
+          },
+          children: adding ? "\xD7" : "+"
+        }
+      )
+    ] }),
+    adding && /* @__PURE__ */ jsxs11("div", { style: { padding: "0 12px 12px", display: "flex", flexDirection: "column", gap: 6 }, children: [
+      /* @__PURE__ */ jsxs11("div", { style: { display: "flex", gap: 6 }, children: [
+        /* @__PURE__ */ jsxs11("div", { style: { flex: 1, minWidth: 0 }, children: [
+          /* @__PURE__ */ jsx11("div", { style: { fontSize: 9, color: "rgba(255,255,255,.35)", fontFamily: FONT_FAMILY, marginBottom: 3 }, children: "\uBC84\uC804" }),
+          /* @__PURE__ */ jsx11(
+            "input",
+            {
+              type: "text",
+              value: formVersion,
+              onChange: (e) => setFormVersion(e.target.value),
+              placeholder: "v1.0.0",
+              style: INPUT_STYLE
+            }
+          )
+        ] }),
+        /* @__PURE__ */ jsxs11("div", { style: { flex: 2, minWidth: 0 }, children: [
+          /* @__PURE__ */ jsx11("div", { style: { fontSize: 9, color: "rgba(255,255,255,.35)", fontFamily: FONT_FAMILY, marginBottom: 3 }, children: "\uB0A0\uC9DC" }),
+          /* @__PURE__ */ jsx11(
+            "input",
+            {
+              type: "date",
+              value: formDate,
+              onChange: (e) => setFormDate(e.target.value),
+              style: { ...INPUT_STYLE, colorScheme: "dark" }
+            }
+          )
+        ] }),
+        /* @__PURE__ */ jsxs11("div", { style: { flex: 2, minWidth: 0 }, children: [
+          /* @__PURE__ */ jsx11("div", { style: { fontSize: 9, color: "rgba(255,255,255,.35)", fontFamily: FONT_FAMILY, marginBottom: 3 }, children: "\uC791\uC131\uC790" }),
+          /* @__PURE__ */ jsx11(
+            "input",
+            {
+              type: "text",
+              value: formAuthor,
+              onChange: (e) => setFormAuthor(e.target.value),
+              placeholder: "\uC791\uC131\uC790",
+              style: INPUT_STYLE
+            }
+          )
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxs11("div", { children: [
+        /* @__PURE__ */ jsx11("div", { style: { fontSize: 9, color: "rgba(255,255,255,.35)", fontFamily: FONT_FAMILY, marginBottom: 3 }, children: "\uBCC0\uACBD \uB0B4\uC6A9" }),
+        /* @__PURE__ */ jsx11(
+          "textarea",
+          {
+            autoFocus: true,
+            value: formContent,
+            onChange: (e) => setFormContent(e.target.value),
+            placeholder: "\uBCC0\uACBD\uB41C \uB0B4\uC6A9\uC744 \uC785\uB825\uD558\uC138\uC694\u2026",
+            rows: 3,
+            onKeyDown: (e) => {
+              if (e.key === "Escape") {
+                e.nativeEvent.stopImmediatePropagation();
+                closeForm();
+              }
+              if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+                e.preventDefault();
+                handleAdd();
+              }
+            },
+            style: { ...INPUT_STYLE, resize: "none", lineHeight: 1.6, overflow: "hidden", border: `1px solid ${SPEC_COLOR}55` }
+          }
+        )
+      ] }),
+      saveError && /* @__PURE__ */ jsxs11("div", { style: { fontSize: 10, color: "#f87171", fontFamily: FONT_FAMILY, background: "rgba(239,68,68,.1)", borderRadius: 3, padding: "4px 8px" }, children: [
+        "\u26A0 ",
+        saveError
+      ] }),
+      /* @__PURE__ */ jsxs11("div", { style: { display: "flex", gap: 5, justifyContent: "flex-end" }, children: [
+        /* @__PURE__ */ jsx11(
+          "button",
+          {
+            onClick: closeForm,
+            style: { padding: "3px 10px", borderRadius: 3, fontSize: 10, background: "transparent", border: `1px solid ${DARK.brd}`, color: DARK.txS, cursor: "pointer", fontFamily: FONT_FAMILY },
+            children: "\uCDE8\uC18C"
+          }
+        ),
+        /* @__PURE__ */ jsx11(
+          "button",
+          {
+            onClick: handleAdd,
+            disabled: !formContent.trim() || saving,
+            style: { padding: "3px 10px", borderRadius: 3, fontSize: 10, fontWeight: 600, background: SPEC_COLOR, border: "none", color: "#fff", cursor: "pointer", fontFamily: FONT_FAMILY, opacity: !formContent.trim() || saving ? 0.5 : 1 },
+            children: saving ? "\uC800\uC7A5 \uC911\u2026" : "\uC800\uC7A5"
+          }
+        )
+      ] })
+    ] }),
+    open && /* @__PURE__ */ jsx11("div", { className: "sb-scroll", style: { maxHeight: 220, overflowY: "auto" }, children: entries.length === 0 ? /* @__PURE__ */ jsx11("div", { style: { padding: "4px 14px 12px", fontSize: 11, color: "rgba(255,255,255,.2)", fontFamily: FONT_FAMILY }, children: "\uBCC0\uACBD \uC774\uB825\uC774 \uC5C6\uC2B5\uB2C8\uB2E4." }) : entries.map((entry, idx) => /* @__PURE__ */ jsx11(
+      ChangelogEntryCard,
+      {
+        entry,
+        canDelete: !!storage.deleteChangelogEntry,
+        onDelete: () => handleDelete(entry.id),
+        isLast: idx === entries.length - 1
+      },
+      entry.id
+    )) })
+  ] });
+}
+function ScreenListItem({ s, isCurrent, cfg, canDelete, allAnnotations, onSelect, onDelete }) {
+  const [hovered, setHovered] = useState9(false);
+  const [confirming, setConfirming] = useState9(false);
+  const pagePins = allAnnotations?.[s.pageId] ?? [];
+  const unresolvedCount = pagePins.filter((p) => p.status !== "resolved").length;
+  return /* @__PURE__ */ jsx11(
+    "div",
+    {
+      onMouseEnter: () => setHovered(true),
+      onMouseLeave: () => {
+        setHovered(false);
+        setConfirming(false);
+      },
+      style: {
+        borderBottom: "1px solid rgba(255,255,255,.05)",
+        background: confirming ? "rgba(239,68,68,.06)" : isCurrent ? `${SPEC_COLOR}12` : hovered ? "rgba(255,255,255,.04)" : "transparent",
+        transition: "background .1s"
+      },
+      children: /* @__PURE__ */ jsxs11(
+        "button",
+        {
+          onClick: onSelect,
+          style: {
+            width: "100%",
+            display: "flex",
+            flexDirection: "column",
+            gap: 4,
+            padding: "12px 16px",
+            background: "transparent",
+            border: "none",
+            cursor: "pointer",
+            textAlign: "left"
+          },
+          children: [
+            /* @__PURE__ */ jsxs11("div", { style: { display: "flex", alignItems: "center", gap: 6 }, children: [
+              /* @__PURE__ */ jsx11("span", { style: {
+                flex: 1,
+                fontSize: 12,
+                fontWeight: isCurrent ? 700 : 500,
+                color: isCurrent ? SPEC_COLOR : s.status === "deprecated" ? "rgba(255,255,255,.3)" : "rgba(255,255,255,.75)",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                fontFamily: FONT_FAMILY,
+                textDecoration: s.status === "deprecated" ? "line-through" : "none"
+              }, children: s.title || s.pageId }),
+              s.updatedAt && !confirming && /* @__PURE__ */ jsx11("span", { style: { fontSize: 9, color: "rgba(255,255,255,.28)", flexShrink: 0, fontFamily: FONT_FAMILY }, children: fmtDate(s.updatedAt) }),
+              canDelete && !confirming && /* @__PURE__ */ jsx11(
+                "button",
+                {
+                  onClick: (e) => {
+                    e.stopPropagation();
+                    setConfirming(true);
+                  },
+                  title: "\uC0AD\uC81C",
+                  style: {
+                    opacity: hovered ? 1 : 0,
+                    transition: "opacity .15s",
+                    background: "transparent",
+                    border: "none",
+                    color: "rgba(255,255,255,.4)",
+                    cursor: "pointer",
+                    fontSize: 13,
+                    lineHeight: 1,
+                    padding: "0 2px",
+                    fontFamily: FONT_FAMILY,
+                    flexShrink: 0
+                  },
+                  onMouseEnter: (e) => {
+                    e.currentTarget.style.color = "#f87171";
+                  },
+                  onMouseLeave: (e) => {
+                    e.currentTarget.style.color = "rgba(255,255,255,.4)";
+                  },
+                  children: "\xD7"
+                }
+              ),
+              confirming && /* @__PURE__ */ jsxs11("div", { style: { display: "flex", alignItems: "center", gap: 5 }, onClick: (e) => e.stopPropagation(), children: [
+                /* @__PURE__ */ jsx11("span", { style: { fontSize: 9, color: "rgba(255,255,255,.45)", fontFamily: FONT_FAMILY }, children: "\uC0AD\uC81C\uD560\uAE4C\uC694?" }),
+                /* @__PURE__ */ jsx11(
+                  "button",
+                  {
+                    onClick: (e) => {
+                      e.stopPropagation();
+                      onDelete();
+                    },
+                    style: {
+                      fontSize: 9,
+                      fontWeight: 700,
+                      padding: "2px 8px",
+                      borderRadius: 3,
+                      cursor: "pointer",
+                      background: "rgba(239,68,68,.25)",
+                      border: "1px solid rgba(239,68,68,.4)",
+                      color: "#fca5a5",
+                      fontFamily: FONT_FAMILY
+                    },
+                    children: "\uC0AD\uC81C"
+                  }
+                ),
+                /* @__PURE__ */ jsx11(
+                  "button",
+                  {
+                    onClick: (e) => {
+                      e.stopPropagation();
+                      setConfirming(false);
+                    },
+                    style: {
+                      fontSize: 9,
+                      padding: "2px 8px",
+                      borderRadius: 3,
+                      cursor: "pointer",
+                      background: "transparent",
+                      border: "1px solid rgba(255,255,255,.15)",
+                      color: "rgba(255,255,255,.45)",
+                      fontFamily: FONT_FAMILY
+                    },
+                    children: "\uCDE8\uC18C"
+                  }
+                )
+              ] })
+            ] }),
+            /* @__PURE__ */ jsxs11("div", { style: { display: "flex", alignItems: "center", gap: 6 }, children: [
+              /* @__PURE__ */ jsx11("span", { style: { fontSize: 11, color: cfg.color, flexShrink: 0 }, children: "\u25CF" }),
+              /* @__PURE__ */ jsx11("span", { style: { fontSize: 10, fontWeight: 500, color: cfg.color, flexShrink: 0, fontFamily: FONT_FAMILY }, children: cfg.label }),
+              (s.updatedBy || s.createdBy) && /* @__PURE__ */ jsxs11(Fragment9, { children: [
+                /* @__PURE__ */ jsx11("span", { style: { fontSize: 10, color: "rgba(255,255,255,.2)", flexShrink: 0 }, children: "-" }),
+                /* @__PURE__ */ jsx11("span", { style: {
+                  fontSize: 10,
+                  color: "rgba(255,255,255,.4)",
+                  fontFamily: FONT_FAMILY,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                  flex: 1
+                }, children: s.updatedBy || s.createdBy })
+              ] }),
+              !(s.updatedBy || s.createdBy) && /* @__PURE__ */ jsx11("span", { style: { flex: 1 } }),
+              unresolvedCount > 0 && /* @__PURE__ */ jsxs11("span", { style: {
+                fontSize: 9,
+                fontWeight: 700,
+                color: "#93c5fd",
+                background: "rgba(59,130,246,.2)",
+                padding: "1px 5px",
+                borderRadius: 2,
+                flexShrink: 0,
+                fontFamily: FONT_FAMILY
+              }, children: [
+                /* @__PURE__ */ jsx11(IconChat, { size: 9, color: "#93c5fd" }),
+                " ",
+                unresolvedCount
+              ] })
+            ] })
+          ]
+        }
+      )
+    }
+  );
+}
+function ScreenListPanel({ screens, currentPageId, onSelect, allAnnotations, storage, currentAuthor, onScreenAdded, onScreenDeleted, screensLoaded = true }) {
+  const [filterStatus, setFilterStatus] = useState9(null);
+  const [addOpen, setAddOpen] = useState9(false);
+  const [addTitle, setAddTitle] = useState9("");
+  const [addSaving, setAddSaving] = useState9(false);
+  const [addError, setAddError] = useState9(null);
+  const isCurrentPageRegistered = screensLoaded && screens.some((s) => s.pageId === currentPageId && s.id !== null);
+  const handleSelect = (pageId) => {
+    onSelect(pageId);
+  };
+  const openAddForm = () => {
+    setAddTitle("");
+    setAddError(null);
+    setAddOpen(true);
+  };
+  const closeAddForm = () => {
+    setAddOpen(false);
+    setAddError(null);
+  };
+  const handleAddScreen = async () => {
+    const title = addTitle.trim();
+    if (!title) {
+      setAddError("\uD654\uBA74 \uC774\uB984\uC744 \uC785\uB825\uD574\uC8FC\uC138\uC694.");
+      return;
+    }
+    if (!storage.saveScreenSpec) return;
+    setAddSaving(true);
+    setAddError(null);
+    try {
+      const saved = await storage.saveScreenSpec(currentPageId, { title, updatedBy: currentAuthor || null });
+      onScreenAdded?.(saved);
+      closeAddForm();
+    } catch (e) {
+      const apiMsg = e && typeof e === "object" && "userMessage" in e ? e.userMessage : void 0;
+      setAddError(apiMsg ?? "\uC800\uC7A5\uC5D0 \uC2E4\uD328\uD588\uC2B5\uB2C8\uB2E4");
+    } finally {
+      setAddSaving(false);
+    }
+  };
+  const handleDeleteScreen = async (pageId) => {
+    if (!storage.deleteScreenSpec) return;
+    try {
+      await storage.deleteScreenSpec(pageId);
+      onScreenDeleted?.(pageId);
+    } catch {
+    }
+  };
+  const statusCounts = useMemo2(
+    () => ALL_STATUSES.reduce((acc, s) => {
+      acc[s] = screens.filter((sc) => (sc.status ?? "draft") === s).length;
+      return acc;
+    }, {}),
+    [screens]
+  );
+  const sortScreens = (list) => {
+    const active = list.filter((s) => s.status !== "deprecated").sort((a, b) => (a.title || a.pageId).localeCompare(b.title || b.pageId, "ko"));
+    const deprecated = list.filter((s) => s.status === "deprecated").sort((a, b) => (a.title || a.pageId).localeCompare(b.title || b.pageId, "ko"));
+    return [...active, ...deprecated];
+  };
+  const filtered = sortScreens(filterStatus ? screens.filter((s) => (s.status ?? "draft") === filterStatus) : screens);
+  return /* @__PURE__ */ jsxs11(
+    "div",
+    {
+      "data-sb-ui": "true",
+      style: {
+        position: "fixed",
+        top: 0,
+        right: DRAWER_W,
+        bottom: 45,
+        width: 280,
+        background: DARK.bg2,
+        borderLeft: `1px solid ${DARK.brd}`,
+        boxShadow: "-8px 0 32px rgba(0,0,0,.35)",
+        display: "flex",
+        flexDirection: "column",
+        zIndex: 9994,
+        fontFamily: FONT_FAMILY,
+        animation: "sbSlideLeft .15s ease"
+      },
+      children: [
+        /* @__PURE__ */ jsx11("style", { children: `@keyframes sbSlideLeft{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}` }),
+        /* @__PURE__ */ jsxs11("div", { style: {
+          display: "flex",
+          alignItems: "center",
+          padding: "14px 16px 12px",
+          flexShrink: 0
+        }, children: [
+          /* @__PURE__ */ jsxs11("span", { style: { flex: 1, fontSize: 12, fontWeight: 700, color: "rgba(255,255,255,.7)", fontFamily: FONT_FAMILY }, children: [
+            "\uD654\uBA74 \uBAA9\uB85D",
+            /* @__PURE__ */ jsx11("span", { style: { marginLeft: 6, fontSize: 10, color: "rgba(255,255,255,.3)", fontWeight: 400 }, children: filterStatus ? `${filtered.length} / ${screens.length}` : screens.length })
+          ] }),
+          storage.saveScreenSpec && /* @__PURE__ */ jsx11(
+            "button",
+            {
+              onClick: () => {
+                if (!screensLoaded || isCurrentPageRegistered) return;
+                addOpen ? closeAddForm() : openAddForm();
+              },
+              title: addOpen ? "\uCDE8\uC18C" : !screensLoaded ? "\uB85C\uB529 \uC911\u2026" : isCurrentPageRegistered ? "\uC774\uBBF8 \uB4F1\uB85D\uB41C \uD654\uBA74\uC785\uB2C8\uB2E4" : "\uD604\uC7AC \uD654\uBA74 \uB4F1\uB85D",
+              disabled: (!screensLoaded || isCurrentPageRegistered) && !addOpen,
+              style: {
+                width: 22,
+                height: 22,
+                borderRadius: 3,
+                fontSize: 15,
+                lineHeight: 1,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                background: addOpen ? `${SPEC_COLOR}22` : "transparent",
+                border: `1px solid ${addOpen ? SPEC_COLOR : "rgba(255,255,255,.15)"}`,
+                color: addOpen ? SPEC_COLOR : !screensLoaded || isCurrentPageRegistered ? "rgba(255,255,255,.2)" : "rgba(255,255,255,.45)",
+                cursor: (!screensLoaded || isCurrentPageRegistered) && !addOpen ? "default" : "pointer",
+                transition: "all .15s",
+                flexShrink: 0
+              },
+              onMouseEnter: (e) => {
+                if (!addOpen && screensLoaded && !isCurrentPageRegistered) {
+                  e.currentTarget.style.borderColor = SPEC_COLOR;
+                  e.currentTarget.style.color = SPEC_COLOR;
+                }
+              },
+              onMouseLeave: (e) => {
+                if (!addOpen) {
+                  e.currentTarget.style.borderColor = "rgba(255,255,255,.15)";
+                  e.currentTarget.style.color = screensLoaded && !isCurrentPageRegistered ? "rgba(255,255,255,.45)" : "rgba(255,255,255,.2)";
+                }
+              },
+              children: addOpen ? "\xD7" : "+"
+            }
+          )
+        ] }),
+        addOpen && /* @__PURE__ */ jsxs11("div", { style: { padding: "0 14px 12px", display: "flex", flexDirection: "column", gap: 6, flexShrink: 0, borderBottom: `1px solid ${DARK.brd}` }, children: [
+          /* @__PURE__ */ jsxs11("div", { children: [
+            /* @__PURE__ */ jsxs11("div", { style: { fontSize: 9, color: "rgba(255,255,255,.35)", fontFamily: FONT_FAMILY, marginBottom: 3 }, children: [
+              "\uD654\uBA74 \uC774\uB984 ",
+              /* @__PURE__ */ jsx11("span", { style: { color: "#f87171" }, children: "*" })
+            ] }),
+            /* @__PURE__ */ jsx11(
+              "input",
+              {
+                autoFocus: true,
+                type: "text",
+                value: addTitle,
+                onChange: (e) => setAddTitle(e.target.value),
+                placeholder: "\uC608: \uB300\uC2DC\uBCF4\uB4DC, \uC8FC\uBB38 \uBAA9\uB85D\u2026",
+                onKeyDown: (e) => {
+                  if (e.key === "Escape") {
+                    e.nativeEvent.stopImmediatePropagation();
+                    closeAddForm();
+                  }
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleAddScreen();
+                  }
+                },
+                style: INPUT_STYLE
+              }
+            )
+          ] }),
+          /* @__PURE__ */ jsxs11("div", { children: [
+            /* @__PURE__ */ jsxs11("div", { style: { fontSize: 9, color: "rgba(255,255,255,.25)", fontFamily: FONT_FAMILY, marginBottom: 3 }, children: [
+              "\uC2DD\uBCC4\uC790 ",
+              /* @__PURE__ */ jsx11("span", { style: { color: "rgba(255,255,255,.2)", fontWeight: 400 }, children: "(\uD604\uC7AC \uD398\uC774\uC9C0)" })
+            ] }),
+            /* @__PURE__ */ jsx11(
+              "input",
+              {
+                type: "text",
+                value: currentPageId,
+                disabled: true,
+                readOnly: true,
+                style: {
+                  ...INPUT_STYLE,
+                  color: "rgba(255,255,255,.25)",
+                  background: "rgba(255,255,255,.03)",
+                  cursor: "default",
+                  userSelect: "all"
+                }
+              }
+            )
+          ] }),
+          addError && /* @__PURE__ */ jsxs11("div", { style: { fontSize: 10, color: "#f87171", fontFamily: FONT_FAMILY, background: "rgba(239,68,68,.1)", borderRadius: 3, padding: "4px 8px" }, children: [
+            "\u26A0 ",
+            addError
+          ] }),
+          /* @__PURE__ */ jsxs11("div", { style: { display: "flex", gap: 5, justifyContent: "flex-end" }, children: [
+            /* @__PURE__ */ jsx11(
+              "button",
+              {
+                onClick: closeAddForm,
+                style: { padding: "3px 10px", borderRadius: 3, fontSize: 10, background: "transparent", border: `1px solid ${DARK.brd}`, color: DARK.txS, cursor: "pointer", fontFamily: FONT_FAMILY },
+                children: "\uCDE8\uC18C"
+              }
+            ),
+            /* @__PURE__ */ jsx11(
+              "button",
+              {
+                onClick: handleAddScreen,
+                disabled: !addTitle.trim() || addSaving,
+                style: { padding: "3px 10px", borderRadius: 3, fontSize: 10, fontWeight: 600, background: SPEC_COLOR, border: "none", color: "#fff", cursor: "pointer", fontFamily: FONT_FAMILY, opacity: !addTitle.trim() || addSaving ? 0.5 : 1 },
+                children: addSaving ? "\uC800\uC7A5 \uC911\u2026" : "\uCD94\uAC00"
+              }
+            )
+          ] })
+        ] }),
+        /* @__PURE__ */ jsxs11("div", { style: {
+          display: "flex",
+          borderBottom: "1px solid rgba(255,255,255,.08)",
+          flexShrink: 0
+        }, children: [
+          /* @__PURE__ */ (() => {
+            const isActive = filterStatus === null;
+            return /* @__PURE__ */ jsx11(
+              "button",
+              {
+                onClick: () => setFilterStatus(null),
+                style: {
+                  flex: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "8px 0",
+                  background: "transparent",
+                  border: "none",
+                  borderBottom: `2px solid ${isActive ? "rgba(255,255,255,.7)" : "transparent"}`,
+                  cursor: "pointer",
+                  fontFamily: FONT_FAMILY,
+                  transition: "border-color .15s"
+                },
+                onMouseEnter: (e) => {
+                  if (!isActive) e.currentTarget.style.borderBottomColor = "rgba(255,255,255,.2)";
+                },
+                onMouseLeave: (e) => {
+                  if (!isActive) e.currentTarget.style.borderBottomColor = "transparent";
+                },
+                children: /* @__PURE__ */ jsx11("span", { style: { fontSize: 10, fontWeight: isActive ? 700 : 400, color: isActive ? "rgba(255,255,255,.85)" : "rgba(255,255,255,.4)" }, children: "\uC804\uCCB4" })
+              }
+            );
+          })(),
+          ALL_STATUSES.map((status) => {
+            const cfg = STATUS_CFG[status];
+            const count = statusCounts[status];
+            const isActive = filterStatus === status;
+            return /* @__PURE__ */ jsx11(
+              "button",
+              {
+                onClick: () => setFilterStatus((prev) => prev === status ? null : status),
+                style: {
+                  flex: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "8px 0",
+                  background: "transparent",
+                  border: "none",
+                  borderBottom: `2px solid ${isActive ? cfg.color : "transparent"}`,
+                  cursor: "pointer",
+                  opacity: count === 0 ? 0.3 : 1,
+                  fontFamily: FONT_FAMILY,
+                  transition: "border-color .15s"
+                },
+                onMouseEnter: (e) => {
+                  if (!isActive) e.currentTarget.style.borderBottomColor = `${cfg.color}55`;
+                },
+                onMouseLeave: (e) => {
+                  if (!isActive) e.currentTarget.style.borderBottomColor = "transparent";
+                },
+                children: /* @__PURE__ */ jsx11("span", { style: {
+                  fontSize: 10,
+                  fontWeight: isActive ? 700 : 400,
+                  color: isActive ? cfg.color : "rgba(255,255,255,.4)"
+                }, children: cfg.label })
+              },
+              status
+            );
+          })
+        ] }),
+        /* @__PURE__ */ jsxs11("div", { className: "sb-scroll", style: { flex: 1, overflowY: "auto" }, children: [
+          filtered.length === 0 && /* @__PURE__ */ jsx11("div", { style: { padding: "20px 16px", color: "rgba(255,255,255,.25)", fontSize: 12 }, children: "\uD574\uB2F9 \uC0C1\uD0DC\uC758 \uD654\uBA74\uC774 \uC5C6\uC2B5\uB2C8\uB2E4." }),
+          filtered.map((s) => {
+            const isCurrent = s.pageId === currentPageId;
+            const cfg = STATUS_CFG[s.status ?? "draft"] ?? STATUS_CFG.draft;
+            const canDelete = !!storage.deleteScreenSpec && s.id !== null;
+            return /* @__PURE__ */ jsx11(
+              ScreenListItem,
+              {
+                s,
+                isCurrent,
+                cfg,
+                canDelete,
+                allAnnotations,
+                onSelect: () => handleSelect(s.pageId),
+                onDelete: () => handleDeleteScreen(s.pageId)
+              },
+              s.pageId
+            );
+          })
+        ] }),
+        /* @__PURE__ */ jsx11(ChangelogSection, { storage, currentAuthor })
+      ]
+    }
+  );
+}
+function ScreenSpecTab({ pageId, storage, currentAuthor, onDeleteElement, refreshKey, onScreenSpecSaved, externalTitle, onSoftDeleteElement, onRestoreElement, onHoverElement, onElementSaved }) {
+  const [screen, setScreen] = useState9(null);
+  const [elements, setElements] = useState9([]);
+  const [feedback, setFeedback] = useState9(null);
+  const [hoveredItemId, setHoveredItemId] = useState9(null);
+  const [renamingId, setRenamingId] = useState9(null);
+  const [renameValue, setRenameValue] = useState9("");
+  const [editingContentId, setEditingContentId] = useState9(null);
+  const [editContent, setEditContent] = useState9("");
+  const [collapsedIds, setCollapsedIds] = useState9(/* @__PURE__ */ new Set());
+  const [softDeletedIds, setSoftDeletedIds] = useState9(/* @__PURE__ */ new Set());
+  const [editingTitle, setEditingTitle] = useState9(false);
+  const [editTitleValue, setEditTitleValue] = useState9("");
+  const [editingDesc, setEditingDesc] = useState9(false);
+  const [editDescValue, setEditDescValue] = useState9("");
+  const [editingAuthor, setEditingAuthor] = useState9(false);
+  const [editAuthorValue, setEditAuthorValue] = useState9("");
+  useEffect9(() => {
+    if (storage.loadScreenSpec) storage.loadScreenSpec(pageId).then(setScreen).catch(() => {
+    });
+    if (storage.loadPageSpecs) storage.loadPageSpecs(pageId).then(setElements).catch(() => {
+    });
+  }, [pageId, storage, refreshKey]);
+  const showFeedback = (type, msg) => {
+    setFeedback({ type, msg });
+    setTimeout(() => setFeedback(null), 2500);
+  };
+  const saveScreen = async (patch) => {
+    if (!storage.saveScreenSpec) return;
+    try {
+      const saved = await storage.saveScreenSpec(pageId, {
+        title: screen?.title,
+        description: screen?.description,
+        status: screen?.status ?? "draft",
+        updatedBy: currentAuthor || null,
+        ...patch
+      });
+      setScreen(saved);
+      onScreenSpecSaved?.(saved);
+      showFeedback("ok", "\uC800\uC7A5\uB428");
+    } catch (e) {
+      showFeedback("err", e instanceof Error ? e.message : "\uC800\uC7A5 \uC2E4\uD328");
+    }
+  };
+  const saveElement = async (spec, patch) => {
+    if (!storage.savePageSpec) return;
+    const saved = await storage.savePageSpec(pageId, spec.elementId, { ...patch, updatedBy: currentAuthor || null });
+    setElements((prev) => prev.map((e) => e.id === spec.id ? saved : e));
+    onElementSaved?.(saved);
+    if (storage.saveScreenSpec) {
+      const updatedScreen = await storage.saveScreenSpec(pageId, {
+        title: screen?.title,
+        description: screen?.description,
+        status: screen?.status ?? "draft",
+        updatedBy: currentAuthor || null
+      });
+      setScreen(updatedScreen);
+      onScreenSpecSaved?.(updatedScreen);
+    }
+  };
+  const toggleCollapse = (id) => {
+    setCollapsedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+  const softDeleteElement = (spec) => {
+    setSoftDeletedIds((prev) => /* @__PURE__ */ new Set([...prev, spec.id]));
+    if (editingContentId === spec.id) setEditingContentId(null);
+    onSoftDeleteElement?.(spec.id);
+  };
+  const hardDeleteElement = async (spec) => {
+    const name = spec.elementLabel ?? spec.elementId;
+    if (!window.confirm(`"${name}" \uC694\uC18C\uB97C \uC644\uC804\uD788 \uC0AD\uC81C\uD569\uB2C8\uB2E4.
+\uC0AD\uC81C \uD6C4 \uBCF5\uAD6C\uD560 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4. \uACC4\uC18D\uD558\uC2DC\uACA0\uC2B5\uB2C8\uAE4C?`)) return;
+    try {
+      await storage.deletePageSpec?.(spec.id);
+      setElements((prev) => prev.filter((e) => e.id !== spec.id));
+      setSoftDeletedIds((prev) => {
+        const next = new Set(prev);
+        next.delete(spec.id);
+        return next;
+      });
+      onDeleteElement?.(spec.id);
+    } catch (e) {
+      showFeedback("err", e instanceof Error ? e.message : "\uC0AD\uC81C \uC2E4\uD328");
+    }
+  };
+  const restoreElement = (spec) => {
+    setSoftDeletedIds((prev) => {
+      const next = new Set(prev);
+      next.delete(spec.id);
+      return next;
+    });
+    onRestoreElement?.(spec.id);
+  };
+  return /* @__PURE__ */ jsxs11("div", { style: { display: "flex", flexDirection: "column", height: "100%", padding: "16px 8px 8px 8px" }, children: [
+    /* @__PURE__ */ jsxs11("div", { children: [
+      /* @__PURE__ */ jsx11("div", { style: { display: "flex", gap: 4, marginBottom: 8, paddingLeft: 4, paddingRight: 4 }, children: ALL_STATUSES.map((s) => {
+        const cfg = STATUS_CFG[s];
+        const isActive = (screen?.status ?? "draft") === s;
+        return /* @__PURE__ */ jsx11(
+          "button",
+          {
+            onClick: () => saveScreen({ status: s }),
+            style: {
+              flex: 1,
+              padding: "0",
+              height: 26,
+              borderRadius: 3,
+              fontSize: 10,
+              fontWeight: 700,
+              border: `1px solid ${isActive ? cfg.color : DARK.brd}`,
+              background: isActive ? `${cfg.color}22` : "transparent",
+              color: isActive ? cfg.color : DARK.txL,
+              cursor: "pointer",
+              fontFamily: FONT_FAMILY,
+              transition: "all .15s"
+            },
+            onMouseEnter: (e) => {
+              if (!isActive) {
+                e.currentTarget.style.borderColor = cfg.color;
+                e.currentTarget.style.color = cfg.color;
+              }
+            },
+            onMouseLeave: (e) => {
+              if (!isActive) {
+                e.currentTarget.style.borderColor = DARK.brd;
+                e.currentTarget.style.color = DARK.txL;
+              }
+            },
+            children: cfg.label
+          },
+          s
+        );
+      }) }),
+      /* @__PURE__ */ jsx11("div", { style: { borderTop: `1px solid ${DARK.brd}`, margin: "8px 4px" } }),
+      /* @__PURE__ */ jsx11("div", { style: { marginBottom: 6, paddingLeft: 4, paddingRight: 4 }, children: editingTitle ? /* @__PURE__ */ jsx11(
+        "input",
+        {
+          autoFocus: true,
+          value: editTitleValue,
+          onChange: (e) => setEditTitleValue(e.target.value),
+          onBlur: () => {
+            const t = editTitleValue.trim();
+            if (t) saveScreen({ title: t });
+            setEditingTitle(false);
+          },
+          onKeyDown: (e) => {
+            if (e.key === "Escape") {
+              e.nativeEvent.stopImmediatePropagation();
+              setEditingTitle(false);
+            }
+            if (e.key === "Enter") {
+              e.preventDefault();
+              const t = editTitleValue.trim();
+              if (t) saveScreen({ title: t });
+              setEditingTitle(false);
+            }
+          },
+          style: {
+            width: "100%",
+            boxSizing: "border-box",
+            background: DARK.bg3,
+            border: `1px solid ${SPEC_COLOR}66`,
+            borderRadius: 3,
+            padding: "4px 8px",
+            color: DARK.txt,
+            fontSize: 18,
+            fontWeight: 700,
+            fontFamily: FONT_FAMILY,
+            outline: "none"
+          }
+        }
+      ) : /* @__PURE__ */ jsxs11("div", { style: { display: "flex", alignItems: "center" }, children: [
+        /* @__PURE__ */ jsx11(
+          "span",
+          {
+            onDoubleClick: () => {
+              setEditingTitle(true);
+              setEditTitleValue(externalTitle ?? screen?.title ?? pageId);
+            },
+            title: "\uB354\uBE14\uD074\uB9AD\uD558\uC5EC \uC218\uC815",
+            style: { fontSize: 18, fontWeight: 700, color: DARK.txt, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", cursor: "text" },
+            children: externalTitle ?? screen?.title ?? pageId
+          }
+        ),
+        /* @__PURE__ */ jsxs11("div", { style: { display: "flex", alignItems: "center", gap: 6, flexShrink: 0, marginLeft: 8 }, children: [
+          screen?.updatedAt && /* @__PURE__ */ jsx11("span", { style: { fontSize: 10, color: DARK.txL, fontFamily: FONT_FAMILY }, children: fmtDate(screen.updatedAt) }),
+          editingAuthor ? /* @__PURE__ */ jsx11(
+            "input",
+            {
+              autoFocus: true,
+              value: editAuthorValue,
+              onChange: (e) => setEditAuthorValue(e.target.value),
+              onKeyDown: (e) => {
+                if (e.key === "Escape") {
+                  e.nativeEvent.stopImmediatePropagation();
+                  setEditingAuthor(false);
+                }
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  const v = editAuthorValue.trim();
+                  if (v) saveScreen({ updatedBy: v });
+                  setEditingAuthor(false);
+                }
+              },
+              onBlur: () => {
+                const v = editAuthorValue.trim();
+                if (v) saveScreen({ updatedBy: v });
+                setEditingAuthor(false);
+              },
+              style: {
+                fontSize: 10,
+                width: 80,
+                padding: "1px 5px",
+                borderRadius: 3,
+                background: "rgba(255,255,255,.08)",
+                border: `1px solid ${SPEC_COLOR}66`,
+                color: "rgba(255,255,255,.8)",
+                fontFamily: FONT_FAMILY,
+                outline: "none"
+              }
+            }
+          ) : /* @__PURE__ */ jsx11(
+            "span",
+            {
+              onDoubleClick: () => {
+                setEditAuthorValue(screen?.updatedBy || screen?.createdBy || "");
+                setEditingAuthor(true);
+              },
+              title: "\uB354\uBE14\uD074\uB9AD\uD558\uC5EC \uC791\uC131\uC790 \uBCC0\uACBD",
+              style: {
+                fontSize: 10,
+                color: SPEC_COLOR,
+                fontFamily: FONT_FAMILY,
+                cursor: "text"
+              },
+              children: screen?.updatedBy || screen?.createdBy || "\uC791\uC131\uC790"
+            }
+          )
+        ] })
+      ] }) }),
+      /* @__PURE__ */ jsx11("div", { style: { marginBottom: 6, paddingLeft: 4, paddingRight: 4 }, children: editingDesc ? /* @__PURE__ */ jsxs11("div", { style: { display: "flex", flexDirection: "column", gap: 6 }, children: [
+        /* @__PURE__ */ jsx11(
+          "textarea",
+          {
+            autoFocus: true,
+            value: editDescValue,
+            onChange: (e) => {
+              setEditDescValue(e.target.value);
+              e.target.style.height = "auto";
+              e.target.style.height = e.target.scrollHeight + "px";
+            },
+            ref: (el) => {
+              if (el) {
+                el.style.height = "auto";
+                el.style.height = el.scrollHeight + "px";
+              }
+            },
+            onKeyDown: (e) => {
+              if (e.key === "Escape") {
+                e.nativeEvent.stopImmediatePropagation();
+                setEditingDesc(false);
+              }
+              if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+                e.preventDefault();
+                saveScreen({ description: editDescValue.trim() });
+                setEditingDesc(false);
+              }
+            },
+            placeholder: "\uD654\uBA74 \uC804\uBC18\uC5D0 \uB300\uD55C \uC124\uBA85\u2026",
+            style: {
+              width: "100%",
+              boxSizing: "border-box",
+              resize: "none",
+              overflow: "hidden",
+              background: DARK.bg3,
+              border: `1px solid ${SPEC_COLOR}66`,
+              borderRadius: 3,
+              padding: "5px 8px",
+              color: DARK.txt,
+              fontSize: 11,
+              fontFamily: FONT_FAMILY,
+              outline: "none",
+              lineHeight: 1.6,
+              minHeight: 56
+            }
+          }
+        ),
+        /* @__PURE__ */ jsxs11("div", { style: { display: "flex", gap: 5, justifyContent: "flex-end" }, children: [
+          /* @__PURE__ */ jsx11(
+            "button",
+            {
+              onClick: () => setEditingDesc(false),
+              style: { padding: "3px 10px", borderRadius: 3, fontSize: 10, background: "transparent", border: `1px solid ${DARK.brd}`, color: DARK.txS, cursor: "pointer", fontFamily: FONT_FAMILY },
+              children: "\uCDE8\uC18C"
+            }
+          ),
+          /* @__PURE__ */ jsx11(
+            "button",
+            {
+              onClick: () => {
+                saveScreen({ description: editDescValue.trim() });
+                setEditingDesc(false);
+              },
+              style: { padding: "3px 10px", borderRadius: 3, fontSize: 10, fontWeight: 600, background: SPEC_COLOR, border: "none", color: "#fff", cursor: "pointer", fontFamily: FONT_FAMILY },
+              children: "\uC800\uC7A5"
+            }
+          )
+        ] })
+      ] }) : /* @__PURE__ */ jsx11(
+        "div",
+        {
+          onDoubleClick: () => {
+            setEditingDesc(true);
+            setEditDescValue(screen?.description ?? "");
+          },
+          title: "\uB354\uBE14\uD074\uB9AD\uD558\uC5EC \uC218\uC815",
+          style: {
+            fontSize: 11,
+            color: screen?.description ? DARK.txS : DARK.txL,
+            lineHeight: 1.6,
+            cursor: "text",
+            fontFamily: FONT_FAMILY,
+            minHeight: 36,
+            whiteSpace: "pre-wrap"
+          },
+          children: screen?.description || "\uB354\uBE14 \uD074\uB9AD \uD558\uBA74 \uB0B4\uC6A9\uC744 \uC785\uB825\uD558\uC2E4 \uC218 \uC788\uC2B5\uB2C8\uB2E4."
+        }
+      ) }),
+      /* @__PURE__ */ jsx11("div", { style: { borderTop: "none", borderBottom: `3px solid ${DARK.brd}`, margin: "8px 4px" } }),
+      /* @__PURE__ */ jsxs11("div", { style: { padding: "4px 4px 6px", display: "flex", alignItems: "center" }, children: [
+        /* @__PURE__ */ jsxs11("span", { style: { flex: 1, fontSize: 10, color: DARK.txL, fontFamily: FONT_FAMILY, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".4px" }, children: [
+          "\uC694\uC18C \uC2A4\uD399 ",
+          elements.length > 0 && /* @__PURE__ */ jsxs11("span", { style: { fontWeight: 400 }, children: [
+            "(",
+            elements.length,
+            ")"
+          ] })
+        ] }),
+        elements.length > 0 && /* @__PURE__ */ jsxs11("div", { style: { display: "flex", gap: 2 }, children: [
+          /* @__PURE__ */ jsx11(
+            "button",
+            {
+              onClick: () => setCollapsedIds(new Set(elements.map((e) => e.id))),
+              style: { border: `1px solid ${DARK.brd}`, background: "transparent", color: DARK.txL, cursor: "pointer", fontSize: 10, fontFamily: FONT_FAMILY, padding: "2px 6px", borderRadius: 3 },
+              onMouseEnter: (e) => {
+                e.currentTarget.style.color = SPEC_COLOR;
+                e.currentTarget.style.borderColor = SPEC_COLOR;
+              },
+              onMouseLeave: (e) => {
+                e.currentTarget.style.color = DARK.txL;
+                e.currentTarget.style.borderColor = DARK.brd;
+              },
+              children: "\uC811\uAE30"
+            }
+          ),
+          /* @__PURE__ */ jsx11(
+            "button",
+            {
+              onClick: () => setCollapsedIds(/* @__PURE__ */ new Set()),
+              style: { border: `1px solid ${DARK.brd}`, background: "transparent", color: DARK.txL, cursor: "pointer", fontSize: 10, fontFamily: FONT_FAMILY, padding: "2px 6px", borderRadius: 3 },
+              onMouseEnter: (e) => {
+                e.currentTarget.style.color = SPEC_COLOR;
+                e.currentTarget.style.borderColor = SPEC_COLOR;
+              },
+              onMouseLeave: (e) => {
+                e.currentTarget.style.color = DARK.txL;
+                e.currentTarget.style.borderColor = DARK.brd;
+              },
+              children: "\uD3BC\uCE58\uAE30"
+            }
+          )
+        ] })
+      ] })
+    ] }),
+    /* @__PURE__ */ jsxs11("div", { className: "sb-scroll", style: { flex: 1, overflowY: "auto" }, children: [
+      elements.length === 0 && /* @__PURE__ */ jsxs11("div", { style: {
+        textAlign: "center",
+        color: DARK.txL,
+        fontSize: 11,
+        marginTop: 24,
+        lineHeight: 1.8,
+        fontFamily: FONT_FAMILY
+      }, children: [
+        '"+ \uCD94\uAC00"\uB97C \uB20C\uB7EC',
+        /* @__PURE__ */ jsx11("br", {}),
+        "\uD654\uBA74 \uC694\uC18C\uB97C \uC120\uD0DD\uD558\uC138\uC694"
+      ] }),
+      [...elements].sort((a, b) => (a.num ?? Infinity) - (b.num ?? Infinity)).map((spec, idx) => /* @__PURE__ */ jsxs11(
+        "div",
+        {
+          onMouseEnter: () => {
+            setHoveredItemId(spec.id);
+            onHoverElement?.(spec.elementId);
+          },
+          onMouseLeave: () => {
+            setHoveredItemId(null);
+            onHoverElement?.(null);
+          },
+          style: {
+            padding: "10px 4px",
+            borderBottom: idx < elements.length - 1 ? `1px solid ${DARK.brd}` : "none",
+            background: softDeletedIds.has(spec.id) ? "rgba(239,68,68,.06)" : hoveredItemId === spec.id ? "rgba(59,130,246,.08)" : "transparent",
+            cursor: "pointer",
+            transition: "background .15s"
+          },
+          children: [
+            /* @__PURE__ */ jsxs11("div", { style: { display: "flex", alignItems: "center", gap: 6, marginBottom: collapsedIds.has(spec.id) ? 0 : 4 }, children: [
+              /* @__PURE__ */ jsx11(
+                "div",
+                {
+                  onClick: (e) => {
+                    e.stopPropagation();
+                    if (renamingId !== spec.id) toggleCollapse(spec.id);
+                  },
+                  style: {
+                    width: 18,
+                    height: 18,
+                    borderRadius: collapsedIds.has(spec.id) ? "50% 50% 0 50%" : "50%",
+                    background: BADGE_COLOR,
+                    color: "#fff",
+                    fontSize: 9,
+                    fontWeight: 800,
+                    flexShrink: 0,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontFamily: FONT_FAMILY,
+                    transition: "border-radius .2s",
+                    cursor: "pointer"
+                  },
+                  children: spec.num ?? "\xB7"
+                }
+              ),
+              /* @__PURE__ */ jsx11("div", { style: { flex: 1, minWidth: 0 }, children: renamingId === spec.id ? /* @__PURE__ */ jsx11(
+                "input",
+                {
+                  autoFocus: true,
+                  value: renameValue,
+                  onClick: (e) => e.stopPropagation(),
+                  onChange: (e) => setRenameValue(e.target.value),
+                  onKeyDown: (e) => {
+                    e.stopPropagation();
+                    if (e.key === "Enter") {
+                      const t = renameValue.trim();
+                      if (t) saveElement(spec, { elementLabel: t });
+                      setRenamingId(null);
+                    }
+                    if (e.key === "Escape") {
+                      e.nativeEvent.stopImmediatePropagation();
+                      setRenamingId(null);
+                    }
+                  },
+                  onBlur: () => {
+                    const t = renameValue.trim();
+                    if (t && t !== (spec.elementLabel ?? spec.elementId)) saveElement(spec, { elementLabel: t });
+                    setRenamingId(null);
+                  },
+                  style: {
+                    width: "100%",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    background: DARK.bg3,
+                    border: `1px solid ${SPEC_COLOR}66`,
+                    borderRadius: 3,
+                    padding: "1px 6px",
+                    color: DARK.txt,
+                    fontFamily: FONT_FAMILY,
+                    outline: "none",
+                    boxSizing: "border-box"
+                  }
+                }
+              ) : /* @__PURE__ */ jsx11(
+                "span",
+                {
+                  onDoubleClick: (e) => {
+                    e.stopPropagation();
+                    setRenamingId(spec.id);
+                    setRenameValue(spec.elementLabel ?? spec.elementId);
+                  },
+                  title: "\uB354\uBE14\uD074\uB9AD\uD558\uC5EC \uC774\uB984 \uC218\uC815",
+                  style: {
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: softDeletedIds.has(spec.id) ? DARK.txL : DARK.txt,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                    fontFamily: FONT_FAMILY,
+                    display: "block",
+                    textDecoration: softDeletedIds.has(spec.id) ? "line-through" : "none"
+                  },
+                  children: spec.elementLabel ?? spec.elementId
+                }
+              ) }),
+              spec.updatedAt && /* @__PURE__ */ jsx11("span", { style: {
+                fontSize: 9,
+                color: DARK.txL,
+                fontFamily: FONT_FAMILY,
+                flexShrink: 0,
+                whiteSpace: "nowrap"
+              }, children: fmtDate(spec.updatedAt) }),
+              softDeletedIds.has(spec.id) ? /* @__PURE__ */ jsxs11("div", { style: { display: "flex", gap: 4, flexShrink: 0 }, children: [
+                /* @__PURE__ */ jsx11(
+                  "button",
+                  {
+                    onClick: (e) => {
+                      e.stopPropagation();
+                      hardDeleteElement(spec);
+                    },
+                    style: { fontSize: 10, fontFamily: FONT_FAMILY, padding: "2px 6px", borderRadius: 3, cursor: "pointer", border: "1px solid rgba(239,68,68,.4)", background: "transparent", color: "#f87171" },
+                    onMouseEnter: (e) => {
+                      e.currentTarget.style.background = "rgba(239,68,68,.18)";
+                    },
+                    onMouseLeave: (e) => {
+                      e.currentTarget.style.background = "transparent";
+                    },
+                    children: "\uC0AD\uC81C"
+                  }
+                ),
+                /* @__PURE__ */ jsx11(
+                  "button",
+                  {
+                    onClick: (e) => {
+                      e.stopPropagation();
+                      restoreElement(spec);
+                    },
+                    style: { fontSize: 10, fontFamily: FONT_FAMILY, padding: "2px 6px", borderRadius: 3, cursor: "pointer", border: `1px solid ${SPEC_COLOR}66`, background: "transparent", color: SPEC_COLOR },
+                    onMouseEnter: (e) => {
+                      e.currentTarget.style.background = `${SPEC_COLOR}18`;
+                    },
+                    onMouseLeave: (e) => {
+                      e.currentTarget.style.background = "transparent";
+                    },
+                    children: "\uBCF5\uC6D0"
+                  }
+                )
+              ] }) : /* @__PURE__ */ jsx11(
+                "button",
+                {
+                  onClick: (e) => {
+                    e.stopPropagation();
+                    softDeleteElement(spec);
+                  },
+                  title: "\uC694\uC18C \uC0AD\uC81C",
+                  style: {
+                    flexShrink: 0,
+                    width: 18,
+                    height: 18,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderRadius: 3,
+                    border: "1px solid transparent",
+                    background: "transparent",
+                    color: DARK.txL,
+                    fontSize: 11,
+                    fontWeight: 700,
+                    lineHeight: 1,
+                    cursor: "pointer",
+                    fontFamily: FONT_FAMILY,
+                    padding: 0,
+                    opacity: hoveredItemId === spec.id ? 1 : 0.35,
+                    transition: "opacity .15s, background .15s, border-color .15s, color .15s"
+                  },
+                  onMouseEnter: (e) => {
+                    e.currentTarget.style.background = "rgba(239,68,68,.18)";
+                    e.currentTarget.style.borderColor = "rgba(239,68,68,.4)";
+                    e.currentTarget.style.color = "#f87171";
+                  },
+                  onMouseLeave: (e) => {
+                    e.currentTarget.style.background = "transparent";
+                    e.currentTarget.style.borderColor = "transparent";
+                    e.currentTarget.style.color = DARK.txL;
+                  },
+                  children: "\xD7"
+                }
+              )
+            ] }),
+            !collapsedIds.has(spec.id) && /* @__PURE__ */ jsx11("div", { style: { paddingLeft: 24 }, children: editingContentId === spec.id ? /* @__PURE__ */ jsxs11("div", { style: { display: "flex", flexDirection: "column", gap: 6 }, children: [
+              /* @__PURE__ */ jsx11(
+                "textarea",
+                {
+                  autoFocus: true,
+                  value: editContent,
+                  onChange: (e) => {
+                    setEditContent(e.target.value);
+                    e.target.style.height = "auto";
+                    e.target.style.height = e.target.scrollHeight + "px";
+                  },
+                  ref: (el) => {
+                    if (el) {
+                      el.style.height = "auto";
+                      el.style.height = el.scrollHeight + "px";
+                    }
+                  },
+                  onKeyDown: (e) => {
+                    if (e.key === "Escape") {
+                      e.nativeEvent.stopImmediatePropagation();
+                      setEditingContentId(null);
+                    }
+                    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+                      e.preventDefault();
+                      saveElement(spec, { content: editContent });
+                      setEditingContentId(null);
+                    }
+                  },
+                  placeholder: "\uC2A4\uD399 \uB0B4\uC6A9\u2026",
+                  style: {
+                    width: "100%",
+                    boxSizing: "border-box",
+                    resize: "none",
+                    overflow: "hidden",
+                    background: DARK.bg3,
+                    border: `1px solid ${SPEC_COLOR}66`,
+                    borderRadius: 3,
+                    padding: "5px 8px",
+                    color: DARK.txt,
+                    fontSize: 11,
+                    fontFamily: FONT_FAMILY,
+                    outline: "none",
+                    lineHeight: 1.6,
+                    minHeight: 36
+                  }
+                }
+              ),
+              /* @__PURE__ */ jsxs11("div", { style: { display: "flex", gap: 5, justifyContent: "flex-end" }, children: [
+                /* @__PURE__ */ jsx11(
+                  "button",
+                  {
+                    onClick: () => setEditingContentId(null),
+                    style: {
+                      padding: "3px 10px",
+                      borderRadius: 3,
+                      fontSize: 10,
+                      background: "transparent",
+                      border: `1px solid ${DARK.brd}`,
+                      color: DARK.txS,
+                      cursor: "pointer",
+                      fontFamily: FONT_FAMILY
+                    },
+                    children: "\uCDE8\uC18C"
+                  }
+                ),
+                /* @__PURE__ */ jsx11(
+                  "button",
+                  {
+                    onClick: () => {
+                      saveElement(spec, { content: editContent });
+                      setEditingContentId(null);
+                    },
+                    style: {
+                      padding: "3px 10px",
+                      borderRadius: 3,
+                      fontSize: 10,
+                      fontWeight: 600,
+                      background: SPEC_COLOR,
+                      border: "none",
+                      color: "#fff",
+                      cursor: "pointer",
+                      fontFamily: FONT_FAMILY
+                    },
+                    children: "\uC800\uC7A5"
+                  }
+                )
+              ] })
+            ] }) : /* @__PURE__ */ jsx11(
+              "div",
+              {
+                onDoubleClick: () => {
+                  setEditingContentId(spec.id);
+                  setEditContent(spec.content ?? "");
+                },
+                title: "\uB354\uBE14\uD074\uB9AD\uD558\uC5EC \uB0B4\uC6A9 \uC218\uC815",
+                style: {
+                  fontSize: 11,
+                  color: spec.content ? DARK.txS : DARK.txL,
+                  lineHeight: 1.6,
+                  cursor: "text",
+                  fontFamily: FONT_FAMILY,
+                  minHeight: 20,
+                  whiteSpace: "pre-wrap",
+                  textDecoration: softDeletedIds.has(spec.id) ? "line-through" : "none"
+                },
+                children: spec.content || "\uB354\uBE14 \uD074\uB9AD \uD558\uBA74 \uB0B4\uC6A9\uC744 \uC785\uB825\uD558\uC2E4 \uC218 \uC788\uC2B5\uB2C8\uB2E4."
+              }
+            ) })
+          ]
+        },
+        spec.id
+      ))
+    ] }),
+    feedback && /* @__PURE__ */ jsxs11("div", { style: {
+      padding: "5px 16px",
+      fontSize: 10,
+      fontFamily: FONT_FAMILY,
+      color: feedback.type === "ok" ? "#4ade80" : "#f87171",
+      background: feedback.type === "ok" ? "rgba(34,197,94,.08)" : "rgba(239,68,68,.08)",
+      borderTop: `1px solid ${DARK.brd}`,
+      flexShrink: 0
+    }, children: [
+      feedback.type === "ok" ? "\u2713 " : "\u26A0 ",
+      feedback.msg
+    ] })
+  ] });
+}
+function CommentTab({ pins, labels, screenTitle, screenUpdatedAt, screenDescription, selectedId, hoveredId, showResolved, resolvedCount, onSelect, onHover, onToggleShowResolved, sessions, currentSessionId, sessionProgress, onSelectSession, onCreateSession, onDeleteSession, onSetSessionStatus, onUpdateSession }) {
+  const labelById = new Map(labels.map((l) => [l.id, l]));
+  const [authorFilter, setAuthorFilter] = useState9(null);
+  const [labelFilterIds, setLabelFilterIds] = useState9(/* @__PURE__ */ new Set());
+  const uniqueAuthors = Array.from(new Set(pins.map((p) => p.author).filter((a) => !!a)));
+  const resolvedTotal = pins.filter((p) => p.status === "resolved").length;
+  const basePins = showResolved ? pins : pins.filter((p) => p.status !== "resolved");
+  const labelFiltered = labelFilterIds.size === 0 ? basePins : basePins.filter((p) => p.labelId && labelFilterIds.has(p.labelId));
+  const filtered = authorFilter ? labelFiltered.filter((p) => p.author === authorFilter) : labelFiltered;
+  const currentSession = sessions?.find((s) => s.id === currentSessionId) ?? null;
+  const [editingNote, setEditingNote] = useState9(false);
+  const [noteValue, setNoteValue] = useState9("");
+  const [labelDropOpen, setLabelDropOpen] = useState9(false);
+  const labelDropRef = useRef6(null);
+  useEffect9(() => {
+    if (!labelDropOpen) return;
+    const h = (e) => {
+      if (labelDropRef.current && !labelDropRef.current.contains(e.target)) setLabelDropOpen(false);
+    };
+    document.addEventListener("mousedown", h);
+    return () => document.removeEventListener("mousedown", h);
+  }, [labelDropOpen]);
+  const toggleLabelFilter = (id) => {
+    setLabelFilterIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+  const labelTriggerText = labelFilterIds.size === 0 ? "\uC804\uCCB4" : Array.from(labelFilterIds).map((id) => labelById.get(id)?.name ?? id).join(", ");
+  return /* @__PURE__ */ jsxs11("div", { style: { display: "flex", flexDirection: "column", height: "100%", padding: "16px 8px 8px" }, children: [
+    /* @__PURE__ */ jsxs11("div", { style: {
+      display: "flex",
+      gap: 4,
+      alignItems: "center",
+      paddingLeft: 4,
+      paddingRight: 4
+    }, children: [
+      sessions && sessions.length > 0 && onSelectSession && onCreateSession && onDeleteSession && /* @__PURE__ */ jsx11("div", { style: { flex: 1, minWidth: 0 }, children: /* @__PURE__ */ jsx11(
+        SessionPicker,
+        {
+          sessions,
+          currentSessionId: currentSessionId ?? null,
+          sessionProgress,
+          onSelectSession,
+          onCreateSession,
+          onDeleteSession,
+          onSetSessionStatus,
+          onUpdateSession,
+          placement: "bottom"
+        }
+      ) }),
+      labels.length > 0 && /* @__PURE__ */ jsxs11("div", { ref: labelDropRef, style: { position: "relative", flex: 1, minWidth: 0 }, children: [
+        /* @__PURE__ */ jsxs11(
+          "button",
+          {
+            onClick: () => setLabelDropOpen((v) => !v),
+            style: {
+              display: "flex",
+              alignItems: "center",
+              gap: 3,
+              padding: "5px 8px",
+              borderRadius: 2,
+              cursor: "pointer",
+              border: `1px solid ${labelFilterIds.size > 0 ? "rgba(59,130,246,.4)" : "rgba(255,255,255,.07)"}`,
+              background: labelDropOpen ? "rgba(255,255,255,.07)" : "transparent",
+              color: labelFilterIds.size > 0 ? "rgba(59,130,246,.9)" : "rgba(255,255,255,.7)",
+              fontSize: 11,
+              fontWeight: 500,
+              outline: "none",
+              fontFamily: FONT_FAMILY,
+              height: 26,
+              width: "100%",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              transition: "all .15s"
+            },
+            onMouseEnter: (e) => {
+              e.currentTarget.style.background = "rgba(255,255,255,.07)";
+              e.currentTarget.style.color = labelFilterIds.size > 0 ? "rgba(59,130,246,1)" : "rgba(255,255,255,1)";
+              e.currentTarget.style.borderColor = labelFilterIds.size > 0 ? "rgba(59,130,246,.6)" : "rgba(255,255,255,.15)";
+            },
+            onMouseLeave: (e) => {
+              e.currentTarget.style.background = labelDropOpen ? "rgba(255,255,255,.07)" : "transparent";
+              e.currentTarget.style.color = labelFilterIds.size > 0 ? "rgba(59,130,246,.9)" : "rgba(255,255,255,.7)";
+              e.currentTarget.style.borderColor = labelFilterIds.size > 0 ? "rgba(59,130,246,.4)" : "rgba(255,255,255,.07)";
+            },
+            children: [
+              /* @__PURE__ */ jsx11("span", { style: { flex: 1, overflow: "hidden", textOverflow: "ellipsis", textAlign: "left" }, children: labelTriggerText }),
+              /* @__PURE__ */ jsx11("span", { style: { fontSize: 8, opacity: 0.6, marginLeft: 1 }, children: "\u25BE" })
+            ]
+          }
+        ),
+        labelDropOpen && /* @__PURE__ */ jsxs11("div", { style: {
+          position: "absolute",
+          top: "calc(100% + 4px)",
+          left: 0,
+          zIndex: 200,
+          background: DARK.bg2,
+          border: `1px solid ${DARK.brd}`,
+          borderRadius: 4,
+          overflow: "hidden",
+          minWidth: 120,
+          boxShadow: "0 8px 24px rgba(0,0,0,.5)"
+        }, children: [
+          /* @__PURE__ */ jsxs11(
+            "div",
+            {
+              onClick: () => setLabelFilterIds(/* @__PURE__ */ new Set()),
+              style: {
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "6px 10px",
+                cursor: "pointer",
+                background: labelFilterIds.size === 0 ? "rgba(255,255,255,.06)" : "transparent",
+                borderBottom: `1px solid ${DARK.brd}`
+              },
+              children: [
+                /* @__PURE__ */ jsx11("span", { style: {
+                  width: 12,
+                  fontSize: 9,
+                  textAlign: "center",
+                  flexShrink: 0,
+                  color: labelFilterIds.size === 0 ? "rgba(255,255,255,.7)" : "transparent"
+                }, children: "\u2713" }),
+                /* @__PURE__ */ jsx11("span", { style: {
+                  fontSize: 11,
+                  fontFamily: FONT_FAMILY,
+                  color: labelFilterIds.size === 0 ? DARK.txt : DARK.txL,
+                  fontWeight: labelFilterIds.size === 0 ? 600 : 400
+                }, children: "\uC804\uCCB4" })
+              ]
+            }
+          ),
+          labels.map((l) => {
+            const active = labelFilterIds.has(l.id);
+            const color = l.color || FALLBACK_LABEL_COLOR;
+            return /* @__PURE__ */ jsxs11(
+              "div",
+              {
+                onClick: () => toggleLabelFilter(l.id),
+                style: {
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  padding: "6px 10px",
+                  cursor: "pointer",
+                  background: active ? `${color}14` : "transparent",
+                  transition: "background .1s"
+                },
+                onMouseEnter: (e) => {
+                  if (!active) e.currentTarget.style.background = "rgba(255,255,255,.04)";
+                },
+                onMouseLeave: (e) => {
+                  if (!active) e.currentTarget.style.background = "transparent";
+                },
+                children: [
+                  /* @__PURE__ */ jsx11("span", { style: {
+                    width: 12,
+                    fontSize: 9,
+                    textAlign: "center",
+                    flexShrink: 0,
+                    color: active ? color : "transparent"
+                  }, children: "\u2713" }),
+                  /* @__PURE__ */ jsx11("span", { style: { width: 6, height: 6, borderRadius: "50%", background: color, flexShrink: 0 } }),
+                  /* @__PURE__ */ jsx11("span", { style: {
+                    fontSize: 11,
+                    fontFamily: FONT_FAMILY,
+                    color: active ? color : DARK.txL,
+                    fontWeight: active ? 600 : 400
+                  }, children: l.name })
+                ]
+              },
+              l.id
+            );
+          })
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxs11(
+        "select",
+        {
+          value: authorFilter ?? "",
+          onChange: (e) => setAuthorFilter(e.target.value || null),
+          disabled: uniqueAuthors.length === 0,
+          style: {
+            flex: 1,
+            minWidth: 0,
+            padding: "5px 8px",
+            background: DARK.bg3,
+            border: `1px solid ${authorFilter ? "rgba(59,130,246,.4)" : "rgba(255,255,255,.07)"}`,
+            borderRadius: 2,
+            color: authorFilter ? "rgba(59,130,246,.9)" : "rgba(255,255,255,.7)",
+            fontSize: 11,
+            fontWeight: 500,
+            cursor: uniqueAuthors.length > 0 ? "pointer" : "default",
+            outline: "none",
+            fontFamily: FONT_FAMILY,
+            height: 26,
+            transition: "all .15s",
+            opacity: uniqueAuthors.length === 0 ? 0.4 : 1
+          },
+          children: [
+            /* @__PURE__ */ jsx11("option", { value: "", children: "\uC791\uC131\uC790" }),
+            uniqueAuthors.map((a) => /* @__PURE__ */ jsx11("option", { value: a, children: a }, a))
+          ]
+        }
+      )
+    ] }),
+    /* @__PURE__ */ jsx11("div", { style: { borderTop: `1px solid ${DARK.brd}`, margin: "8px 4px" } }),
+    screenTitle && /* @__PURE__ */ jsxs11(Fragment9, { children: [
+      /* @__PURE__ */ jsx11("div", { style: { marginBottom: 6, paddingLeft: 4, paddingRight: 4 }, children: /* @__PURE__ */ jsxs11("div", { style: { display: "flex", alignItems: "center" }, children: [
+        /* @__PURE__ */ jsx11("span", { title: "\uD654\uBA74 \uBA85\uCE6D", style: {
+          fontSize: 18,
+          fontWeight: 700,
+          color: "rgba(255,255,255,.88)",
+          flex: 1,
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+          fontFamily: FONT_FAMILY
+        }, children: screenTitle }),
+        screenUpdatedAt && /* @__PURE__ */ jsx11("span", { style: { fontSize: 10, color: "rgba(255,255,255,.3)", flexShrink: 0, marginLeft: 8, fontFamily: FONT_FAMILY }, children: fmtDate(screenUpdatedAt) })
+      ] }) }),
+      /* @__PURE__ */ jsx11("div", { style: { paddingLeft: 4, paddingRight: 4 }, children: /* @__PURE__ */ jsx11("div", { style: {
+        fontSize: 11,
+        color: screenDescription ? "rgba(255,255,255,.55)" : "rgba(255,255,255,.3)",
+        lineHeight: 1.6,
+        fontFamily: FONT_FAMILY,
+        minHeight: 36,
+        whiteSpace: "pre-wrap"
+      }, children: screenDescription || "\uB354\uBE14 \uD074\uB9AD \uD558\uBA74 \uB0B4\uC6A9\uC744 \uC785\uB825\uD558\uC2E4 \uC218 \uC788\uC2B5\uB2C8\uB2E4." }) })
+    ] }),
+    /* @__PURE__ */ jsx11("div", { style: { borderBottom: `3px solid ${DARK.brd}`, margin: "8px 4px" } }),
+    /* @__PURE__ */ jsxs11("div", { style: { padding: "4px 4px 6px", display: "flex", alignItems: "center", flexShrink: 0 }, children: [
+      /* @__PURE__ */ jsxs11("span", { style: { flex: 1, fontSize: 10, color: DARK.txL, fontFamily: FONT_FAMILY, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".4px" }, children: [
+        "\uCF54\uBA58\uD2B8 ",
+        filtered.length > 0 && /* @__PURE__ */ jsxs11("span", { style: { fontWeight: 400 }, children: [
+          "(",
+          filtered.length,
+          ")"
+        ] })
+      ] }),
+      resolvedTotal > 0 && /* @__PURE__ */ jsxs11("button", { onClick: onToggleShowResolved, style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 3,
+        padding: "3px 8px",
+        borderRadius: 3,
+        cursor: "pointer",
+        border: `1px solid ${showResolved ? "rgba(22,163,74,.5)" : DARK.brd}`,
+        background: showResolved ? "rgba(22,163,74,.15)" : "transparent",
+        color: showResolved ? "#4ade80" : DARK.txL,
+        fontSize: 10,
+        fontWeight: 600,
+        fontFamily: FONT_FAMILY
+      }, children: [
+        /* @__PURE__ */ jsx11("span", { children: showResolved ? "\u2713" : "\u25CB" }),
+        /* @__PURE__ */ jsxs11("span", { children: [
+          "\uD574\uACB0 ",
+          resolvedTotal
+        ] })
+      ] })
+    ] }),
+    /* @__PURE__ */ jsx11("div", { className: "sb-scroll", style: { flex: 1, overflowY: "auto" }, children: filtered.length === 0 ? /* @__PURE__ */ jsx11("div", { style: { textAlign: "center", color: DARK.txL, fontSize: 11, marginTop: 36, lineHeight: 1.8, fontFamily: FONT_FAMILY }, children: authorFilter || labelFilterIds.size > 0 ? "\uD544\uD130 \uC870\uAC74\uC5D0 \uB9DE\uB294 \uCF54\uBA58\uD2B8\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4." : "\uC544\uC9C1 \uCD94\uAC00\uB41C \uCF54\uBA58\uD2B8\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4." }) : filtered.map((p, idx) => {
+      const sel = p.id === selectedId;
+      const hov = p.id === hoveredId;
+      const label = p.labelId ? labelById.get(p.labelId) : void 0;
+      const color = label?.color ?? FALLBACK_LABEL_COLOR;
+      const resolved = p.status === "resolved";
+      return /* @__PURE__ */ jsxs11(
+        "div",
+        {
+          onClick: () => onSelect(p.id),
+          onMouseEnter: () => onHover?.(p.id),
+          onMouseLeave: () => onHover?.(null),
+          style: {
+            padding: "10px 4px",
+            borderBottom: idx < filtered.length - 1 ? `1px solid ${DARK.brd}` : "none",
+            cursor: "pointer",
+            background: sel ? `${color}1a` : hov ? "rgba(59,130,246,.12)" : "transparent",
+            transition: "background .15s",
+            opacity: resolved ? 0.65 : 1
+          },
+          children: [
+            /* @__PURE__ */ jsxs11("div", { style: { display: "flex", alignItems: "center", gap: 6 }, children: [
+              /* @__PURE__ */ jsxs11("div", { style: {
+                position: "relative",
+                width: 18,
+                height: 18,
+                borderRadius: "50%",
+                background: color,
+                color: "#fff",
+                fontSize: 9,
+                fontWeight: 700,
+                flexShrink: 0,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontFamily: FONT_FAMILY
+              }, children: [
+                p.num,
+                resolved && /* @__PURE__ */ jsx11("span", { style: {
+                  position: "absolute",
+                  top: -3,
+                  right: -3,
+                  width: 10,
+                  height: 10,
+                  borderRadius: "50%",
+                  background: "#16a34a",
+                  color: "#fff",
+                  fontSize: 6,
+                  fontWeight: 900,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  border: "1.5px solid #1e1e1e"
+                }, children: "\u2713" })
+              ] }),
+              /* @__PURE__ */ jsx11("span", { style: {
+                fontSize: 12,
+                fontWeight: 600,
+                color: resolved ? DARK.txL : DARK.txt,
+                fontFamily: FONT_FAMILY,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                textDecoration: resolved ? "line-through" : "none"
+              }, children: p.author || "\uC775\uBA85" }),
+              /* @__PURE__ */ jsx11("div", { style: { flex: 1 } }),
+              p.comments.length > 0 && /* @__PURE__ */ jsxs11("span", { style: { fontSize: 9, padding: "1px 6px", background: "rgba(59,130,246,.2)", color: "#93C5FD", borderRadius: 4, fontWeight: 700, fontFamily: FONT_FAMILY, flexShrink: 0, display: "inline-flex", alignItems: "center", gap: 3 }, children: [
+                /* @__PURE__ */ jsx11(IconChat, { size: 9, color: "#93C5FD" }),
+                " ",
+                p.comments.length
+              ] }),
+              /* @__PURE__ */ jsx11("span", { style: { fontSize: 9, color: DARK.txL, fontFamily: FONT_FAMILY, flexShrink: 0 }, children: fmtDate(p.createdAt) })
+            ] }),
+            p.note && /* @__PURE__ */ jsx11("div", { style: { paddingLeft: 24, marginTop: 4, marginBottom: 2 }, children: /* @__PURE__ */ jsx11("div", { style: { fontSize: 11, color: DARK.txL, fontFamily: FONT_FAMILY, lineHeight: 1.55, whiteSpace: "pre-wrap", wordBreak: "break-word" }, children: p.note }) })
+          ]
+        },
+        p.id
+      );
+    }) })
+  ] });
+}
+var TABS = [
+  { key: "screenSpec", label: "\uD654\uBA74 \uC2A4\uD399" },
+  { key: "comment", label: "\uCF54\uBA58\uD2B8" }
+];
+function SpecDrawer({
+  pageId,
+  storage,
+  currentAuthor,
+  onClose,
+  onDeleteElement,
+  onSoftDeleteElement,
+  onRestoreElement,
+  onScreenSpecSaved,
+  onElementSaved,
+  refreshKey,
+  pins = [],
+  labels = [],
+  selectedPinId = null,
+  hoveredPinId = null,
+  showResolved = false,
+  resolvedCount = 0,
+  onSelectPin,
+  onHoverPin,
+  onToggleShowResolved,
+  defaultTab = "screenSpec",
+  sessions,
+  currentSessionId,
+  sessionProgress,
+  onSelectSession,
+  onCreateSession,
+  onDeleteSession,
+  onSetSessionStatus,
+  onUpdateSession,
+  onHoverElement,
+  allAnnotations,
+  onNavigate,
+  onScreenListChange,
+  pinned = false,
+  onTogglePin
+}) {
+  const [tab, setTab] = useState9(defaultTab);
+  const [screens, setScreens] = useState9([]);
+  const [screensLoaded, setScreensLoaded] = useState9(false);
+  const [activePageId, setActivePageId] = useState9(pageId);
+  const [showScreenList, setShowScreenList] = useState9(() => {
+    try {
+      const saved = localStorage.getItem("sb_screen_list_open");
+      return saved === null ? true : saved === "1";
+    } catch {
+      return true;
+    }
+  });
+  const setShowScreenListPersisted = useCallback2((v) => {
+    setShowScreenList(v);
+    try {
+      localStorage.setItem("sb_screen_list_open", v ? "1" : "0");
+    } catch {
+    }
+    onScreenListChange?.(v);
+  }, [onScreenListChange]);
+  useEffect9(() => {
+    const saved = localStorage.getItem("sb_screen_list_open");
+    onScreenListChange?.(saved === null ? true : saved === "1");
+  }, []);
+  useEffect9(() => {
+    if (!showScreenList) return;
+    const onKey = (e) => {
+      if (e.key !== "Escape") return;
+      const tag = document.activeElement?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA") return;
+      onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [showScreenList, onClose]);
+  const handleSelectPage = (id) => {
+    setActivePageId(id);
+    onNavigate?.(id);
+  };
+  useEffect9(() => {
+    if (!storage.loadScreenSpecs) {
+      setScreensLoaded(true);
+      return;
+    }
+    storage.loadScreenSpecs().then((data) => {
+      setScreens(data);
+      setScreensLoaded(true);
+    }).catch(() => {
+      setScreensLoaded(true);
+    });
+  }, [storage]);
+  useEffect9(() => {
+    setActivePageId(pageId);
+  }, [pageId]);
+  const allScreens = screens.some((s) => s.pageId === activePageId) ? screens : [{ id: null, pageId: activePageId, title: activePageId, description: "", status: "draft", createdAt: null, updatedAt: null }, ...screens];
+  const activeScreenTitle = allScreens.find((s) => s.pageId === activePageId)?.title ?? activePageId;
+  const drawerPins = allAnnotations?.[activePageId] ?? (activePageId === pageId ? pins : []);
+  const handleScreenSpecSaved = (spec) => {
+    setScreens((prev) => {
+      const exists = prev.some((s) => s.pageId === spec.pageId);
+      return exists ? prev.map((s) => s.pageId === spec.pageId ? spec : s) : [...prev, spec];
+    });
+    onScreenSpecSaved?.(spec);
+  };
+  const handleScreenDeleted = (pageId2) => {
+    setScreens((prev) => prev.filter((s) => s.pageId !== pageId2));
+  };
+  const handleRenameScreen = async () => {
+    const current = allScreens.find((s) => s.pageId === activePageId);
+    const name = window.prompt("\uD654\uBA74 \uC774\uB984", current?.title || activePageId);
+    if (!name?.trim() || !storage.saveScreenSpec) return;
+    const saved = await storage.saveScreenSpec(activePageId, { title: name.trim(), updatedBy: currentAuthor || null });
+    setScreens((prev) => {
+      const exists = prev.some((s) => s.pageId === activePageId);
+      return exists ? prev.map((s) => s.pageId === activePageId ? saved : s) : [...prev, saved];
+    });
+  };
+  return /* @__PURE__ */ jsxs11(
+    "div",
+    {
+      id: "sb-spec-drawer",
+      "data-sb-ui": "true",
+      style: {
+        position: "fixed",
+        top: 0,
+        right: 0,
+        bottom: 45,
+        width: DRAWER_W,
+        background: DARK.bg,
+        borderLeft: `1px solid ${DARK.brd}`,
+        boxShadow: "-4px 0 24px rgba(0,0,0,.3)",
+        display: "flex",
+        flexDirection: "column",
+        zIndex: 9995,
+        fontFamily: FONT_FAMILY
+      },
+      children: [
+        /* @__PURE__ */ jsx11("style", { children: `
+        .sb-scroll::-webkit-scrollbar{width:4px}
+        .sb-scroll::-webkit-scrollbar-track{background:transparent}
+        .sb-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);border-radius:10px}
+        .sb-scroll::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.26)}
+        .sb-scroll{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.14) transparent}
+      ` }),
+        showScreenList && /* @__PURE__ */ jsx11(
+          ScreenListPanel,
+          {
+            screens: allScreens,
+            currentPageId: activePageId,
+            onSelect: handleSelectPage,
+            allAnnotations,
+            storage,
+            currentAuthor,
+            onScreenAdded: handleScreenSpecSaved,
+            onScreenDeleted: handleScreenDeleted,
+            screensLoaded
+          }
+        ),
+        /* @__PURE__ */ jsxs11("div", { style: { padding: "14px 10px 0px", background: DARK.bg2, flexShrink: 0, borderBottom: `1px solid ${DARK.brd}` }, children: [
+          /* @__PURE__ */ jsxs11("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center" }, children: [
+            /* @__PURE__ */ jsxs11("div", { style: { display: "flex", alignItems: "center", gap: 7, minWidth: 0 }, children: [
+              /* @__PURE__ */ jsx11(
+                "button",
+                {
+                  onClick: () => setShowScreenListPersisted(!showScreenList),
+                  title: "\uD654\uBA74 \uBAA9\uB85D",
+                  style: {
+                    background: showScreenList ? `${SPEC_COLOR}22` : "transparent",
+                    border: `1px solid ${showScreenList ? SPEC_COLOR : DARK.brd}`,
+                    borderRadius: 2,
+                    color: showScreenList ? SPEC_COLOR : DARK.txL,
+                    fontSize: 10,
+                    padding: "2px 6px",
+                    cursor: "pointer",
+                    fontFamily: FONT_FAMILY,
+                    flexShrink: 0,
+                    transition: "all .15s"
+                  },
+                  onMouseEnter: (e) => {
+                    if (!showScreenList) {
+                      e.currentTarget.style.borderColor = SPEC_COLOR;
+                      e.currentTarget.style.color = SPEC_COLOR;
+                    }
+                  },
+                  onMouseLeave: (e) => {
+                    if (!showScreenList) {
+                      e.currentTarget.style.borderColor = DARK.brd;
+                      e.currentTarget.style.color = DARK.txL;
+                    }
+                  },
+                  children: "\u2261"
+                }
+              ),
+              /* @__PURE__ */ jsx11(
+                ScreenSelector,
+                {
+                  screens: allScreens,
+                  currentPageId: activePageId,
+                  onSelect: handleSelectPage
+                }
+              )
+            ] }),
+            /* @__PURE__ */ jsxs11("div", { style: { display: "flex", alignItems: "center", gap: 4, flexShrink: 0 }, children: [
+              onTogglePin && /* @__PURE__ */ jsx11(
+                "button",
+                {
+                  onClick: onTogglePin,
+                  title: pinned ? "\uACE0\uC815 \uD574\uC81C \u2014 \uD398\uC774\uC9C0 \uC774\uB3D9 \uC2DC \uD328\uB110\uC774 \uB2EB\uD799\uB2C8\uB2E4" : "\uD328\uB110 \uACE0\uC815 \u2014 \uD398\uC774\uC9C0 \uC774\uB3D9 \uC2DC \uD328\uB110\uC774 \uC720\uC9C0\uB429\uB2C8\uB2E4",
+                  style: {
+                    width: 26,
+                    height: 26,
+                    borderRadius: 5,
+                    cursor: "pointer",
+                    flexShrink: 0,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    background: pinned ? `${SPEC_COLOR}22` : "rgba(255,255,255,.08)",
+                    border: `1px solid ${pinned ? SPEC_COLOR + "88" : "transparent"}`,
+                    color: pinned ? SPEC_COLOR : DARK.txS,
+                    transition: "all .15s"
+                  },
+                  onMouseEnter: (e) => {
+                    if (!pinned) {
+                      e.currentTarget.style.background = "rgba(255,255,255,.14)";
+                      e.currentTarget.style.color = DARK.txt;
+                    }
+                  },
+                  onMouseLeave: (e) => {
+                    if (!pinned) {
+                      e.currentTarget.style.background = "rgba(255,255,255,.08)";
+                      e.currentTarget.style.color = DARK.txS;
+                    }
+                  },
+                  children: /* @__PURE__ */ jsx11("svg", { width: "12", height: "12", viewBox: "0 0 16 16", fill: "currentColor", xmlns: "http://www.w3.org/2000/svg", children: /* @__PURE__ */ jsx11("path", { d: "M4.146.146A.5.5 0 0 1 4.5 0h7a.5.5 0 0 1 .5.5c0 .68-.342 1.174-.646 1.479-.126.125-.25.224-.354.298v4.431l.078.048c.203.127.476.314.751.555C12.36 7.775 13 8.527 13 9.5a.5.5 0 0 1-.5.5h-4v4.5c0 .276-.224 1.5-.5 1.5s-.5-1.224-.5-1.5V10h-4a.5.5 0 0 1-.5-.5c0-.973.64-1.725 1.17-2.189A5.921 5.921 0 0 1 5 6.708V2.277a2.77 2.77 0 0 1-.354-.298C4.342 1.674 4 1.179 4 .5a.5.5 0 0 1 .146-.354z" }) })
+                }
+              ),
+              /* @__PURE__ */ jsx11(
+                "button",
+                {
+                  onClick: onClose,
+                  style: {
+                    background: "rgba(255,255,255,.08)",
+                    border: "none",
+                    color: DARK.txS,
+                    width: 26,
+                    height: 26,
+                    borderRadius: 5,
+                    cursor: "pointer",
+                    fontSize: 14,
+                    flexShrink: 0
+                  },
+                  onMouseEnter: (e) => {
+                    e.currentTarget.style.background = "rgba(255,255,255,.14)";
+                  },
+                  onMouseLeave: (e) => {
+                    e.currentTarget.style.background = "rgba(255,255,255,.08)";
+                  },
+                  children: "\xD7"
+                }
+              )
+            ] })
+          ] }),
+          /* @__PURE__ */ jsx11("div", { style: { display: "flex", gap: 0, marginTop: 10 }, children: TABS.map(({ key, label }) => /* @__PURE__ */ jsxs11("button", { onClick: () => setTab(key), style: {
+            padding: "4px 10px",
+            background: "transparent",
+            border: "none",
+            borderBottom: `2px solid ${tab === key ? "#3b82f6" : "transparent"}`,
+            color: tab === key ? "#3b82f6" : DARK.txL,
+            fontSize: 11,
+            fontWeight: tab === key ? 700 : 400,
+            cursor: "pointer",
+            fontFamily: FONT_FAMILY,
+            transition: "all .12s",
+            display: "flex",
+            alignItems: "center",
+            gap: 4
+          }, children: [
+            label,
+            key === "comment" && drawerPins.filter((p) => p.status !== "resolved").length > 0 && /* @__PURE__ */ jsx11("span", { style: {
+              fontSize: 9,
+              fontWeight: 700,
+              minWidth: 14,
+              height: 14,
+              background: tab === "comment" ? "#3b82f6" : "rgba(255,255,255,.18)",
+              color: "#fff",
+              borderRadius: 3,
+              padding: "0 3px",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center"
+            }, children: drawerPins.filter((p) => p.status !== "resolved").length })
+          ] }, key)) })
+        ] }),
+        /* @__PURE__ */ jsxs11("div", { style: { flex: 1, overflow: "hidden" }, children: [
+          tab === "screenSpec" && /* @__PURE__ */ jsx11(
+            ScreenSpecTab,
+            {
+              pageId: activePageId,
+              storage,
+              currentAuthor,
+              onDeleteElement,
+              onSoftDeleteElement,
+              onRestoreElement,
+              onHoverElement,
+              onScreenSpecSaved: handleScreenSpecSaved,
+              onElementSaved,
+              refreshKey,
+              externalTitle: allScreens.find((s) => s.pageId === activePageId)?.title
+            },
+            activePageId
+          ),
+          tab === "comment" && /* @__PURE__ */ jsx11(
+            CommentTab,
+            {
+              pins: drawerPins,
+              labels,
+              screenTitle: activeScreenTitle,
+              screenUpdatedAt: allScreens.find((s) => s.pageId === activePageId)?.updatedAt ?? null,
+              screenDescription: allScreens.find((s) => s.pageId === activePageId)?.description ?? "",
+              selectedId: selectedPinId,
+              hoveredId: hoveredPinId,
+              showResolved,
+              resolvedCount,
+              onSelect: onSelectPin ?? (() => {
+              }),
+              onHover: onHoverPin,
+              onToggleShowResolved: onToggleShowResolved ?? (() => {
+              }),
+              sessions,
+              currentSessionId,
+              sessionProgress,
+              onSelectSession,
+              onCreateSession,
+              onDeleteSession,
+              onSetSessionStatus,
+              onUpdateSession
+            }
+          )
+        ] })
+      ]
+    }
+  );
+}
+
+// src/SpecPin.tsx
+import { createPortal as createPortal2 } from "react-dom";
+import { useEffect as useEffect10, useState as useState10 } from "react";
+import { Fragment as Fragment10, jsx as jsx12, jsxs as jsxs12 } from "react/jsx-runtime";
+var PIN_LAYER_ID = "specbridge-pin-layer";
+var EXPAND_W2 = 220;
+function timeAgo2(iso) {
+  const diff = Date.now() - new Date(iso).getTime();
+  if (diff < 6e4) return "\uBC29\uAE08";
+  if (diff < 36e5) return `${Math.floor(diff / 6e4)}\uBD84 \uC804`;
+  if (diff < 864e5) return `${Math.floor(diff / 36e5)}\uC2DC\uAC04 \uC804`;
+  return `${Math.floor(diff / 864e5)}\uC77C \uC804`;
+}
+var SPEC_COLOR2 = "#ef4444";
+function SpecPin({ spec, align, isExternalHovered, onClick, onMove, onMoveEnd, softDeleted }) {
+  const [hovered, setHovered] = useState10(false);
+  const [dragging, setDragging] = useState10(false);
+  const [contentReady, setContentReady] = useState10(false);
+  const expanded = hovered || !!isExternalHovered;
+  useEffect10(() => {
+    if (!expanded) {
+      setContentReady(false);
+      return;
+    }
+    const raf = requestAnimationFrame(() => setContentReady(true));
+    return () => cancelAnimationFrame(raf);
+  }, [expanded]);
+  if (spec.pinX == null || spec.pinY == null) return null;
+  const num = spec.num ?? "\xB7";
+  const label = spec.elementLabel ?? spec.elementId;
+  const { viewportX, viewportY, expandLeft } = (() => {
+    const el = document.getElementById(PIN_LAYER_ID);
+    const r = el?.getBoundingClientRect() ?? { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight };
+    const rawX = align === "center" ? spec.pinX + r.width / 2 : align === "right" ? r.width - spec.pinX : spec.pinX;
+    const vx = r.left + rawX;
+    const vy = r.top + spec.pinY;
+    return {
+      viewportX: vx,
+      viewportY: vy,
+      expandLeft: vx + EXPAND_W2 > window.innerWidth - 8
+    };
+  })();
+  const EDGE = 8;
+  const MIN_UP = 120;
+  const expandDown = expanded && viewportY + 28 - EDGE < MIN_UP;
+  const maxExpandH = expanded ? expandDown ? Math.min(400, window.innerHeight - viewportY - EDGE) : Math.min(400, viewportY + 28 - EDGE) : 28;
+  const portalLeft = expandLeft ? viewportX + 28 - EXPAND_W2 : viewportX;
+  const portalVertical = expandDown ? { top: viewportY } : { bottom: window.innerHeight - viewportY - 28 };
+  const handleMouseDown = (e) => {
+    if (e.button !== 0) return;
+    if (spec.pinX == null || spec.pinY == null) return;
+    e.stopPropagation();
+    if (!onMove && !onMoveEnd) {
+      onClick();
+      return;
+    }
+    const pinLayer = document.getElementById(PIN_LAYER_ID);
+    if (!pinLayer) {
+      onClick();
+      return;
+    }
+    const base = pinLayer.getBoundingClientRect();
+    const pinRawX = align === "center" ? spec.pinX + base.width / 2 : align === "right" ? base.width - spec.pinX : spec.pinX;
+    const startX = e.clientX - base.left - pinRawX;
+    const startY = e.clientY - base.top - spec.pinY;
+    let moved = false;
+    let lastPos = { pinX: spec.pinX, pinY: spec.pinY };
+    const onMoveHandler = (ev) => {
+      if (!moved) {
+        moved = true;
+        setDragging(true);
+      }
+      const newRawX = ev.clientX - base.left - startX;
+      const newRawY = ev.clientY - base.top - startY;
+      const clampedRawX = Math.max(0, Math.min(base.width, newRawX));
+      const clampedRawY = Math.max(0, Math.min(base.height, newRawY));
+      const newPinX = align === "center" ? clampedRawX - base.width / 2 : align === "right" ? base.width - clampedRawX : clampedRawX;
+      lastPos = { pinX: newPinX, pinY: clampedRawY };
+      onMove?.(lastPos);
+    };
+    const onUp = () => {
+      document.removeEventListener("mousemove", onMoveHandler);
+      document.removeEventListener("mouseup", onUp);
+      setDragging(false);
+      if (!moved) {
+        onClick();
+      } else {
+        onMoveEnd?.(lastPos);
+      }
+    };
+    document.addEventListener("mousemove", onMoveHandler);
+    document.addEventListener("mouseup", onUp);
+  };
+  return /* @__PURE__ */ jsxs12(Fragment10, { children: [
+    /* @__PURE__ */ jsx12(
+      "div",
+      {
+        "data-sb-ui": "true",
+        onMouseDown: handleMouseDown,
+        onMouseEnter: () => setHovered(true),
+        onMouseLeave: () => setHovered(false),
+        title: label,
+        style: {
+          position: "absolute",
+          ...align === "center" ? { left: `calc(50% + ${spec.pinX}px)` } : align === "right" ? { right: `${spec.pinX}px` } : { left: `${spec.pinX}px` },
+          top: `${spec.pinY}px`,
+          transform: "translate(0, 0)",
+          zIndex: 9850,
+          cursor: dragging ? "grabbing" : expanded ? "grab" : "pointer",
+          pointerEvents: "all",
+          display: "flex",
+          alignItems: "flex-start",
+          transition: dragging ? "none" : "opacity .15s",
+          opacity: softDeleted ? 0.4 : 1
+        },
+        children: /* @__PURE__ */ jsx12("div", { style: {
+          width: 28,
+          height: 28,
+          borderRadius: "80px 80px 80px 12px",
+          background: "#1A1A1A",
+          boxShadow: "0 2px 8px rgba(0,0,0,.28)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexShrink: 0
+        }, children: /* @__PURE__ */ jsx12("div", { style: {
+          width: 22,
+          height: 22,
+          borderRadius: "50%",
+          background: SPEC_COLOR2,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center"
+        }, children: /* @__PURE__ */ jsx12("span", { style: {
+          fontSize: 10,
+          fontWeight: 700,
+          color: "#fff",
+          fontFamily: FONT_FAMILY,
+          lineHeight: 1,
+          userSelect: "none",
+          textDecoration: softDeleted ? "line-through" : "none"
+        }, children: num }) }) })
+      }
+    ),
+    expanded && typeof document !== "undefined" && createPortal2(
+      /* @__PURE__ */ jsx12(
+        "div",
+        {
+          onMouseDown: handleMouseDown,
+          onMouseEnter: () => setHovered(true),
+          onMouseLeave: () => setHovered(false),
+          style: {
+            position: "fixed",
+            left: portalLeft,
+            ...portalVertical,
+            width: EXPAND_W2,
+            maxHeight: maxExpandH,
+            minHeight: 28,
+            borderRadius: expandDown ? "4px 16px 16px 16px" : "16px 16px 16px 4px",
+            background: "#1A1A1A",
+            boxShadow: "0 6px 18px rgba(0,0,0,.38)",
+            overflow: "hidden",
+            zIndex: 9992,
+            fontFamily: FONT_FAMILY,
+            pointerEvents: "all",
+            display: "flex",
+            flexDirection: "column",
+            cursor: dragging ? "grabbing" : "grab"
+          },
+          children: contentReady && /* @__PURE__ */ jsxs12("div", { style: { padding: "8px 10px", display: "flex", flexDirection: "column", gap: 6 }, children: [
+            /* @__PURE__ */ jsxs12("div", { style: { display: "flex", alignItems: "center", gap: 7 }, children: [
+              /* @__PURE__ */ jsx12("div", { style: {
+                width: 22,
+                height: 22,
+                borderRadius: "50%",
+                background: SPEC_COLOR2,
+                flexShrink: 0,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center"
+              }, children: /* @__PURE__ */ jsx12("span", { style: { fontSize: 10, fontWeight: 700, color: "#fff", lineHeight: 1 }, children: num }) }),
+              /* @__PURE__ */ jsx12("span", { style: {
+                fontSize: 12,
+                fontWeight: 600,
+                color: "rgba(255,255,255,.88)",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                fontFamily: FONT_FAMILY,
+                minWidth: 0,
+                flexShrink: 1
+              }, children: label }),
+              spec.updatedAt && /* @__PURE__ */ jsx12("span", { style: {
+                marginLeft: "auto",
+                flexShrink: 0,
+                fontSize: 9,
+                color: "rgba(255,255,255,.28)",
+                whiteSpace: "nowrap",
+                fontFamily: FONT_FAMILY
+              }, children: timeAgo2(spec.updatedAt) })
+            ] }),
+            spec.content && /* @__PURE__ */ jsx12("div", { style: {
+              fontSize: 11,
+              color: "rgba(255,255,255,.55)",
+              lineHeight: 1.55,
+              display: "-webkit-box",
+              WebkitLineClamp: 3,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+              fontFamily: FONT_FAMILY
+            }, children: spec.content })
+          ] })
+        }
+      ),
+      document.body
     )
   ] });
 }
@@ -4312,11 +8364,11 @@ var localStorageAdapter = {
 };
 
 // src/useAnnotations.ts
-import { useCallback, useEffect as useEffect7, useMemo, useState as useState8 } from "react";
+import { useCallback as useCallback3, useEffect as useEffect11, useMemo as useMemo3, useState as useState11 } from "react";
 function useAnnotations(pageId, storage) {
-  const [allAnnots, setAllAnnots] = useState8({});
-  const [loading, setLoading] = useState8(true);
-  useEffect7(() => {
+  const [allAnnots, setAllAnnots] = useState11({});
+  const [loading, setLoading] = useState11(true);
+  useEffect11(() => {
     let cancelled = false;
     storage.loadAnnotations().then((data) => {
       if (!cancelled) setAllAnnots(data);
@@ -4327,8 +8379,8 @@ function useAnnotations(pageId, storage) {
       cancelled = true;
     };
   }, [storage]);
-  const pins = useMemo(() => allAnnots[pageId] ?? [], [allAnnots, pageId]);
-  const replacePin = useCallback((pin) => {
+  const pins = useMemo3(() => allAnnots[pageId] ?? [], [allAnnots, pageId]);
+  const replacePin = useCallback3((pin) => {
     setAllAnnots((prev) => {
       const out = {};
       for (const [pid, arr] of Object.entries(prev)) {
@@ -4337,7 +8389,7 @@ function useAnnotations(pageId, storage) {
       return out;
     });
   }, []);
-  const removePinEverywhere = useCallback((pinId) => {
+  const removePinEverywhere = useCallback3((pinId) => {
     setAllAnnots((prev) => {
       const out = {};
       for (const [pid, arr] of Object.entries(prev)) {
@@ -4346,7 +8398,7 @@ function useAnnotations(pageId, storage) {
       return out;
     });
   }, []);
-  const addPin = useCallback(
+  const addPin = useCallback3(
     async (x, y, author, labelId, sessionId) => {
       try {
         const pin = await storage.createPin({ pageId, x, y, labelId, author, sessionId });
@@ -4362,8 +8414,15 @@ function useAnnotations(pageId, storage) {
     },
     [pageId, storage]
   );
-  const updatePin = useCallback(
+  const updatePin = useCallback3(
     async (id, patch) => {
+      setAllAnnots((prev) => {
+        const out = {};
+        for (const [pid, arr] of Object.entries(prev)) {
+          out[pid] = arr.map((p) => p.id === id ? { ...p, ...patch } : p);
+        }
+        return out;
+      });
       try {
         const pin = await storage.updatePin(id, patch);
         replacePin(pin);
@@ -4373,7 +8432,7 @@ function useAnnotations(pageId, storage) {
     },
     [storage, replacePin]
   );
-  const deletePin = useCallback(
+  const deletePin = useCallback3(
     async (id) => {
       try {
         await storage.deletePin(id);
@@ -4384,7 +8443,7 @@ function useAnnotations(pageId, storage) {
     },
     [storage, removePinEverywhere]
   );
-  const movePin = useCallback(
+  const movePin = useCallback3(
     async (id, pos) => {
       try {
         const pin = await storage.updatePin(id, pos);
@@ -4395,7 +8454,7 @@ function useAnnotations(pageId, storage) {
     },
     [storage, replacePin]
   );
-  const resolvePin = useCallback(
+  const resolvePin = useCallback3(
     async (id, by) => {
       try {
         const pin = await storage.resolvePin(id, by);
@@ -4406,7 +8465,7 @@ function useAnnotations(pageId, storage) {
     },
     [storage, replacePin]
   );
-  const reopenPin = useCallback(
+  const reopenPin = useCallback3(
     async (id) => {
       try {
         const pin = await storage.reopenPin(id);
@@ -4417,7 +8476,7 @@ function useAnnotations(pageId, storage) {
     },
     [storage, replacePin]
   );
-  const addComment = useCallback(
+  const addComment = useCallback3(
     async (pinId, author, text) => {
       try {
         const comment = await storage.addComment(pinId, author, text);
@@ -4438,8 +8497,17 @@ function useAnnotations(pageId, storage) {
     },
     [storage]
   );
-  const updateComment = useCallback(
+  const updateComment = useCallback3(
     async (pinId, commentId, text) => {
+      setAllAnnots((prev) => {
+        const out = {};
+        for (const [pid, arr] of Object.entries(prev)) {
+          out[pid] = arr.map(
+            (p) => p.id === pinId ? { ...p, comments: p.comments.map((c) => c.id === commentId ? { ...c, text } : c) } : p
+          );
+        }
+        return out;
+      });
       try {
         const comment = await storage.updateComment(commentId, text);
         setAllAnnots((prev) => {
@@ -4457,7 +8525,7 @@ function useAnnotations(pageId, storage) {
     },
     [storage]
   );
-  const deleteComment = useCallback(
+  const deleteComment = useCallback3(
     async (pinId, commentId) => {
       try {
         await storage.deleteComment(commentId);
@@ -4493,12 +8561,12 @@ function useAnnotations(pageId, storage) {
 }
 
 // src/useAuthor.ts
-import { useCallback as useCallback2, useEffect as useEffect8, useState as useState9 } from "react";
+import { useCallback as useCallback4, useEffect as useEffect12, useState as useState12 } from "react";
 function useAuthor(storage) {
-  const [author, setAuthorState] = useState9("");
-  const [defaultLabelId, setDefaultLabelIdState] = useState9(null);
-  const [loading, setLoading] = useState9(true);
-  useEffect8(() => {
+  const [author, setAuthorState] = useState12("");
+  const [defaultLabelId, setDefaultLabelIdState] = useState12(null);
+  const [loading, setLoading] = useState12(true);
+  useEffect12(() => {
     let cancelled = false;
     Promise.all([
       storage.loadAuthor(),
@@ -4515,7 +8583,7 @@ function useAuthor(storage) {
       cancelled = true;
     };
   }, [storage]);
-  const setAuthor = useCallback2(
+  const setAuthor = useCallback4(
     async (name) => {
       setAuthorState(name);
       try {
@@ -4526,7 +8594,7 @@ function useAuthor(storage) {
     },
     [storage]
   );
-  const setDefaultLabelId = useCallback2(
+  const setDefaultLabelId = useCallback4(
     async (id) => {
       setDefaultLabelIdState(id);
       try {
@@ -4541,11 +8609,11 @@ function useAuthor(storage) {
 }
 
 // src/useLabels.ts
-import { useCallback as useCallback3, useEffect as useEffect9, useState as useState10 } from "react";
+import { useCallback as useCallback5, useEffect as useEffect13, useState as useState13 } from "react";
 function useLabels(storage) {
-  const [labels, setLabels] = useState10([]);
-  const [loading, setLoading] = useState10(true);
-  useEffect9(() => {
+  const [labels, setLabels] = useState13([]);
+  const [loading, setLoading] = useState13(true);
+  useEffect13(() => {
     let cancelled = false;
     storage.loadLabels().then((v) => {
       if (!cancelled) setLabels(v);
@@ -4556,7 +8624,7 @@ function useLabels(storage) {
       cancelled = true;
     };
   }, [storage]);
-  const addLabel = useCallback3(
+  const addLabel = useCallback5(
     async (name, color) => {
       try {
         const trimmed = name.trim();
@@ -4571,7 +8639,7 @@ function useLabels(storage) {
     },
     [storage]
   );
-  const updateLabel = useCallback3(
+  const updateLabel = useCallback5(
     async (id, patch) => {
       try {
         const updated = await storage.updateLabel(id, patch);
@@ -4582,7 +8650,7 @@ function useLabels(storage) {
     },
     [storage]
   );
-  const deleteLabel = useCallback3(
+  const deleteLabel = useCallback5(
     async (id) => {
       try {
         await storage.deleteLabel(id);
@@ -4596,11 +8664,47 @@ function useLabels(storage) {
   return { labels, addLabel, updateLabel, deleteLabel, loading };
 }
 
+// src/useSettings.ts
+import { useCallback as useCallback6, useState as useState14 } from "react";
+var SETTINGS_KEY = "cs_sb_settings_v1";
+var DEFAULT_SETTINGS = {
+  panelMode: "overlay",
+  markerAlign: "left"
+};
+function loadSettings() {
+  try {
+    const raw = localStorage.getItem(SETTINGS_KEY);
+    if (raw) return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
+  } catch {
+  }
+  return { ...DEFAULT_SETTINGS };
+}
+function saveSettings(settings) {
+  try {
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+  } catch {
+  }
+}
+function useSettings() {
+  const [settings, setSettingsState] = useState14(loadSettings);
+  const setSetting = useCallback6(
+    (key, value) => {
+      setSettingsState((prev) => {
+        const next = { ...prev, [key]: value };
+        saveSettings(next);
+        return next;
+      });
+    },
+    []
+  );
+  return { settings, setSetting };
+}
+
 // src/useSessions.ts
-import { useCallback as useCallback4, useEffect as useEffect10, useState as useState11 } from "react";
+import { useCallback as useCallback7, useEffect as useEffect14, useState as useState15 } from "react";
 function useSessions(storage) {
-  const [sessions, setSessions] = useState11([]);
-  useEffect10(() => {
+  const [sessions, setSessions] = useState15([]);
+  useEffect14(() => {
     let cancelled = false;
     storage.loadSessions().then(async (v) => {
       if (cancelled) return;
@@ -4619,7 +8723,7 @@ function useSessions(storage) {
       cancelled = true;
     };
   }, [storage]);
-  const addSession = useCallback4(
+  const addSession = useCallback7(
     async (name, options) => {
       const trimmed = name.trim();
       if (!trimmed) return null;
@@ -4634,7 +8738,7 @@ function useSessions(storage) {
     },
     [storage]
   );
-  const updateSession = useCallback4(
+  const updateSession = useCallback7(
     async (id, patch) => {
       if (patch.name !== void 0 && !patch.name.trim()) return;
       try {
@@ -4646,19 +8750,19 @@ function useSessions(storage) {
     },
     [storage]
   );
-  const setSessionStatus = useCallback4(
+  const setSessionStatus = useCallback7(
     async (id, status) => {
       await updateSession(id, { status });
     },
     [updateSession]
   );
-  const setSessionViewport = useCallback4(
+  const setSessionViewport = useCallback7(
     async (id, viewport) => {
       await updateSession(id, { viewport });
     },
     [updateSession]
   );
-  const deleteSession = useCallback4(
+  const deleteSession = useCallback7(
     async (id) => {
       try {
         await storage.deleteSession(id);
@@ -4679,9 +8783,10 @@ function useSessions(storage) {
 }
 
 // src/SpecBridgeAnnotation.tsx
-import { Fragment as Fragment8, jsx as jsx9, jsxs as jsxs8 } from "react/jsx-runtime";
+import { Fragment as Fragment11, jsx as jsx13, jsxs as jsxs13 } from "react/jsx-runtime";
 var LAYER_ID = "specbridge-annot-layer";
 var CONTAINER_ID = "specbridge-annot-container";
+var PIN_LAYER_ID2 = "specbridge-pin-layer";
 var LOGO_TIP_KEY = "cs_annot_logo_tip_v1";
 function hasShownLogoTip() {
   try {
@@ -4700,26 +8805,60 @@ function SpecBridgeAnnotation({
   pageId,
   enabled: initialEnabled = true,
   storage = localStorageAdapter,
-  onExport,
-  children
+  onNavigate,
+  children,
+  overlayMode = false,
+  pageWrapper,
+  serviceId
 }) {
-  const [enabled, setEnabled] = useState12(initialEnabled);
-  const [showGuide, setShowGuide] = useState12(() => !hasDismissedForever());
-  const [showLogoTip, setShowLogoTip] = useState12(false);
-  const [adding, setAdding] = useState12(false);
-  const [showList, setShowList] = useState12(false);
-  const [showResolved, setShowResolved] = useState12(false);
-  const [selectedId, setSelectedId] = useState12(null);
-  const [filterLabelIds, setFilterLabelIds] = useState12(/* @__PURE__ */ new Set());
-  const [currentSessionId, setCurrentSessionId] = useState12(null);
-  const [hoveredId, setHoveredId] = useState12(null);
-  const hoverTimer = useRef4(null);
-  const [showAuthorModal, setShowAuthorModal] = useState12(false);
-  const [showLabelModal, setShowLabelModal] = useState12(false);
-  const [lastLabelId, setLastLabelIdState] = useState12(null);
-  const [latestSdkVersion, setLatestSdkVersion] = useState12(null);
-  const [, setResizeTick] = useState12(0);
-  useEffect11(() => {
+  const [enabled, setEnabled] = useState16(initialEnabled);
+  const [showGuide, setShowGuide] = useState16(() => !hasDismissedForever());
+  const [showLogoTip, setShowLogoTip] = useState16(false);
+  const [adding, setAdding] = useState16(false);
+  const mountTimeRef = useRef7(Date.now());
+  const firstToolbarUsedRef = useRef7(false);
+  const markerClickCountRef = useRef7(0);
+  const [showDrawer, setShowDrawer] = useState16(() => {
+    try {
+      return localStorage.getItem("sb_drawer_pinned") === "1";
+    } catch {
+      return false;
+    }
+  });
+  const [showScreenListOpen, setShowScreenListOpen] = useState16(false);
+  const [drawerDefaultTab, setDrawerDefaultTab] = useState16("screenSpec");
+  const [pickingForElement, setPickingForElement] = useState16(false);
+  const [specPins, setSpecPins] = useState16([]);
+  const [softDeletedSpecIds, setSoftDeletedSpecIds] = useState16(/* @__PURE__ */ new Set());
+  const [hoveredSpecElementId, setHoveredSpecElementId] = useState16(null);
+  const [specRefreshKey, setSpecRefreshKey] = useState16(0);
+  const [showResolved, setShowResolved] = useState16(false);
+  const [currentViewport, setCurrentViewport] = useState16("desktop");
+  const [viewportToast, setViewportToast] = useState16(null);
+  const viewportToastTimer = useRef7(null);
+  const [selectedId, setSelectedId] = useState16(null);
+  const [currentSessionId, setCurrentSessionId] = useState16(null);
+  const [hoveredId, setHoveredId] = useState16(null);
+  const hoverTimer = useRef7(null);
+  const [showAuthorModal, setShowAuthorModal] = useState16(false);
+  const [showLabelModal, setShowLabelModal] = useState16(false);
+  const [lastLabelId, setLastLabelIdState] = useState16(null);
+  const [latestSdkVersion, setLatestSdkVersion] = useState16(null);
+  const [screenMarkerAlign, setScreenMarkerAlign] = useState16(null);
+  const containerRef = useRef7(null);
+  const [drawerPinned, setDrawerPinned] = useState16(() => {
+    try {
+      return localStorage.getItem("sb_drawer_pinned") === "1";
+    } catch {
+      return false;
+    }
+  });
+  const drawerPinnedRef = useRef7(drawerPinned);
+  useEffect15(() => {
+    drawerPinnedRef.current = drawerPinned;
+  }, [drawerPinned]);
+  const [, setResizeTick] = useState16(0);
+  useEffect15(() => {
     const onResize = () => setResizeTick((t) => t + 1);
     const onScroll = () => setResizeTick((t) => t + 1);
     window.addEventListener("resize", onResize);
@@ -4729,7 +8868,23 @@ function SpecBridgeAnnotation({
       window.removeEventListener("scroll", onScroll);
     };
   }, []);
-  useEffect11(() => {
+  useEffect15(() => {
+    if (!storage.loadSetting) return;
+    storage.loadSetting("markerAlign").then((val) => {
+      if (val === "left" || val === "center" || val === "right") {
+        setSetting("markerAlign", val);
+      }
+    }).catch(() => {
+    });
+  }, [storage]);
+  useEffect15(() => {
+    if (!storage.loadScreenSpec) {
+      setScreenMarkerAlign(null);
+      return;
+    }
+    storage.loadScreenSpec(pageId).then((s) => setScreenMarkerAlign(s.markerAlign ?? null)).catch(() => setScreenMarkerAlign(null));
+  }, [pageId, storage]);
+  useEffect15(() => {
     const id = "specbridge-pretendard";
     if (document.getElementById(id)) return;
     const link = document.createElement("link");
@@ -4738,14 +8893,14 @@ function SpecBridgeAnnotation({
     link.href = "https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css";
     document.head.appendChild(link);
   }, []);
-  useEffect11(() => {
+  useEffect15(() => {
     if (!storage.checkSdkVersion) return;
     storage.checkSdkVersion().then(({ latest }) => {
       if (latest) setLatestSdkVersion(latest);
     }).catch(() => {
     });
   }, []);
-  useEffect11(() => {
+  useEffect15(() => {
     let cancelled = false;
     storage.loadLastLabelId().then((v) => {
       if (!cancelled) setLastLabelIdState(v);
@@ -4754,22 +8909,55 @@ function SpecBridgeAnnotation({
       cancelled = true;
     };
   }, [storage]);
-  useEffect11(() => {
+  useEffect15(() => {
     storage.loadCurrentSessionId().then((id) => {
       if (id) setCurrentSessionId(id);
     }).catch(() => {
     });
   }, []);
+  useEffect15(() => {
+    if (serviceId) setServiceId(serviceId);
+  }, [serviceId]);
+  useEffect15(() => {
+    trackEvent("sb_session_start", { page_id: pageId });
+  }, [pageId]);
+  useEffect15(() => {
+    if (selectedId) trackEvent("sb_panel_open", { page_id: pageId });
+  }, [selectedId, pageId]);
+  const { settings, setSetting } = useSettings();
+  const trackFirstToolbarUse = useCallback8((action) => {
+    if (firstToolbarUsedRef.current) return;
+    firstToolbarUsedRef.current = true;
+    trackEvent("sb_toolbar_first_use", {
+      page_id: pageId,
+      action,
+      time_to_interact_ms: Date.now() - mountTimeRef.current
+    });
+  }, [pageId]);
+  const handleChangeSetting = useCallback8(
+    (key, value) => {
+      setSetting(key, value);
+      if (key === "markerAlign") {
+        storage.saveSetting?.("markerAlign", value).catch(() => {
+        });
+        if (storage.saveScreenSpec) {
+          storage.saveScreenSpec(pageId, { markerAlign: value }).then((spec) => setScreenMarkerAlign(spec.markerAlign ?? null)).catch(() => {
+          });
+        }
+      }
+    },
+    [setSetting, storage, pageId]
+  );
   const { author, setAuthor, defaultLabelId, setDefaultLabelId } = useAuthor(storage);
   const { labels, addLabel, updateLabel, deleteLabel } = useLabels(storage);
-  const { sessions, addSession, updateSession, setSessionStatus, setSessionViewport, deleteSession } = useSessions(storage);
-  const handleSelectSession = useCallback5((id) => {
+  const { sessions, addSession, updateSession, setSessionStatus, deleteSession } = useSessions(storage);
+  const handleSelectSession = useCallback8((id) => {
     setCurrentSessionId(id);
     storage.saveCurrentSessionId(id).catch(() => {
     });
     setSelectedId(null);
   }, [storage]);
-  const handleCreateSession = useCallback5(
+  const handleCreateSession = useCallback8(
     async (name, options) => {
       const session = await addSession(name, options);
       if (!session) return null;
@@ -4778,10 +8966,76 @@ function SpecBridgeAnnotation({
     },
     [addSession, handleSelectSession]
   );
-  const handleDeleteSession = useCallback5(async (id) => {
+  const handleDeleteSession = useCallback8(async (id) => {
     await deleteSession(id);
     if (currentSessionId === id) handleSelectSession(null);
   }, [deleteSession, currentSessionId, handleSelectSession]);
+  const VIEWPORT_MAX_W = {
+    desktop: void 0,
+    tablet: 768,
+    mobile: 375
+  };
+  const handleViewportChange = useCallback8((vp) => {
+    trackFirstToolbarUse("viewport_switch");
+    trackEvent("sb_viewport_change", { to: vp, page_id: pageId });
+    setCurrentViewport(vp);
+    if (vp !== "desktop") {
+      if (viewportToastTimer.current) clearTimeout(viewportToastTimer.current);
+      const label = vp === "tablet" ? "\uD0DC\uBE14\uB9BF" : "\uBAA8\uBC14\uC77C";
+      setViewportToast(`${label} \uBDF0\uC5D0\uC11C\uB294 \uD540\uC774 \uD45C\uC2DC\uB418\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4`);
+      viewportToastTimer.current = setTimeout(() => setViewportToast(null), 3500);
+    } else {
+      setViewportToast(null);
+    }
+  }, [trackFirstToolbarUse, pageId]);
+  useEffect15(() => {
+    if (!overlayMode || !pageWrapper) return;
+    const maxW = VIEWPORT_MAX_W[currentViewport];
+    const isDesktop = currentViewport === "desktop";
+    const drawerOffset = enabled && settings.panelMode === "push" && showDrawer ? DRAWER_W + (showScreenListOpen ? SCREEN_LIST_W : 0) : 0;
+    pageWrapper.style.transition = "max-width .3s ease, width .3s ease";
+    if (isDesktop) {
+      pageWrapper.style.maxWidth = "";
+      pageWrapper.style.left = "";
+      pageWrapper.style.margin = "";
+      pageWrapper.style.marginRight = "";
+      pageWrapper.style.transform = "translateX(0)";
+      pageWrapper.style.width = drawerOffset ? `calc(100% - ${drawerOffset}px)` : "";
+      pageWrapper.style.overflow = "";
+      pageWrapper.style.outline = "";
+      pageWrapper.style.boxShadow = "";
+      if (containerRef.current) {
+        containerRef.current.style.transition = "width .3s ease";
+        containerRef.current.style.width = drawerOffset ? `calc(100% - ${drawerOffset}px)` : "100%";
+      }
+    } else {
+      pageWrapper.style.maxWidth = `${maxW}px`;
+      pageWrapper.style.width = "100%";
+      pageWrapper.style.left = "50%";
+      pageWrapper.style.transform = "translateX(-50%)";
+      pageWrapper.style.margin = "";
+      pageWrapper.style.marginRight = "";
+      pageWrapper.style.overflow = "hidden";
+      pageWrapper.style.outline = "2px solid rgba(255,255,255,.06)";
+      pageWrapper.style.boxShadow = "0 0 0 1px rgba(255,255,255,.04), 0 8px 40px rgba(0,0,0,.4)";
+    }
+    return () => {
+      pageWrapper.style.maxWidth = "";
+      pageWrapper.style.width = "";
+      pageWrapper.style.left = "";
+      pageWrapper.style.margin = "";
+      pageWrapper.style.marginRight = "";
+      pageWrapper.style.transition = "";
+      pageWrapper.style.transform = "";
+      pageWrapper.style.overflow = "";
+      pageWrapper.style.outline = "";
+      pageWrapper.style.boxShadow = "";
+      if (containerRef.current) {
+        containerRef.current.style.transition = "";
+        containerRef.current.style.width = "";
+      }
+    };
+  }, [overlayMode, pageWrapper, currentViewport, enabled, settings.panelMode, showDrawer, showScreenListOpen]);
   const {
     allAnnots,
     pins: allPagePins,
@@ -4795,25 +9049,22 @@ function SpecBridgeAnnotation({
     resolvePin,
     reopenPin
   } = useAnnotations(pageId, storage);
-  const labelById = useMemo2(() => new Map(labels.map((l) => [l.id, l])), [labels]);
-  const visiblePins = useMemo2(() => {
+  const labelById = useMemo4(() => new Map(labels.map((l) => [l.id, l])), [labels]);
+  const visiblePins = useMemo4(() => {
     let pins = allPagePins;
     if (currentSessionId !== null) {
-      pins = pins.filter((p) => p.id === selectedId || p.sessionId === currentSessionId);
+      pins = pins.filter((p) => p.id === selectedId || p.sessionId === currentSessionId || p.sessionId == null);
     }
     if (!showResolved) {
       pins = pins.filter((p) => p.status !== "resolved" || p.id === selectedId);
     }
-    if (filterLabelIds.size > 0) {
-      pins = pins.filter((p) => p.id === selectedId || p.labelId != null && filterLabelIds.has(p.labelId));
-    }
     return pins;
-  }, [allPagePins, showResolved, selectedId, filterLabelIds, currentSessionId]);
-  const resolvedCountThisPage = useMemo2(
+  }, [allPagePins, showResolved, selectedId, currentSessionId]);
+  const resolvedCountThisPage = useMemo4(
     () => allPagePins.filter((p) => p.status === "resolved").length,
     [allPagePins]
   );
-  const sessionProgress = useMemo2(() => {
+  const sessionProgress = useMemo4(() => {
     const progress = {};
     for (const pins of Object.values(allAnnots)) {
       for (const pin of pins) {
@@ -4825,7 +9076,7 @@ function SpecBridgeAnnotation({
     }
     return progress;
   }, [allAnnots]);
-  const pinUsage = useMemo2(() => {
+  const pinUsage = useMemo4(() => {
     const usage = {};
     for (const list of Object.values(allAnnots)) {
       for (const p of list) {
@@ -4834,7 +9085,7 @@ function SpecBridgeAnnotation({
     }
     return usage;
   }, [allAnnots]);
-  const rememberLastLabel = useCallback5(
+  const rememberLastLabel = useCallback8(
     (id) => {
       if (!id) return;
       setLastLabelIdState(id);
@@ -4842,35 +9093,46 @@ function SpecBridgeAnnotation({
     },
     [storage]
   );
-  useEffect11(() => {
+  useEffect15(() => {
     if (!defaultLabelId && labels.length > 0) {
       setDefaultLabelId(labels[0].id);
     }
   }, [labels, defaultLabelId, setDefaultLabelId]);
-  useEffect11(() => {
+  useEffect15(() => {
     if (lastLabelId && !labels.some((l) => l.id === lastLabelId)) {
       setLastLabelIdState(null);
       storage.saveLastLabelId(null);
     }
   }, [labels, lastLabelId, storage]);
-  useEffect11(() => {
+  useEffect15(() => {
     setSelectedId(null);
     setAdding(false);
+    if (!drawerPinnedRef.current) setShowDrawer(false);
   }, [pageId]);
-  useEffect11(() => {
+  useEffect15(() => {
+    if (!enabled || !storage.loadPageSpecs) {
+      setSpecPins([]);
+      return;
+    }
+    storage.loadPageSpecs(pageId).then((specs) => {
+      setSpecPins(specs.filter((s) => s.pinX != null && s.pinY != null));
+    }).catch(() => {
+    });
+  }, [enabled, pageId, storage]);
+  useEffect15(() => {
     if (!enabled) {
       setAdding(false);
-      setShowList(false);
+      setShowDrawer(false);
       setSelectedId(null);
       setShowLabelModal(false);
     }
   }, [enabled]);
-  useEffect11(() => {
+  useEffect15(() => {
     if (selectedId && !visiblePins.some((p) => p.id === selectedId)) {
       setSelectedId(null);
     }
   }, [selectedId, visiblePins]);
-  useEffect11(() => {
+  useEffect15(() => {
     if (!adding) return;
     const onKey = (e) => {
       if (e.key === "Escape") setAdding(false);
@@ -4878,7 +9140,7 @@ function SpecBridgeAnnotation({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [adding]);
-  useEffect11(() => {
+  useEffect15(() => {
     const onKey = (e) => {
       if (e.code !== "KeyA") return;
       if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) return;
@@ -4893,10 +9155,10 @@ function SpecBridgeAnnotation({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
-  useEffect11(() => {
+  useEffect15(() => {
     if (!enabled) return;
     const onKey = (e) => {
-      if (e.code !== "KeyN") return;
+      if (e.code !== "KeyC") return;
       if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) return;
       const t = e.target;
       if (t) {
@@ -4913,7 +9175,35 @@ function SpecBridgeAnnotation({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [enabled, author]);
-  useEffect11(() => {
+  useEffect15(() => {
+    if (!pickingForElement) return;
+    const onKey = (e) => {
+      if (e.key === "Escape") setPickingForElement(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [pickingForElement]);
+  useEffect15(() => {
+    if (!enabled) return;
+    const onKey = (e) => {
+      if (e.code !== "KeyS") return;
+      if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) return;
+      const t = e.target;
+      if (t) {
+        const tag = t.tagName;
+        if (tag === "INPUT" || tag === "TEXTAREA" || t.isContentEditable) return;
+      }
+      e.preventDefault();
+      if (!author) {
+        setShowAuthorModal(true);
+        return;
+      }
+      setPickingForElement((v) => !v);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [enabled, author]);
+  useEffect15(() => {
     if (!enabled) return;
     const onKey = (e) => {
       if (e.code !== "KeyL") return;
@@ -4921,19 +9211,20 @@ function SpecBridgeAnnotation({
       const t = e.target;
       if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
       e.preventDefault();
-      setShowList((v) => !v);
+      setDrawerDefaultTab("screenSpec");
+      setShowDrawer((v) => !v);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [enabled]);
-  const handleLayerClick = useCallback5(
+  const handleLayerClick = useCallback8(
     async (e) => {
       if (!adding) return;
       if (!author) {
         setShowAuthorModal(true);
         return;
       }
-      const layer = document.getElementById(CONTAINER_ID);
+      const layer = document.getElementById(PIN_LAYER_ID2);
       if (!layer) return;
       const rect = layer.getBoundingClientRect();
       const defaultExists = defaultLabelId && labels.some((l) => l.id === defaultLabelId);
@@ -4945,27 +9236,30 @@ function SpecBridgeAnnotation({
       const rawY = e.clientY - rect.top - PIN_SIZE;
       const clampedX = Math.max(MARGIN, Math.min(rawX, rect.width - PIN_SIZE - MARGIN));
       const clampedY = Math.max(MARGIN, Math.min(rawY, rect.height - PIN_SIZE - MARGIN));
-      const pin = await addPin(clampedX / rect.width, clampedY / rect.height, author, resolvedLabelId, currentSessionId);
+      const resolvedAlign = screenMarkerAlign ?? settings.markerAlign;
+      const storedX = resolvedAlign === "center" ? clampedX - rect.width / 2 : resolvedAlign === "right" ? rect.width - clampedX : clampedX;
+      const pin = await addPin(storedX, clampedY, author, resolvedLabelId, currentSessionId);
       if (!pin) return;
+      trackEvent("sb_pin_added", { page_id: pageId });
       if (!defaultExists) rememberLastLabel(resolvedLabelId);
       setSelectedId(pin.id);
       setAdding(false);
     },
     [adding, author, addPin, labels, lastLabelId, defaultLabelId, rememberLastLabel]
   );
-  const handlePanelClose = useCallback5(() => {
+  const handlePanelClose = useCallback8(() => {
     const pin = allPagePins.find((p) => p.id === selectedId);
     if (pin && !pin.note?.trim()) deletePin(pin.id);
     setSelectedId(null);
   }, [allPagePins, selectedId, deletePin]);
-  const handleUpdatePin = useCallback5(
+  const handleUpdatePin = useCallback8(
     async (id, patch) => {
       await updatePin(id, patch);
       if (patch.labelId !== void 0) rememberLastLabel(patch.labelId);
     },
     [updatePin, rememberLastLabel]
   );
-  const handleResolve = useCallback5(
+  const handleResolve = useCallback8(
     (pinId) => {
       if (!author) {
         setShowAuthorModal(true);
@@ -4975,60 +9269,259 @@ function SpecBridgeAnnotation({
     },
     [author, resolvePin]
   );
-  const handleExport = useCallback5(() => {
-    const payload = {
-      exportedAt: (/* @__PURE__ */ new Date()).toISOString(),
-      annotations: allAnnots,
-      labels
+  useEffect15(() => {
+    if (!enabled) return;
+    const onKey = (e) => {
+      if (e.code !== "KeyQ") return;
+      if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) return;
+      const t = e.target;
+      if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
+      e.preventDefault();
+      if (selectedId) {
+        const pin = allPagePins.find((p) => p.id === selectedId);
+        if (pin?.status === "resolved") reopenPin(selectedId);
+        else handleResolve(selectedId);
+      }
     };
-    if (onExport) {
-      onExport(payload);
-      return;
-    }
-    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [enabled, selectedId, handleResolve, allPagePins, reopenPin]);
+  function downloadBlob(blob, filename) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "annotations.json";
+    a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
-  }, [allAnnots, labels, onExport]);
-  const handlePinHoverEnter = useCallback5((id) => {
+  }
+  const STATUS_LABEL = {
+    planned: "\uC608\uC815",
+    draft: "\uC791\uC131",
+    review: "\uAC80\uD1A0",
+    changed: "\uBCC0\uACBD",
+    confirmed: "\uD655\uC815",
+    deprecated: "\uD3D0\uAE30"
+  };
+  function safeFilename(name) {
+    return name.replace(/[\\/:*?"<>|]/g, "_").trim() || "untitled";
+  }
+  function buildScreenMarkdown(screen, specs) {
+    const date = screen.updatedAt ? screen.updatedAt.slice(0, 10) : "";
+    const author2 = screen.updatedBy || screen.createdBy || "";
+    const statusLabel = STATUS_LABEL[screen.status] ?? screen.status;
+    const meta = [
+      `**\uC0C1\uD0DC**: ${statusLabel}`,
+      author2 && `**\uC791\uC131\uC790**: ${author2}`,
+      date && `**\uC218\uC815\uC77C**: ${date}`
+    ].filter(Boolean).join(" \xB7 ");
+    const lines = [
+      `# ${screen.title || screen.pageId}`,
+      "",
+      meta
+    ];
+    if (screen.description) {
+      lines.push("", screen.description);
+    }
+    const sorted = [...specs].sort((a, b) => (a.num ?? 999) - (b.num ?? 999));
+    if (sorted.length > 0) {
+      lines.push("", "---", "", "## \uC2A4\uD399 \uD56D\uBAA9", "");
+      sorted.forEach((spec) => {
+        const num = spec.num != null ? `[${spec.num}] ` : "";
+        const label = spec.elementLabel ? ` \u2014 ${spec.elementLabel}` : "";
+        lines.push(`### ${num}${spec.title}${label}`);
+        lines.push("");
+        lines.push(`**\uC0C1\uD0DC**: ${STATUS_LABEL[spec.status] ?? spec.status}`);
+        if (spec.content) {
+          lines.push("", spec.content);
+        }
+        lines.push("", "---", "");
+      });
+    }
+    return lines.join("\n");
+  }
+  const handleExportJson = useCallback8(async () => {
+    if (!storage.loadScreenSpecs || !storage.loadAllPageSpecs) return;
+    const [screens, pageSpecs] = await Promise.all([
+      storage.loadScreenSpecs(),
+      storage.loadAllPageSpecs()
+    ]);
+    const today = (/* @__PURE__ */ new Date()).toISOString().slice(0, 10);
+    const payload = { exportedAt: (/* @__PURE__ */ new Date()).toISOString(), screens, pageSpecs };
+    downloadBlob(
+      new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" }),
+      `specbridge-specs-${today}.json`
+    );
+    trackEvent("sb_export", { format: "json", screen_count: screens.length });
+  }, [storage]);
+  const handleExportMarkdown = useCallback8(async () => {
+    if (!storage.loadScreenSpecs || !storage.loadAllPageSpecs) return;
+    const [screens, pageSpecs] = await Promise.all([
+      storage.loadScreenSpecs(),
+      storage.loadAllPageSpecs()
+    ]);
+    const files = {};
+    screens.forEach((screen) => {
+      const specs = pageSpecs.filter((s) => s.pageId === screen.pageId);
+      const md = buildScreenMarkdown(screen, specs);
+      files[`${safeFilename(screen.title || screen.pageId)}.md`] = strToU8(md);
+    });
+    if (Object.keys(files).length === 0) return;
+    const today = (/* @__PURE__ */ new Date()).toISOString().slice(0, 10);
+    const zipped = zipSync(files, { level: 6 });
+    downloadBlob(
+      new Blob([zipped], { type: "application/zip" }),
+      `specbridge-specs-${today}.zip`
+    );
+    trackEvent("sb_export", { format: "markdown", screen_count: screens.length });
+  }, [storage]);
+  const handlePinHoverEnter = useCallback8((id) => {
     if (hoverTimer.current) {
       clearTimeout(hoverTimer.current);
       hoverTimer.current = null;
     }
     setHoveredId(id);
   }, []);
-  const handlePinHoverLeave = useCallback5((_id) => {
+  const handlePinHoverLeave = useCallback8((_id) => {
     hoverTimer.current = setTimeout(() => {
       setHoveredId(null);
       hoverTimer.current = null;
     }, 60);
   }, []);
-  useEffect11(() => {
+  useEffect15(() => {
     if (currentSessionId !== null && sessions.length > 0 && !sessions.some((s) => s.id === currentSessionId)) {
       handleSelectSession(null);
     }
   }, [sessions, currentSessionId, handleSelectSession]);
-  useEffect11(() => {
-    if (sessions.length === 1 && currentSessionId === null) {
-      handleSelectSession(sessions[0].id);
-    }
-  }, [sessions, currentSessionId, handleSelectSession]);
-  return /* @__PURE__ */ jsxs8(
+  return /* @__PURE__ */ jsxs13(
     "div",
     {
+      ref: containerRef,
       id: CONTAINER_ID,
-      style: {
-        position: "relative",
-        minHeight: "100%",
+      style: overlayMode ? {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        pointerEvents: "none",
         overflow: "hidden"
-        // 절대 위치 자식이 문서 스크롤 높이에 영향주지 않도록
+      } : {
+        position: "relative",
+        minHeight: "100vh",
+        overflow: "hidden",
+        maxWidth: VIEWPORT_MAX_W[currentViewport],
+        ...(() => {
+          const containerMargin = currentViewport !== "desktop" ? { margin: "0 auto" } : { marginRight: enabled && settings.panelMode === "push" && showDrawer ? DRAWER_W + (showScreenListOpen ? SCREEN_LIST_W : 0) : 0 };
+          return containerMargin;
+        })(),
+        transition: "max-width .3s ease, margin .3s ease",
+        outline: currentViewport !== "desktop" ? "2px solid rgba(255,255,255,.06)" : "none",
+        boxShadow: currentViewport !== "desktop" ? "0 0 0 1px rgba(255,255,255,.04), 0 8px 40px rgba(0,0,0,.4)" : "none"
       },
       children: [
         children,
-        enabled && /* @__PURE__ */ jsx9(
+        /* @__PURE__ */ jsxs13("div", { style: overlayMode ? { pointerEvents: "auto" } : void 0, children: [
+          /* @__PURE__ */ jsx13(
+            ElementPicker,
+            {
+              active: enabled && pickingForElement,
+              align: screenMarkerAlign ?? settings.markerAlign,
+              onSelectElement: async (elementId, elementLabel, pinX, pinY) => {
+                setPickingForElement(false);
+                if (storage.savePageSpec) {
+                  const saved = await storage.savePageSpec(pageId, elementId, {
+                    elementLabel,
+                    pinX,
+                    pinY,
+                    updatedBy: author || null
+                  });
+                  trackEvent("sb_spec_created", { page_id: pageId });
+                  setSpecPins((prev) => {
+                    const exists = prev.some((p) => p.elementId === elementId);
+                    return exists ? prev.map((p) => p.elementId === elementId ? saved : p) : [...prev, saved];
+                  });
+                  setSpecRefreshKey((k) => k + 1);
+                }
+                setShowDrawer(true);
+              }
+            }
+          ),
+          enabled && showDrawer && /* @__PURE__ */ jsx13(
+            SpecDrawer,
+            {
+              pageId,
+              storage,
+              currentAuthor: author,
+              onClose: () => {
+                setDrawerPinned(false);
+                try {
+                  localStorage.setItem("sb_drawer_pinned", "0");
+                } catch {
+                }
+                setShowDrawer(false);
+              },
+              pinned: drawerPinned,
+              onTogglePin: () => {
+                const next = !drawerPinned;
+                setDrawerPinned(next);
+                try {
+                  localStorage.setItem("sb_drawer_pinned", next ? "1" : "0");
+                } catch {
+                }
+              },
+              onDeleteElement: (id) => {
+                setSpecPins((prev) => prev.filter((s) => s.id !== id));
+                setSoftDeletedSpecIds((prev) => {
+                  const n = new Set(prev);
+                  n.delete(id);
+                  return n;
+                });
+              },
+              onSoftDeleteElement: (id) => setSoftDeletedSpecIds((prev) => /* @__PURE__ */ new Set([...prev, id])),
+              onRestoreElement: (id) => setSoftDeletedSpecIds((prev) => {
+                const n = new Set(prev);
+                n.delete(id);
+                return n;
+              }),
+              onScreenSpecSaved: (spec) => {
+                const align = spec.markerAlign ?? null;
+                setScreenMarkerAlign(align);
+                if (align) setSetting("markerAlign", align);
+              },
+              onElementSaved: (spec) => setSpecPins((prev) => prev.map((s) => s.id === spec.id ? spec : s)),
+              onHoverElement: (elementId) => setHoveredSpecElementId(elementId),
+              allAnnotations: allAnnots,
+              onNavigate,
+              onScreenListChange: setShowScreenListOpen,
+              refreshKey: specRefreshKey,
+              defaultTab: drawerDefaultTab,
+              pins: visiblePins,
+              labels,
+              selectedPinId: selectedId,
+              hoveredPinId: hoveredId,
+              showResolved,
+              resolvedCount: resolvedCountThisPage,
+              onSelectPin: (id) => {
+                setSelectedId(id);
+                const pin = allPagePins.find((p) => p.id === id);
+                if (pin && pin.comments.length > 0) {
+                  setDrawerDefaultTab("comment");
+                }
+              },
+              onHoverPin: (id) => setHoveredId(id ?? null),
+              onToggleShowResolved: () => setShowResolved((v) => !v),
+              sessions,
+              currentSessionId,
+              sessionProgress,
+              onSelectSession: handleSelectSession,
+              onCreateSession: handleCreateSession,
+              onDeleteSession: handleDeleteSession,
+              onSetSessionStatus: setSessionStatus,
+              onUpdateSession: updateSession
+            }
+          )
+        ] }),
+        enabled && /* @__PURE__ */ jsx13(
           "div",
           {
             id: LAYER_ID,
@@ -5040,173 +9533,561 @@ function SpecBridgeAnnotation({
               cursor: adding ? "crosshair" : "default",
               pointerEvents: adding ? "all" : "none"
             },
-            children: /* @__PURE__ */ jsx9("div", { style: { pointerEvents: "none" }, children: visiblePins.map((pin) => {
-              const label = pin.labelId ? labelById.get(pin.labelId) : void 0;
-              const isHov = pin.id === hoveredId;
-              const isSel = pin.id === selectedId;
-              return /* @__PURE__ */ jsx9(
-                AnnotPin,
+            children: (() => {
+              const resolvedAlign = screenMarkerAlign ?? settings.markerAlign;
+              return /* @__PURE__ */ jsxs13("div", { id: PIN_LAYER_ID2, style: { position: "absolute", inset: 0 }, children: [
+                currentViewport === "desktop" && enabled && specPins.map((spec) => /* @__PURE__ */ jsx13(
+                  SpecPin,
+                  {
+                    spec,
+                    align: resolvedAlign,
+                    isExternalHovered: hoveredSpecElementId === spec.elementId,
+                    softDeleted: softDeletedSpecIds.has(spec.id ?? ""),
+                    onClick: () => setShowDrawer(true),
+                    onMove: (pos) => {
+                      setSpecPins((prev) => prev.map(
+                        (s) => s.id === spec.id ? { ...s, pinX: pos.pinX, pinY: pos.pinY } : s
+                      ));
+                    },
+                    onMoveEnd: async (pos) => {
+                      if (!storage.savePageSpec) return;
+                      try {
+                        const saved = await storage.savePageSpec(pageId, spec.elementId, {
+                          pinX: pos.pinX,
+                          pinY: pos.pinY,
+                          updatedBy: author || null
+                        });
+                        setSpecPins((prev) => prev.map((s) => s.id === spec.id ? saved : s));
+                      } catch (e) {
+                        console.error("[specbridge] moveSpecPin failed", e);
+                      }
+                    }
+                  },
+                  spec.id ?? spec.elementId
+                )),
+                /* @__PURE__ */ jsx13("div", { style: { pointerEvents: "none" }, children: currentViewport === "desktop" && visiblePins.map((pin) => {
+                  const label = pin.labelId ? labelById.get(pin.labelId) : void 0;
+                  const isHov = pin.id === hoveredId;
+                  const isSel = pin.id === selectedId;
+                  return /* @__PURE__ */ jsx13(
+                    AnnotPin,
+                    {
+                      pin,
+                      num: pin.num,
+                      label,
+                      layerId: PIN_LAYER_ID2,
+                      align: resolvedAlign,
+                      isSelected: isSel,
+                      isHovered: isHov,
+                      onSelect: () => {
+                        const nextId = isSel ? null : pin.id;
+                        setSelectedId(nextId);
+                        if (nextId) {
+                          markerClickCountRef.current++;
+                          trackEvent("sb_marker_click", {
+                            page_id: pageId,
+                            session_marker_count: markerClickCountRef.current
+                          });
+                          if (pin.comments.length > 0) {
+                            setDrawerDefaultTab("comment");
+                            setShowDrawer(true);
+                          }
+                        }
+                      },
+                      onMove: (pos) => movePin(pin.id, pos),
+                      onHoverEnter: handlePinHoverEnter,
+                      onHoverLeave: handlePinHoverLeave
+                    },
+                    pin.id
+                  );
+                }) })
+              ] });
+            })()
+          }
+        ),
+        /* @__PURE__ */ jsxs13("div", { style: overlayMode ? { pointerEvents: "auto" } : void 0, children: [
+          enabled && selectedId && (() => {
+            const selectedPin = allPagePins.find((p) => p.id === selectedId);
+            if (!selectedPin) return null;
+            return /* @__PURE__ */ jsxs13(Fragment11, { children: [
+              /* @__PURE__ */ jsx13(
+                "div",
                 {
-                  pin,
-                  num: pin.num,
-                  label,
-                  layerId: CONTAINER_ID,
-                  isSelected: isSel,
-                  isHovered: isHov,
-                  onSelect: () => setSelectedId(isSel ? null : pin.id),
-                  onMove: (pos) => movePin(pin.id, pos),
-                  onHoverEnter: handlePinHoverEnter,
-                  onHoverLeave: handlePinHoverLeave
-                },
-                pin.id
-              );
-            }) })
-          }
-        ),
-        enabled && showList && /* @__PURE__ */ jsx9(
-          AnnotList,
-          {
-            pins: visiblePins,
-            labels,
-            pageId,
-            selectedId,
-            hoveredId,
-            showResolved,
-            resolvedCount: resolvedCountThisPage,
-            onSelect: (id) => setSelectedId(id),
-            onHover: (id) => setHoveredId(id ?? null),
-            onToggleShowResolved: () => setShowResolved((v) => !v),
-            onClose: () => setShowList(false)
-          }
-        ),
-        enabled && selectedId && (() => {
-          const selectedPin = allPagePins.find((p) => p.id === selectedId);
-          if (!selectedPin) return null;
-          return /* @__PURE__ */ jsxs8(Fragment8, { children: [
-            /* @__PURE__ */ jsx9(
-              "div",
-              {
-                style: { position: "fixed", inset: 0, zIndex: 9989 },
-                onClick: handlePanelClose
-              }
-            ),
-            /* @__PURE__ */ jsx9(
-              AnnotPanel,
-              {
-                pins: allPagePins,
-                selectedId,
-                anchor: (() => {
-                  const el = document.getElementById(CONTAINER_ID);
-                  const r = el?.getBoundingClientRect();
-                  return {
-                    x: r ? r.left + selectedPin.x * r.width : selectedPin.x * window.innerWidth,
-                    y: r ? r.top + selectedPin.y * r.height : selectedPin.y * window.innerHeight
-                  };
-                })(),
-                labels,
-                currentAuthor: author,
-                leftBound: showList ? 252 : 0,
-                onClose: handlePanelClose,
-                onUpdate: handleUpdatePin,
-                onDelete: (id) => {
-                  deletePin(id);
-                  setSelectedId(null);
-                },
-                onManageLabels: () => setShowLabelModal(true),
-                onAddComment: (pinId, text) => addComment(pinId, author, text),
-                onUpdateComment: updateComment,
-                onDeleteComment: deleteComment,
-                onResolve: handleResolve,
-                onReopen: reopenPin
-              }
-            )
-          ] });
-        })(),
-        showAuthorModal && /* @__PURE__ */ jsx9(
-          AuthorModal,
-          {
-            currentAuthor: author,
-            currentDefaultLabelId: defaultLabelId,
-            labels,
-            onSave: (name, labelId) => {
-              setAuthor(name);
-              setDefaultLabelId(labelId);
-              setShowAuthorModal(false);
-            },
-            onCancel: () => setShowAuthorModal(false)
-          }
-        ),
-        showLabelModal && /* @__PURE__ */ jsx9(
-          LabelManagerModal,
-          {
-            labels,
-            pinUsage,
-            onAdd: addLabel,
-            onUpdate: updateLabel,
-            onDelete: deleteLabel,
-            onClose: () => setShowLabelModal(false)
-          }
-        ),
-        showGuide && /* @__PURE__ */ jsx9(
-          OnboardingGuide,
-          {
-            onClose: (forever) => {
-              setShowGuide(false);
-              if (!forever && !hasShownLogoTip()) {
-                markLogoTipShown();
-                setShowLogoTip(true);
-                setTimeout(() => setShowLogoTip(false), 5e3);
+                  style: { position: "fixed", inset: 0, zIndex: 9989 },
+                  onClick: handlePanelClose
+                }
+              ),
+              /* @__PURE__ */ jsx13(
+                AnnotPanel,
+                {
+                  pins: allPagePins,
+                  selectedId,
+                  anchor: (() => {
+                    const el = document.getElementById(PIN_LAYER_ID2);
+                    const r = el?.getBoundingClientRect();
+                    const panelAlign = screenMarkerAlign ?? settings.markerAlign;
+                    return {
+                      x: r ? r.left + (panelAlign === "center" ? selectedPin.x + r.width / 2 : panelAlign === "right" ? r.width - selectedPin.x : selectedPin.x) : selectedPin.x,
+                      y: r ? r.top + selectedPin.y : selectedPin.y
+                    };
+                  })(),
+                  labels,
+                  currentAuthor: author,
+                  leftBound: 0,
+                  rightBound: showDrawer ? DRAWER_W : 0,
+                  onClose: handlePanelClose,
+                  onUpdate: handleUpdatePin,
+                  onDelete: (id) => {
+                    deletePin(id);
+                    setSelectedId(null);
+                  },
+                  onManageLabels: () => setShowLabelModal(true),
+                  onAddComment: (pinId, text) => {
+                    trackEvent("sb_comment_add", { page_id: pageId });
+                    addComment(pinId, author, text);
+                  },
+                  onUpdateComment: updateComment,
+                  onDeleteComment: deleteComment,
+                  onResolve: handleResolve,
+                  onReopen: reopenPin
+                }
+              )
+            ] });
+          })(),
+          showAuthorModal && /* @__PURE__ */ jsx13(
+            AuthorModal,
+            {
+              currentAuthor: author,
+              currentDefaultLabelId: defaultLabelId,
+              labels,
+              onSave: (name, labelId) => {
+                setAuthor(name);
+                setDefaultLabelId(labelId);
+                setShowAuthorModal(false);
+              },
+              onCancel: () => setShowAuthorModal(false)
+            }
+          ),
+          showLabelModal && /* @__PURE__ */ jsx13(
+            LabelManagerModal,
+            {
+              labels,
+              pinUsage,
+              onAdd: addLabel,
+              onUpdate: updateLabel,
+              onDelete: deleteLabel,
+              onClose: () => setShowLabelModal(false)
+            }
+          ),
+          showGuide && /* @__PURE__ */ jsx13(
+            OnboardingGuide,
+            {
+              onClose: (forever) => {
+                setShowGuide(false);
+                trackEvent("sb_guide_closed", { dismissed_forever: forever });
+                if (!forever && !hasShownLogoTip()) {
+                  markLogoTipShown();
+                  setShowLogoTip(true);
+                  setTimeout(() => setShowLogoTip(false), 5e3);
+                }
               }
             }
-          }
-        ),
-        /* @__PURE__ */ jsx9(
-          AnnotationToolbar,
-          {
-            enabled,
-            onToggleEnabled: () => setEnabled((v) => !v),
-            author,
-            onEditAuthor: () => setShowAuthorModal(true),
-            adding,
-            onToggleAdd: () => {
-              if (!author) {
-                setShowAuthorModal(true);
-                return;
+          ),
+          viewportToast && /* @__PURE__ */ jsxs13(
+            "div",
+            {
+              "data-sb-ui": "true",
+              style: {
+                position: "fixed",
+                bottom: 56,
+                left: "50%",
+                transform: "translateX(-50%)",
+                background: "rgba(15,20,40,.96)",
+                backdropFilter: "blur(12px)",
+                border: "1px solid rgba(255,255,255,.12)",
+                borderRadius: 20,
+                padding: "8px 20px",
+                fontSize: 12,
+                color: "rgba(255,255,255,.85)",
+                fontFamily: FONT_FAMILY,
+                fontWeight: 500,
+                boxShadow: "0 4px 20px rgba(0,0,0,.4)",
+                zIndex: 10001,
+                whiteSpace: "nowrap",
+                pointerEvents: "none",
+                animation: "sbToastIn .2s ease"
+              },
+              children: [
+                /* @__PURE__ */ jsx13(IconPin, { size: 12, color: "rgba(255,255,255,.8)", style: { marginRight: 5 } }),
+                viewportToast
+              ]
+            }
+          ),
+          /* @__PURE__ */ jsx13("style", { children: `@keyframes sbToastIn{from{opacity:0;transform:translateX(-50%) translateY(8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}` }),
+          /* @__PURE__ */ jsx13(
+            AnnotationToolbar,
+            {
+              enabled,
+              onToggleEnabled: () => setEnabled((v) => {
+                trackFirstToolbarUse("toggle_mode");
+                trackEvent("sb_design_mode", { enabled: !v, page_id: pageId });
+                return !v;
+              }),
+              author,
+              defaultLabelId,
+              onSaveAuthor: (name, labelId) => {
+                setAuthor(name);
+                setDefaultLabelId(labelId);
+              },
+              adding,
+              onToggleAdd: () => {
+                if (!author) {
+                  setShowAuthorModal(true);
+                  return;
+                }
+                trackFirstToolbarUse("add_comment");
+                trackEvent("sb_toolbar_action", { action: "add_comment", page_id: pageId });
+                setAdding((v) => !v);
+              },
+              pinCount: visiblePins.length,
+              showList: showDrawer,
+              onToggleList: () => {
+                setDrawerDefaultTab("screenSpec");
+                trackFirstToolbarUse("toggle_list");
+                trackEvent("sb_toolbar_action", { action: "toggle_list", page_id: pageId });
+                setShowDrawer((v) => {
+                  if (!v) setSelectedId(null);
+                  return !v;
+                });
+              },
+              onExportJson: handleExportJson,
+              onExportMarkdown: handleExportMarkdown,
+              labels,
+              latestSdkVersion,
+              onShowGuide: () => {
+                setShowGuide(true);
+                setShowLogoTip(false);
+              },
+              showLogoTip,
+              onAddSpec: enabled ? () => {
+                trackFirstToolbarUse("add_spec");
+                trackEvent("sb_toolbar_action", { action: "add_spec", page_id: pageId });
+                setPickingForElement(true);
+              } : void 0,
+              addingSpec: pickingForElement,
+              currentViewport,
+              onViewportChange: handleViewportChange,
+              settings,
+              onChangeSetting: handleChangeSetting
+            }
+          )
+        ] })
+      ]
+    }
+  );
+}
+
+// src/AnnotList.tsx
+import { useState as useState17 } from "react";
+import { Fragment as Fragment12, jsx as jsx14, jsxs as jsxs14 } from "react/jsx-runtime";
+function isMentioned(pin, author) {
+  const pat = `@${author}`;
+  if (pin.note.includes(pat)) return true;
+  return pin.comments.some((c) => c.text.includes(pat));
+}
+function AnnotList({
+  pins,
+  labels,
+  pageId,
+  selectedId,
+  hoveredId,
+  showResolved,
+  resolvedCount,
+  currentAuthor,
+  onSelect,
+  onHover,
+  onToggleShowResolved,
+  onClose
+}) {
+  const labelById = new Map(labels.map((l) => [l.id, l]));
+  const [authorFilter, setAuthorFilter] = useState17(null);
+  const [mentionOnly, setMentionOnly] = useState17(false);
+  const uniqueAuthors = Array.from(new Set(pins.map((p) => p.author).filter((a) => !!a)));
+  const byAuthor = authorFilter ? pins.filter((p) => p.author === authorFilter) : pins;
+  const filteredPins = mentionOnly && currentAuthor ? byAuthor.filter((p) => isMentioned(p, currentAuthor)) : byAuthor;
+  const mentionCount = currentAuthor ? pins.filter((p) => isMentioned(p, currentAuthor)).length : 0;
+  return /* @__PURE__ */ jsxs14(
+    "div",
+    {
+      style: {
+        position: "fixed",
+        left: 0,
+        top: 0,
+        bottom: 0,
+        width: 252,
+        background: DARK.bg,
+        borderRight: `1px solid ${DARK.brd}`,
+        boxShadow: "4px 0 24px rgba(0,0,0,.3)",
+        zIndex: 9999,
+        display: "flex",
+        flexDirection: "column",
+        fontFamily: FONT_FAMILY
+      },
+      children: [
+        /* @__PURE__ */ jsx14("style", { children: `
+        .sb-scroll::-webkit-scrollbar{width:4px;height:4px}
+        .sb-scroll::-webkit-scrollbar-track{background:transparent}
+        .sb-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);border-radius:10px}
+        .sb-scroll::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.26)}
+        .sb-scroll{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.14) transparent}
+      ` }),
+        /* @__PURE__ */ jsxs14("div", { style: { padding: "14px 16px", background: DARK.bg2, flexShrink: 0, borderBottom: `1px solid ${DARK.brd}` }, children: [
+          /* @__PURE__ */ jsxs14("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center" }, children: [
+            /* @__PURE__ */ jsxs14("div", { children: [
+              /* @__PURE__ */ jsxs14("div", { style: { fontSize: 12, fontWeight: 700, color: DARK.txt, display: "flex", alignItems: "center", gap: 5 }, children: [
+                /* @__PURE__ */ jsx14(IconDocument, { size: 13, color: DARK.txt }),
+                " \uBC88\uD638 \uBAA9\uB85D"
+              ] }),
+              /* @__PURE__ */ jsx14("div", { style: { fontSize: 10, color: DARK.txL, marginTop: 2, fontFamily: "monospace" }, children: pageId })
+            ] }),
+            /* @__PURE__ */ jsx14(
+              "button",
+              {
+                onClick: onClose,
+                style: {
+                  background: "rgba(255,255,255,.08)",
+                  border: "none",
+                  color: DARK.txS,
+                  width: 26,
+                  height: 26,
+                  borderRadius: 5,
+                  cursor: "pointer",
+                  fontSize: 14
+                },
+                children: "\xD7"
               }
-              setAdding((v) => !v);
+            )
+          ] }),
+          /* @__PURE__ */ jsxs14("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 10 }, children: [
+            /* @__PURE__ */ jsxs14("span", { style: { fontSize: 11, color: DARK.txL }, children: [
+              "\uCD1D ",
+              filteredPins.length,
+              "\uAC1C"
+            ] }),
+            /* @__PURE__ */ jsxs14("div", { style: { display: "flex", alignItems: "center", gap: 5 }, children: [
+              currentAuthor && /* @__PURE__ */ jsxs14(
+                "button",
+                {
+                  onClick: () => mentionCount > 0 && setMentionOnly((v) => !v),
+                  title: mentionCount === 0 ? "\uBA58\uC158\uB41C \uD56D\uBAA9 \uC5C6\uC74C" : mentionOnly ? "\uC804\uCCB4 \uBCF4\uAE30" : "\uB0B4\uAC00 \uBA58\uC158\uB41C \uD56D\uBAA9\uB9CC \uBCF4\uAE30",
+                  style: {
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 4,
+                    padding: "3px 8px",
+                    borderRadius: 2,
+                    border: `1px solid ${mentionOnly ? "rgba(217,119,87,.6)" : DARK.brd}`,
+                    background: mentionOnly ? "rgba(217,119,87,.18)" : "rgba(255,255,255,.04)",
+                    color: mentionOnly ? "#D97757" : mentionCount === 0 ? DARK.txS : DARK.txL,
+                    fontSize: 10,
+                    fontWeight: 600,
+                    cursor: mentionCount > 0 ? "pointer" : "default",
+                    transition: "all .15s",
+                    opacity: mentionCount === 0 ? 0.5 : 1
+                  },
+                  children: [
+                    /* @__PURE__ */ jsx14("span", { children: "@\uBA58\uC158" }),
+                    mentionCount > 0 && /* @__PURE__ */ jsx14("span", { style: {
+                      background: mentionOnly ? "#D97757" : "rgba(217,119,87,.4)",
+                      color: "#fff",
+                      borderRadius: 10,
+                      padding: "0 5px",
+                      fontSize: 9,
+                      fontWeight: 700,
+                      minWidth: 14,
+                      textAlign: "center"
+                    }, children: mentionCount })
+                  ]
+                }
+              ),
+              resolvedCount > 0 && /* @__PURE__ */ jsxs14(
+                "button",
+                {
+                  onClick: onToggleShowResolved,
+                  title: showResolved ? "\uD574\uACB0\uB41C \uD56D\uBAA9 \uC228\uAE30\uAE30" : "\uD574\uACB0\uB41C \uD56D\uBAA9 \uBCF4\uAE30",
+                  style: {
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 4,
+                    padding: "3px 8px",
+                    borderRadius: 2,
+                    border: `1px solid ${showResolved ? "rgba(22,163,74,.5)" : DARK.brd}`,
+                    background: showResolved ? "rgba(22,163,74,.15)" : "rgba(255,255,255,.04)",
+                    color: showResolved ? "#4ade80" : DARK.txL,
+                    fontSize: 10,
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    transition: "all .15s"
+                  },
+                  children: [
+                    /* @__PURE__ */ jsx14("span", { style: { fontSize: 11 }, children: showResolved ? "\u2713" : "\u25CB" }),
+                    /* @__PURE__ */ jsxs14("span", { children: [
+                      "\uD574\uACB0 ",
+                      resolvedCount
+                    ] })
+                  ]
+                }
+              )
+            ] })
+          ] }),
+          /* @__PURE__ */ jsx14("div", { style: { marginTop: 8 }, children: /* @__PURE__ */ jsxs14(
+            "select",
+            {
+              value: authorFilter ?? "",
+              onChange: (e) => setAuthorFilter(e.target.value || null),
+              disabled: uniqueAuthors.length === 0,
+              style: {
+                width: "100%",
+                padding: "4px 8px",
+                background: DARK.bg3,
+                border: `1px solid ${authorFilter ? "rgba(59,130,246,.5)" : DARK.brd}`,
+                borderRadius: 2,
+                color: authorFilter ? DARK.txt : DARK.txL,
+                fontSize: 11,
+                cursor: uniqueAuthors.length > 0 ? "pointer" : "default",
+                outline: "none",
+                fontFamily: FONT_FAMILY,
+                opacity: uniqueAuthors.length === 0 ? 0.4 : 1
+              },
+              children: [
+                /* @__PURE__ */ jsx14("option", { value: "", style: { background: DARK.bg3, color: DARK.txL }, children: "\uC804\uCCB4 \uC791\uC131\uC790" }),
+                uniqueAuthors.map((a) => /* @__PURE__ */ jsx14("option", { value: a, style: { background: DARK.bg3, color: DARK.txt }, children: a }, a))
+              ]
+            }
+          ) })
+        ] }),
+        /* @__PURE__ */ jsx14("div", { className: "sb-scroll", style: { flex: 1, overflowY: "auto", padding: 8 }, children: filteredPins.length === 0 ? /* @__PURE__ */ jsx14(
+          "div",
+          {
+            style: {
+              textAlign: "center",
+              color: DARK.txL,
+              fontSize: 12,
+              marginTop: 36,
+              lineHeight: 1.8
             },
-            pinCount: visiblePins.length,
-            showList,
-            onToggleList: () => {
-              setShowList((v) => !v);
-              setSelectedId(null);
-            },
-            onExport: handleExport,
-            labels,
-            filterLabelIds,
-            onToggleLabelFilter: (id) => setFilterLabelIds((prev) => {
-              const next = new Set(prev);
-              next.has(id) ? next.delete(id) : next.add(id);
-              return next;
-            }),
-            onClearLabelFilter: () => setFilterLabelIds(/* @__PURE__ */ new Set()),
-            latestSdkVersion,
-            onShowGuide: () => {
-              setShowGuide(true);
-              setShowLogoTip(false);
-            },
-            showLogoTip,
-            sessions,
-            currentSessionId,
-            sessionProgress,
-            onSelectSession: handleSelectSession,
-            onCreateSession: handleCreateSession,
-            onDeleteSession: handleDeleteSession,
-            onUpdateSession: updateSession,
-            onSetSessionStatus: setSessionStatus,
-            onSetSessionViewport: setSessionViewport
+            children: mentionOnly ? `@${currentAuthor}\uB85C \uBA58\uC158\uB41C \uD56D\uBAA9\uC774 \uC5C6\uC2B5\uB2C8\uB2E4.` : authorFilter ? "\uC120\uD0DD\uD55C \uC791\uC131\uC790\uC758 \uD540\uC774 \uC5C6\uC2B5\uB2C8\uB2E4." : /* @__PURE__ */ jsxs14(Fragment12, { children: [
+              /* @__PURE__ */ jsx14("br", {}),
+              "\uC544\uC9C1 \uCD94\uAC00\uB41C \uB808\uC774\uBE14\uC774 \uC5C6\uC2B5\uB2C8\uB2E4.",
+              /* @__PURE__ */ jsx14("br", {}),
+              "\uD654\uBA74\uC744 \uD074\uB9AD\uD574\uC11C \uCD94\uAC00\uD558\uC138\uC694."
+            ] })
           }
-        )
+        ) : filteredPins.map((p) => {
+          const sel = p.id === selectedId;
+          const hov = p.id === hoveredId;
+          const label = p.labelId ? labelById.get(p.labelId) : void 0;
+          const color = label?.color ?? FALLBACK_LABEL_COLOR;
+          const resolved = p.status === "resolved";
+          return /* @__PURE__ */ jsxs14(
+            "div",
+            {
+              onClick: () => onSelect(p.id),
+              onMouseEnter: () => onHover?.(p.id),
+              onMouseLeave: () => onHover?.(null),
+              style: {
+                padding: "10px 12px",
+                borderRadius: 2,
+                marginBottom: 4,
+                cursor: "pointer",
+                border: `1px solid ${sel ? color : hov ? color : DARK.brd}`,
+                background: sel ? `${color}1a` : hov ? `${color}0d` : DARK.bg2,
+                display: "flex",
+                alignItems: "flex-start",
+                gap: 8,
+                transition: "all .12s",
+                opacity: resolved ? 0.6 : 1
+              },
+              children: [
+                /* @__PURE__ */ jsxs14(
+                  "div",
+                  {
+                    style: {
+                      position: "relative",
+                      width: 20,
+                      height: 20,
+                      borderRadius: "50%",
+                      background: color,
+                      color: "#fff",
+                      fontSize: 10,
+                      fontWeight: 700,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexShrink: 0
+                    },
+                    children: [
+                      p.num,
+                      resolved && /* @__PURE__ */ jsx14(
+                        "span",
+                        {
+                          style: {
+                            position: "absolute",
+                            top: -3,
+                            right: -3,
+                            width: 11,
+                            height: 11,
+                            borderRadius: "50%",
+                            background: "#16a34a",
+                            color: "#fff",
+                            fontSize: 7,
+                            fontWeight: 900,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            border: "1.5px solid #fff"
+                          },
+                          children: "\u2713"
+                        }
+                      )
+                    ]
+                  }
+                ),
+                /* @__PURE__ */ jsxs14("div", { style: { flex: 1, minWidth: 0 }, children: [
+                  /* @__PURE__ */ jsxs14("div", { style: { display: "flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600, color: DARK.txt, overflow: "hidden" }, children: [
+                    /* @__PURE__ */ jsx14(
+                      "span",
+                      {
+                        style: {
+                          padding: "1px 7px",
+                          borderRadius: 999,
+                          background: `${color}22`,
+                          color,
+                          fontSize: 10,
+                          fontWeight: 700,
+                          flexShrink: 0,
+                          textDecoration: resolved ? "line-through" : "none"
+                        },
+                        children: label?.name ?? "\uBBF8\uBD84\uB958"
+                      }
+                    ),
+                    resolved && /* @__PURE__ */ jsx14("span", { style: { fontSize: 9, padding: "1px 5px", background: "rgba(22,163,74,.2)", color: "#4ade80", borderRadius: 5, fontWeight: 700, flexShrink: 0 }, children: "\uD574\uACB0" })
+                  ] }),
+                  /* @__PURE__ */ jsxs14("div", { style: { display: "flex", alignItems: "center", gap: 5, marginTop: 2 }, children: [
+                    p.author && /* @__PURE__ */ jsx14("span", { style: { fontSize: 10, color: DARK.txL }, children: p.author }),
+                    p.comments.length > 0 && /* @__PURE__ */ jsxs14("span", { style: { fontSize: 9, padding: "1px 5px", background: "rgba(59,130,246,.2)", color: "#93C5FD", borderRadius: 5, fontWeight: 700, display: "inline-flex", alignItems: "center", gap: 3 }, children: [
+                      /* @__PURE__ */ jsx14(IconChat, { size: 9, color: "#93C5FD" }),
+                      " ",
+                      p.comments.length
+                    ] })
+                  ] }),
+                  p.note && /* @__PURE__ */ jsx14("div", { style: { fontSize: 11, color: DARK.txL, marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, children: p.note })
+                ] })
+              ]
+            },
+            p.id
+          );
+        }) })
       ]
     }
   );
@@ -5236,17 +10117,23 @@ function httpAdapter(options) {
     const res = await fetch(url, init);
     if (!res.ok) {
       let detail = "";
+      let userMessage;
       try {
-        detail = JSON.stringify(await res.json());
+        const body2 = await res.json();
+        detail = JSON.stringify(body2);
+        if (body2?.error) userMessage = body2.error;
       } catch {
         try {
           detail = await res.text();
         } catch {
         }
       }
-      const err = new Error(`${method} ${path} \u2192 ${res.status} ${detail}`);
-      onError(err, { method, path });
-      throw err;
+      const err2 = Object.assign(
+        new Error(`${method} ${path} \u2192 ${res.status} ${detail}`),
+        { status: res.status, userMessage }
+      );
+      onError(err2, { method, path });
+      throw err2;
     }
     if (res.status === 204) return void 0;
     return await res.json();
@@ -5363,6 +10250,18 @@ function httpAdapter(options) {
       } catch {
       }
     },
+    // ── 프로젝트 전역 설정 (meta) ──────────────────────────
+    async loadSetting(key) {
+      try {
+        const res = await request("GET", `/api/meta/${encodeURIComponent(key)}`);
+        return res.value;
+      } catch {
+        return null;
+      }
+    },
+    async saveSetting(key, value) {
+      await request("PUT", `/api/meta/${encodeURIComponent(key)}`, { value });
+    },
     async checkSdkVersion() {
       try {
         const res = await fetch(`${base}/api/sdk/version`, {
@@ -5374,6 +10273,50 @@ function httpAdapter(options) {
       } catch {
         return { latest: null, minimum: null };
       }
+    },
+    // ── Page Spec ────────────────────────────────────────────
+    async loadPageSpecs(pageId) {
+      return request("GET", `/api/page-specs?pageId=${encodeURIComponent(pageId)}`);
+    },
+    async loadAllPageSpecs() {
+      return request("GET", "/api/page-specs");
+    },
+    // ── Screen Spec ──────────────────────────────────────
+    async loadScreenSpecs() {
+      return request("GET", "/api/screen-specs");
+    },
+    async loadScreenSpec(pageId) {
+      return request("GET", `/api/screen-specs/${encodeURIComponent(pageId)}`);
+    },
+    async saveScreenSpec(pageId, data) {
+      return request("POST", "/api/screen-specs", { pageId, ...data });
+    },
+    async deleteScreenSpec(pageId) {
+      await request("DELETE", `/api/screen-specs/${encodeURIComponent(pageId)}`);
+    },
+    async savePageSpec(pageId, elementId, data) {
+      return request("POST", "/api/page-specs", {
+        pageId,
+        elementId,
+        ...data
+      });
+    },
+    async deletePageSpec(id) {
+      await request("DELETE", `/api/page-specs/${id}`);
+    },
+    // ── Rule Spec ────────────────────────────────────────────
+    async loadRuleSpecs() {
+      return request("GET", "/api/rule-specs");
+    },
+    // ── Changelog ────────────────────────────────────────────
+    async loadChangelog() {
+      return request("GET", "/api/changelog");
+    },
+    async addChangelogEntry(content, author, date, version) {
+      return request("POST", "/api/changelog", { content, author, date: date ?? null, version: version ?? null });
+    },
+    async deleteChangelogEntry(id) {
+      await request("DELETE", `/api/changelog/${encodeURIComponent(id)}`);
     }
   };
 }
@@ -5405,12 +10348,14 @@ export {
   LabelManagerModal,
   SDK_VERSION,
   STORAGE_KEYS,
+  SettingsPopover,
   SpecBridgeAnnotation,
   httpAdapter,
   localStorageAdapter,
   useAnnotations,
   useAuthor,
   useLabels,
+  useSettings,
   whoami
 };
 //# sourceMappingURL=index.js.map
