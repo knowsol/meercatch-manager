@@ -1,7 +1,7 @@
 import '../styles/global.css'
 import Providers from '../components/Providers'
-import AppShell from '../components/AppShell'
 import SpecBridgeWrapper from '../components/SpecBridgeWrapper'
+import AuthGuard from '../components/AuthGuard'
 
 export const metadata = {
   title: 'Meercat.ch - Manager',
@@ -15,7 +15,7 @@ export default function RootLayout({ children }) {
       <body>
         <Providers>
           <SpecBridgeWrapper>
-            <AppShell>{children}</AppShell>
+            <AuthGuard>{children}</AuthGuard>
           </SpecBridgeWrapper>
         </Providers>
       </body>
