@@ -105,8 +105,8 @@ export default function Sidebar({ mobileOpen, onMobileClose }) {
             <div key={item.id} className={`ni${isActive ? ' a' : ''}`} onClick={() => handleNavigate(item.path)}>
               <span className="ic"><SvgIcon paths={IC[item.icon]} /></span>
               <span className="ni-txt">{item.label}</span>
-              {!collapsed && item.common && (
-                <span style={{ fontSize: 10, fontWeight: 600, background: 'rgba(255,255,255,0.13)', color: 'rgba(255,255,255,0.55)', padding: '1px 5px', borderRadius: 3, marginLeft: 'auto', flexShrink: 0 }}>공통</span>
+              {!collapsed && !item.common && (
+                <span style={{ fontSize: 10, fontWeight: 600, background: 'rgba(99,102,241,0.25)', color: 'rgba(165,168,255,0.9)', padding: '1px 5px', borderRadius: 3, marginLeft: 'auto', flexShrink: 0 }}>교육청</span>
               )}
             </div>
           );
