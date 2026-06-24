@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@specbridge-v1/sdk": "github:knowsol/specBridge",
     "fflate": "^0.8.3",
     "next": "^14.2.0",
     "react": "^18.3.0",
