@@ -12,22 +12,28 @@ function parseClass(name) { const m = name?.match(/(\d+)반/);  return m ? m[1] 
 export default function ClassList() {
   const { isSchoolAdmin, schoolId } = useSchoolScope();
   const [search, setSearch] = useState('');
+  const [schoolFilter, setSchoolFilter] = useState('');
   const [gradeFilter, setGradeFilter] = useState('');
   const [classFilter, setClassFilter] = useState('');
   const [page, setPage] = useState(1);
-  useEffect(() => setPage(1), [search, gradeFilter, classFilter]);
+  useEffect(() => setPage(1), [search, schoolFilter, gradeFilter, classFilter]);
 
   const allGroups = DUMMY.groups || [];
   const groups = isSchoolAdmin && schoolId
     ? allGroups.filter(g => g.schoolId === schoolId)
     : allGroups;
 
+  const schools = [...new Set(groups.map(g => g.schoolId).filter(Boolean))]
+    .map(id => DUMMY.schools?.find(s => s.schoolId === id))
+    .filter(Boolean)
+    .sort((a, b) => a.name.localeCompare(b.name));
   const grades  = [...new Set(groups.map(g => parseGrade(g.name)).filter(Boolean))].sort((a, b) => +a - +b);
   const classes = [...new Set(groups.map(g => parseClass(g.name)).filter(Boolean))].sort((a, b) => +a - +b);
 
   const filtered = groups.filter(g => {
     const q = search.toLowerCase();
     if (q && !g.name.toLowerCase().includes(q)) return false;
+    if (schoolFilter && String(g.schoolId) !== String(schoolFilter)) return false;
     if (gradeFilter && parseGrade(g.name) !== gradeFilter) return false;
     if (classFilter && parseClass(g.name) !== classFilter) return false;
     return true;
@@ -69,6 +75,17 @@ export default function ClassList() {
 
       {/* 검색 + 필터 + 버튼 */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+        {!isSchoolAdmin && (
+          <select
+            className="inp"
+            value={schoolFilter}
+            onChange={e => setSchoolFilter(e.target.value)}
+            style={{ width: 130, flexShrink: 0 }}
+          >
+            <option value="">전체 학교</option>
+            {schools.map(s => <option key={s.schoolId} value={s.schoolId}>{s.name}</option>)}
+          </select>
+        )}
         <select
           className="inp"
           value={gradeFilter}
@@ -95,8 +112,8 @@ export default function ClassList() {
           onChange={e => setSearch(e.target.value)}
           style={{ flex: 1 }}
         />
-        {(gradeFilter || classFilter || search) && (
-          <button className="btn" onClick={() => { setGradeFilter(''); setClassFilter(''); setSearch(''); }}
+        {(schoolFilter || gradeFilter || classFilter || search) && (
+          <button className="btn" onClick={() => { setSchoolFilter(''); setGradeFilter(''); setClassFilter(''); setSearch(''); }}
             style={{ color: 'var(--t2)', flexShrink: 0 }}>초기화</button>
         )}
         <div style={{ fontSize: 13, color: 'var(--t2)', whiteSpace: 'nowrap' }}>
