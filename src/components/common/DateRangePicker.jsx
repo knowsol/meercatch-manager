@@ -96,7 +96,7 @@ const CSS = `
 .rdp-day_button:focus, .rdp-day_button:focus-visible { border-color: var(--bd) !important; }
 `
 
-export default function DateRangePicker({ from, to, onChange }) {
+export default function DateRangePicker({ from, to, onChange, placeholder = '등록일 선택' }) {
   const [open, setOpen] = useState(false)
   const [range, setRange] = useState({ from: from || undefined, to: to || undefined })
   const ref = useRef(null)
@@ -129,7 +129,7 @@ export default function DateRangePicker({ from, to, onChange }) {
     ? range?.to
       ? `${format(range.from, 'yyyy.MM.dd')} ~ ${format(range.to, 'yyyy.MM.dd')}`
       : `${format(range.from, 'yyyy.MM.dd')} ~`
-    : '등록일 선택'
+    : placeholder
 
   const hasValue = !!(range?.from || range?.to)
 

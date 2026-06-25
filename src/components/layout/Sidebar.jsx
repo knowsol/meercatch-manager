@@ -51,17 +51,16 @@ const MENU = [
   { id: 'users',            icon: 'users',            label: '계정 현황',       path: '/users',            common: true  },
   { section: '설정' },
   { id: 'licenses',         icon: 'licenses',         label: '라이선스',        path: '/licenses',         common: true  },
-  { id: 'notifications',    icon: 'notifications',    label: '알림 설정',       path: '/notifications',    common: false },
-  { id: 'policy-settings',  icon: 'policy-settings',  label: '정책 설정',       path: '/policy-settings',  common: false },
+  { id: 'policy-settings',  icon: 'policy-settings',  label: '정책 설정',       path: '/policy-settings',  common: false, isNew: true },
   { id: 'account',          icon: 'account',          label: '내 계정',         path: '/account',          common: true  },
   { section: '운영 설정' },
   { id: 'detection-policy', icon: 'detection-policy', label: '예외 서비스 관리', path: '/detection-policy', common: true  },
   { id: 'whitelist',        icon: 'whitelist',        label: '화이트리스트 관리', path: '/whitelist',       common: true  },
   { id: 'blacklist',        icon: 'blacklist',        label: '블랙리스트 관리', path: '/blacklist',        common: true  },
   { section: '관리자 전용' },
-  { id: 'audit-logs',       icon: 'audit-logs',       label: '감사 로그',       path: '/audit-logs',       common: true  },
-  { id: 'app-versions',     icon: 'app-versions',     label: '앱 버전 관리',    path: '/app-versions',     common: true  },
-  { id: 'valid-urls',       icon: 'urls',             label: '검증 URL 현황',   path: '/valid-urls',       common: false },
+  { id: 'audit-logs',       icon: 'audit-logs',       label: '감사 로그',       path: '/audit-logs',       common: true,  isSystem: true },
+  { id: 'app-versions',     icon: 'app-versions',     label: '앱 버전 관리',    path: '/app-versions',     common: true,  isSystem: true },
+  { id: 'valid-urls',       icon: 'urls',             label: '검증 URL 현황',   path: '/valid-urls',       common: false, isSystem: true },
   { section: '참고자료' },
   { id: 'components',      icon: 'components',       label: '컴포넌트 모음',   path: '/components',       common: true },
   { id: 'table-guide',     icon: 'reports',          label: '기본 레이아웃',   path: '/components/table', common: true },
@@ -89,13 +88,8 @@ export default function Sidebar({ mobileOpen, onMobileClose }) {
       <div className="sb-h" onClick={() => handleNavigate('/')} style={{ cursor: 'pointer' }}>
         <div className="sb-logo-row">
           <div className="sb-logo-icon">
-            <svg viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg" style={{ width: '76%', height: '76%' }}>
-              <path d="M12 22C9 22 5 18.5 5 14.5C5 11.5 7.5 10 10 10C10.8 10 11.5 10.2 12 10.6C12.5 10.2 13.2 10 14 10C16.5 10 19 11.5 19 14.5C19 18.5 15 22 12 22Z"/>
-              <ellipse cx="6.5" cy="8.5" rx="2.3" ry="2.9" transform="rotate(-20 6.5 8.5)"/>
-              <ellipse cx="10.5" cy="6.2" rx="2.3" ry="2.9" transform="rotate(-5 10.5 6.2)"/>
-              <ellipse cx="13.5" cy="6.2" rx="2.3" ry="2.9" transform="rotate(5 13.5 6.2)"/>
-              <ellipse cx="17.5" cy="8.5" rx="2.3" ry="2.9" transform="rotate(20 17.5 8.5)"/>
-            </svg>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/symbol.png" alt="symbol" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 7 }} />
           </div>
           <div className="sb-logo-text">Meercatch Manager</div>
         </div>
@@ -154,7 +148,13 @@ export default function Sidebar({ mobileOpen, onMobileClose }) {
             <div key={item.id} className={`ni${isActive ? ' a' : ''}`} onClick={() => handleNavigate(item.path)}>
               <span className="ic"><SvgIcon paths={IC[item.icon]} /></span>
               <span className="ni-txt">{item.label}</span>
-              {!collapsed && !item.common && (
+              {!collapsed && item.isNew && (
+                <span style={{ fontSize: 10, fontWeight: 700, background: 'rgba(239,68,68,0.2)', color: '#f87171', padding: '1px 5px', borderRadius: 3, marginLeft: 'auto', flexShrink: 0 }}>NEW</span>
+              )}
+              {!collapsed && item.isSystem && (
+                <span style={{ fontSize: 10, fontWeight: 600, background: 'rgba(100,116,139,0.25)', color: 'rgba(148,163,184,0.9)', padding: '1px 5px', borderRadius: 3, marginLeft: 'auto', flexShrink: 0 }}>시스템</span>
+              )}
+              {!collapsed && !item.common && !item.isNew && !item.isSystem && (
                 <span style={{ fontSize: 10, fontWeight: 600, background: 'rgba(99,102,241,0.25)', color: 'rgba(165,168,255,0.9)', padding: '1px 5px', borderRadius: 3, marginLeft: 'auto', flexShrink: 0 }}>교육청</span>
               )}
             </div>
