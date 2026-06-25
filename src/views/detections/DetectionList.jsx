@@ -155,7 +155,7 @@ function HistoryView() {
   return (
     <div>
       <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 20, flexWrap: 'wrap' }}>
-        <div style={{ display: 'flex', gap: 0, border: '1px solid var(--bd)', borderRadius: 8, overflow: 'hidden', flex: '0 0 auto' }}>
+        <div style={{ display: 'flex', gap: 0, border: '1px solid var(--bd)', borderRadius: 4, overflow: 'hidden', flex: '0 0 auto' }}>
           <input className="inp" placeholder="학교명, 학년, 반으로 검색" style={{ border: 'none', borderRadius: 0, width: 240, outline: 'none', boxShadow: 'none' }}
             value={inputVal} onChange={e => setInputVal(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && setSearch(inputVal)} />
@@ -197,14 +197,25 @@ function HistoryView() {
   );
 }
 
+function TabPlaceholder() {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 0', color: 'var(--t3)' }}>
+      <svg width="40" height="40" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24" style={{ marginBottom: 16, opacity: 0.4 }}>
+        <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
+      </svg>
+      <div style={{ fontSize: 13, opacity: 0.6 }}>준비 중인 페이지입니다.</div>
+    </div>
+  );
+}
+
 export default function DetectionList() {
   const { openPanel } = usePanel();
-  const [mainTab, setMainTab]       = useState('탐지 현황');
+  const [activeTab, setActiveTab] = useState(0);
   const [typeFilter, setTypeFilter] = useState('전체');
   const [fromDate, setFromDate]     = useState('');
   const [toDate, setToDate]         = useState('');
   const [page, setPage]             = useState(1);
-  useEffect(() => setPage(1), [mainTab, typeFilter, fromDate, toDate]);
+  useEffect(() => setPage(1), [activeTab, typeFilter, fromDate, toDate]);
 
   const typeCounts = DUMMY.detections.reduce((acc, d) => {
     acc[d.type] = (acc[d.type] || 0) + 1;
@@ -257,27 +268,89 @@ export default function DetectionList() {
 
   const cols = typeFilter === '도박' ? gamblingCols : defaultCols;
 
+  const PAGE_TABS = [
+    { label: '전체 탐지', count: DUMMY.detections.length },
+    { label: '키워드 탐지', count: typeCounts['도박'] || 0 },
+    { label: '도메인 탐지', count: typeCounts['선정성'] || 0 },
+    { label: '탐지 이력', count: null },
+  ];
+
   return (
-    <div>
-      <div className="ph">
-        <div className="ph-left">
-          <div className="ph-title">탐지 현황</div>
+    <div style={{ padding: '28px 32px' }}>
+
+      {/* 페이지 탭 헤더 */}
+      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', borderBottom: '2px solid var(--bd)', marginBottom: 40 }}>
+        <div style={{ display: 'flex' }}>
+          {PAGE_TABS.map((tab, i) => {
+            const active = activeTab === i;
+            return (
+              <button
+                key={tab.label}
+                onClick={() => setActiveTab(i)}
+                style={{
+                  padding: '12px 20px',
+                  fontSize: 22,
+                  fontWeight: active ? 700 : 400,
+                  color: active ? 'var(--t2)' : 'var(--t3)',
+                  background: 'none',
+                  border: 'none',
+                  borderBottom: active ? '2px solid var(--t1)' : '2px solid transparent',
+                  marginBottom: -2,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  whiteSpace: 'nowrap',
+                  transition: 'color 0.15s',
+                }}
+                onMouseEnter={e => { if (!active) e.currentTarget.style.color = 'var(--t2)'; }}
+                onMouseLeave={e => { if (!active) e.currentTarget.style.color = 'var(--t3)'; }}
+              >
+                {tab.label}
+                {tab.count !== null && (
+                  <span style={{
+                    fontSize: 12,
+                    fontWeight: 400,
+                    color: active ? 'var(--ac)' : 'var(--t3)',
+                    background: active ? 'color-mix(in srgb, var(--ac) 12%, transparent)' : 'var(--bg3)',
+                    padding: '1px 7px',
+                    borderRadius: 4,
+                    minWidth: 24,
+                    textAlign: 'center',
+                  }}>{tab.count}</span>
+                )}
+              </button>
+            );
+          })}
         </div>
+
+        {activeTab === 0 && (
+          <div style={{ display: 'flex', gap: 8, paddingBottom: 10 }}>
+            <button
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 14px', borderRadius: 4, background: 'var(--bg1)', color: 'var(--t2)', border: '1px solid var(--bd)', cursor: 'pointer', fontSize: 13, fontWeight: 500, transition: 'background 0.15s, color 0.15s' }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg3)'; e.currentTarget.style.color = 'var(--t1)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'var(--bg1)'; e.currentTarget.style.color = 'var(--t2)'; }}
+            >
+              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                <path d="M12 4v12m0 0l-4-4m4 4l4-4M5 20h14"/>
+              </svg>
+              내보내기
+            </button>
+          </div>
+        )}
       </div>
 
-      <div className="grid-3 section-gap">
-        <KPI label="전체 탐지" value={DUMMY.detections.length} />
-        <KPI label="선정성"    value={typeCounts['선정성'] || 0} color="err" />
-        <KPI label="도박"      value={typeCounts['도박'] || 0}   color="warn" />
-      </div>
+      {/* KPI - 전체 탐지 탭에서만 표시 */}
+      {activeTab === 0 && (
+        <div className="grid-3 section-gap">
+          <KPI label="전체 탐지" value={DUMMY.detections.length} />
+          <KPI label="선정성"    value={typeCounts['선정성'] || 0} color="err" />
+          <KPI label="도박"      value={typeCounts['도박'] || 0}   color="warn" />
+        </div>
+      )}
 
-      <div className="tabs" style={{ margin: '0 0 16px' }}>
-        {['탐지 현황', '탐지 이력'].map(t => (
-          <div key={t} className={`tab${mainTab === t ? ' a' : ''}`} onClick={() => setMainTab(t)}>{t}</div>
-        ))}
-      </div>
-
-      {mainTab === '탐지 이력' ? <HistoryView /> : (
+      {/* 탭 콘텐츠 */}
+      {activeTab === 0 && (
         <>
           <div className="fb" style={{ marginBottom: 16 }}>
             <select className="inp" style={{ maxWidth: 120 }} value={typeFilter} onChange={e => setTypeFilter(e.target.value)}>
@@ -301,6 +374,12 @@ export default function DetectionList() {
           <Pagination page={page} total={data.length} pageSize={25} onChange={setPage} />
         </>
       )}
+
+      {activeTab === 1 && <TabPlaceholder />}
+
+      {activeTab === 2 && <TabPlaceholder />}
+
+      {activeTab === 3 && <HistoryView />}
     </div>
   );
 }

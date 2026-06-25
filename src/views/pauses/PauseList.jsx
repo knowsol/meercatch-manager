@@ -1,23 +1,242 @@
 'use client'
-import { useState } from 'react';
-import Pagination from '../../components/common/Pagination';
-import { useSchoolScope } from '../../hooks/useSchoolScope';
-import { usePanel } from '../../context/PanelContext';
-import { useToastCtx } from '../../components/layout/Layout';
-import KPI from '../../components/common/KPI';
-import Table from '../../components/common/Table';
-import { fmtDT } from '../../components/common/helpers';
-import { DUMMY } from '../../data/dummy';
-import PauseNewPanel from './PauseNewPanel';
+import { useState, useRef, useEffect } from 'react'
+import Table, { EmptyState } from '../../components/common/Table'
+import { PanelLayout } from '../../components/common/Panel'
+import { StatusBadge } from '../../components/common/Badge'
+import { usePanel } from '../../context/PanelContext'
+import Pagination from '../../components/common/Pagination'
+import DateRangePicker from '../../components/common/DateRangePicker'
+import { DayPicker } from 'react-day-picker'
+import { ko } from 'date-fns/locale'
+import { format, parse, isValid } from 'date-fns'
+import { useSchoolScope } from '../../hooks/useSchoolScope'
+import { useToastCtx } from '../../components/layout/Layout'
+import { fmtDT } from '../../components/common/helpers'
+import { DUMMY } from '../../data/dummy'
+import PauseNewPanel from './PauseNewPanel'
 
+// ── SingleDayPicker ──────────────────────────────────────────────────────────
+function SingleDayPicker({ value, onChange, placeholder = '날짜 선택' }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef(null)
+  const parsed = value ? parse(value, 'yyyy-MM-dd', new Date()) : undefined
+  const selected = parsed && isValid(parsed) ? parsed : undefined
+
+  useEffect(() => {
+    const handler = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  return (
+    <div ref={ref} style={{ position: 'relative', display: 'inline-block' }}>
+      <input
+        readOnly
+        value={value || ''}
+        placeholder={placeholder}
+        onClick={() => setOpen(o => !o)}
+        style={{ width: 120, padding: '4px 8px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 4, cursor: 'pointer', background: 'var(--bg)', color: 'var(--t1)' }}
+      />
+      {open && (
+        <div style={{ position: 'absolute', zIndex: 100, background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 4, boxShadow: '0 4px 16px rgba(0,0,0,.12)', top: '110%', left: 0 }}>
+          <DayPicker
+            mode="single"
+            selected={selected}
+            locale={ko}
+            onSelect={d => { onChange(d ? format(d, 'yyyy-MM-dd') : ''); setOpen(false) }}
+          />
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Checkbox ─────────────────────────────────────────────────────────────────
+function Checkbox({ checked, indeterminate, onChange }) {
+  const ref = useRef(null)
+  useEffect(() => { if (ref.current) ref.current.indeterminate = !!indeterminate }, [indeterminate])
+  return <input ref={ref} type="checkbox" checked={!!checked} onChange={onChange} style={{ cursor: 'pointer' }} />
+}
+
+// ── FilterChip ────────────────────────────────────────────────────────────────
+function FilterChip({ label, field, options, value, onChange, onRemove }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef(null)
+  useEffect(() => {
+    const handler = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+  const selected = options.find(o => o.value === value)
+  return (
+    <div ref={ref} style={{ position: 'relative' }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 4, background: value ? 'var(--accent-light, #eff6ff)' : 'var(--bg)', color: 'var(--t1)', cursor: 'pointer', whiteSpace: 'nowrap' }}
+      >
+        {label}{selected ? `: ${selected.label}` : ''}
+        {value && <span onClick={e => { e.stopPropagation(); onChange(''); }} style={{ marginLeft: 2, color: 'var(--t3)' }}>✕</span>}
+        {!value && <span style={{ color: 'var(--t3)', fontSize: 10 }}>▾</span>}
+      </button>
+      {open && (
+        <div style={{ position: 'absolute', zIndex: 50, top: '110%', left: 0, background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 4, boxShadow: '0 4px 16px rgba(0,0,0,.12)', minWidth: 140 }}>
+          {options.map(o => (
+            <div
+              key={o.value}
+              onClick={() => { onChange(o.value); setOpen(false) }}
+              style={{ padding: '8px 14px', fontSize: 13, cursor: 'pointer', background: value === o.value ? 'var(--hover)' : 'transparent', color: 'var(--t1)' }}
+            >{o.label}</div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── AddFilterButton ───────────────────────────────────────────────────────────
+function AddFilterButton({ defs, active, onAdd }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef(null)
+  useEffect(() => {
+    const handler = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+  const available = defs.filter(d => !active.includes(d.field))
+  if (!available.length) return null
+  return (
+    <div ref={ref} style={{ position: 'relative' }}>
+      <button onClick={() => setOpen(o => !o)} style={{ padding: '4px 10px', fontSize: 13, border: '1px dashed var(--border)', borderRadius: 4, background: 'transparent', color: 'var(--t2)', cursor: 'pointer' }}>
+        + 필터
+      </button>
+      {open && (
+        <div style={{ position: 'absolute', zIndex: 50, top: '110%', left: 0, background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 4, boxShadow: '0 4px 16px rgba(0,0,0,.12)', minWidth: 140 }}>
+          {available.map(d => (
+            <div key={d.field} onClick={() => { onAdd(d.field); setOpen(false) }} style={{ padding: '8px 14px', fontSize: 13, cursor: 'pointer', color: 'var(--t1)' }}>{d.label}</div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── ColToggle ─────────────────────────────────────────────────────────────────
+function ColToggle({ cols, hiddenCols, onToggle }) {
+  const [open, setOpen] = useState(false)
+  const [dropPos, setDropPos] = useState({ bottom: 0, left: 0 })
+  const ref = useRef(null)
+  const btnRef = useRef(null)
+  const toggleable = cols.filter(c => c.label && typeof c.label === 'string')
+  useEffect(() => {
+    function handleClick(e) { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [])
+  function handleToggleOpen() {
+    if (!open && btnRef.current) {
+      const rect = btnRef.current.getBoundingClientRect()
+      setDropPos({ bottom: window.innerHeight - rect.top + 4, left: rect.left })
+    }
+    setOpen(o => !o)
+  }
+  return (
+    <div ref={ref} style={{ position: 'relative' }}>
+      <button ref={btnRef} onClick={handleToggleOpen} title="열 표시 설정"
+        style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: 0, border: 'none', background: 'none', color: hiddenCols.length > 0 ? 'var(--t1)' : 'var(--t3)', cursor: 'pointer', position: 'relative', flexShrink: 0 }}
+        onMouseEnter={e => e.currentTarget.style.color = 'var(--t1)'}
+        onMouseLeave={e => e.currentTarget.style.color = hiddenCols.length > 0 ? 'var(--t1)' : 'var(--t3)'}>
+        <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" viewBox="0 0 24 24" style={{ marginTop: 4 }}>
+          <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+          <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+        </svg>
+        {hiddenCols.length > 0 && <span style={{ position: 'absolute', top: 4, right: -2, width: 6, height: 6, borderRadius: '50%', background: '#f97316' }} />}
+      </button>
+      {open && (
+        <div style={{ position: 'fixed', bottom: dropPos.bottom, left: dropPos.left, zIndex: 9999, background: 'var(--bg1)', border: '1px solid var(--bd)', borderRadius: 4, boxShadow: '0 6px 20px rgba(0,0,0,0.12)', minWidth: 160, overflow: 'hidden' }}>
+          <div style={{ padding: '8px 14px 6px', fontSize: 11, color: 'var(--t3)', fontWeight: 600, borderBottom: '1px solid var(--bd)' }}>열 표시 설정</div>
+          {toggleable.map(c => {
+            const hidden = hiddenCols.includes(c.key)
+            return (
+              <div key={c.key} onClick={() => onToggle(c.key)}
+                style={{ padding: '8px 14px', fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}
+                onMouseEnter={e => e.currentTarget.style.background = 'var(--bg2)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                <span style={{ width: 15, height: 15, borderRadius: 3, flexShrink: 0, border: `1.5px solid ${!hidden ? '#111827' : 'var(--bd)'}`, background: !hidden ? '#111827' : '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {!hidden && <svg width="9" height="9" fill="none" stroke="#fff" strokeWidth="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>}
+                </span>
+                <span style={{ color: hidden ? 'var(--t3)' : 'var(--t1)' }}>{c.label}</span>
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── KebabMenu ─────────────────────────────────────────────────────────────────
+function KebabMenu({ items }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef(null)
+  useEffect(() => {
+    const handler = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+  return (
+    <div ref={ref} style={{ position: 'relative', display: 'inline-block' }}>
+      <button onClick={e => { e.stopPropagation(); setOpen(o => !o) }} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px', fontSize: 16, color: 'var(--t3)' }}>⋯</button>
+      {open && (
+        <div style={{ position: 'absolute', zIndex: 50, right: 0, top: '110%', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 4, boxShadow: '0 4px 16px rgba(0,0,0,.12)', minWidth: 120 }}>
+          {items.map((item, i) => (
+            <div key={i} onClick={e => { e.stopPropagation(); item.onClick(); setOpen(false) }} style={{ padding: '8px 14px', fontSize: 13, cursor: 'pointer', color: item.danger ? 'var(--red, #ef4444)' : 'var(--t1)' }}>{item.label}</div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Status tabs ───────────────────────────────────────────────────────────────
+const STATUS_TABS = [
+  { value: '', label: '전체' },
+  { value: 'ACTIVE', label: '진행중' },
+  { value: 'EXPIRED', label: '만료' },
+  { value: 'CANCELLED', label: '취소' },
+]
+
+// ── Filter defs ───────────────────────────────────────────────────────────────
+const FILTER_DEFS = [
+  {
+    field: 'pauseType',
+    label: '중단유형',
+    options: [
+      { value: '', label: '전체' },
+      { value: '자율', label: '자율' },
+      { value: '행사', label: '행사' },
+      { value: '기타', label: '기타' },
+    ],
+  },
+  {
+    field: 'requesterRole',
+    label: '요청자역할',
+    options: [
+      { value: '', label: '전체' },
+      { value: 'admin', label: '관리자' },
+      { value: 'staff', label: '운영자' },
+      { value: 'teacher', label: '교사' },
+    ],
+  },
+]
+
+// ── Detail Panel ──────────────────────────────────────────────────────────────
 function PauseDetailPanel({ pauseId, onClose, onRelease }) {
-  const p = DUMMY.pauses.find(x => x.pauseId === pauseId);
-  if (!p) return null;
+  const p = DUMMY.pauses.find(x => x.pauseId === pauseId)
+  if (!p) return null
 
-  const grp = DUMMY.groups.find(g => g.groupId === p.groupId);
-  const sch = grp ? DUMMY.schools.find(s => s.schoolId === grp.schoolId) : null;
-
-  const roleMap = { admin: '관리자', staff: '운영자', teacher: '교사' };
+  const grp = DUMMY.groups.find(g => g.groupId === p.groupId)
+  const sch = grp ? DUMMY.schools.find(s => s.schoolId === grp.schoolId) : null
+  const roleMap = { admin: '관리자', staff: '운영자', teacher: '교사' }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -53,89 +272,290 @@ function PauseDetailPanel({ pauseId, onClose, onRelease }) {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
+// ── COLS def ──────────────────────────────────────────────────────────────────
+const ALL_COLS = [
+  {
+    key: 'groupId', label: '학교', render: v => {
+      const grp = DUMMY.groups.find(g => g.groupId === v)
+      const sch = grp ? DUMMY.schools.find(s => s.schoolId === grp.schoolId) : null
+      return sch ? sch.name : '—'
+    }
+  },
+  { key: 'pauseType', label: '중단유형' },
+  { key: 'requester', label: '요청자' },
+  { key: 'startAt', label: '시작시각', render: v => fmtDT(v) },
+  { key: 'endAt', label: '종료시각', render: v => fmtDT(v) },
+  { key: 'reason', label: '사유' },
+  {
+    key: 'status', label: '상태', width: 90, render: v => {
+      if (v === 'ACTIVE') return '진행중'
+      if (v === 'EXPIRED') return '만료'
+      return '취소'
+    }
+  },
+]
+
+// ── Main component ────────────────────────────────────────────────────────────
 export default function PauseList() {
-  const { openPanel, closePanel } = usePanel();
-  const toast = useToastCtx();
-  const { isSchoolAdmin, schoolGroupIds } = useSchoolScope();
-  const [pauses, setPauses] = useState(DUMMY.pauses);
-  const [page, setPage] = useState(1);
+  const { openPanel, closePanel } = usePanel()
+  const toast = useToastCtx()
+  const { isSchoolAdmin, schoolGroupIds } = useSchoolScope()
 
-  const visiblePauses = isSchoolAdmin && schoolGroupIds.length
+  const [pauses, setPauses] = useState(DUMMY.pauses)
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(25)
+  const [selectedId, setSelectedId] = useState(null)
+  const [checkedIds, setCheckedIds] = useState([])
+  const [sortKey, setSortKey] = useState('')
+  const [sortDir, setSortDir] = useState('asc')
+  const [hiddenCols, setHiddenCols] = useState([])
+
+  // filters
+  const [statusFilter, setStatusFilter] = useState('')
+  const [dateFrom, setDateFrom] = useState('')
+  const [dateTo, setDateTo] = useState('')
+  const [search, setSearch] = useState('')
+  const [query, setQuery] = useState('')
+  const [filterValues, setFilterValues] = useState({})
+  const [activeFilters, setActiveFilters] = useState([])
+
+  // scope filter
+  const scoped = isSchoolAdmin && schoolGroupIds.length
     ? pauses.filter(p => schoolGroupIds.includes(p.groupId))
-    : pauses;
+    : pauses
 
-  const active = visiblePauses.filter(p => p.status === 'ACTIVE').length;
-  const expired = visiblePauses.filter(p => p.status === 'EXPIRED').length;
-  const cancelled = visiblePauses.filter(p => p.status === 'CANCELLED').length;
+  // apply filters
+  let filtered = scoped
+  if (statusFilter) filtered = filtered.filter(p => p.status === statusFilter)
+  if (dateFrom) filtered = filtered.filter(p => p.startAt >= dateFrom)
+  if (dateTo) filtered = filtered.filter(p => p.startAt <= dateTo + 'T23:59:59')
+  if (query) {
+    const q = query.toLowerCase()
+    filtered = filtered.filter(p =>
+      p.requester?.toLowerCase().includes(q) ||
+      p.reason?.toLowerCase().includes(q) ||
+      p.pauseType?.toLowerCase().includes(q)
+    )
+  }
+  activeFilters.forEach(field => {
+    const val = filterValues[field]
+    if (val) filtered = filtered.filter(p => p[field] === val)
+  })
+
+  // sort
+  if (sortKey) {
+    filtered = [...filtered].sort((a, b) => {
+      const av = a[sortKey] ?? ''
+      const bv = b[sortKey] ?? ''
+      return sortDir === 'asc' ? (av > bv ? 1 : -1) : (av < bv ? 1 : -1)
+    })
+  }
+
+  const total = filtered.length
+  const paginated = filtered.slice((page - 1) * pageSize, page * pageSize)
+
+  const doSearch = () => { setQuery(search); setPage(1) }
 
   const handleRelease = (pauseId) => {
     if (window.confirm('탐지 중단을 해제하시겠습니까?')) {
       setPauses(prev => prev.map(p => p.pauseId === pauseId
         ? { ...p, status: 'CANCELLED', cancelReason: '관리자 수동 취소' }
         : p
-      ));
-      toast('탐지 중단이 해제되었습니다.', 'warn');
-      closePanel();
+      ))
+      toast('탐지 중단이 해제되었습니다.', 'warn')
+      closePanel()
     }
-  };
+  }
 
-  const cols = [
-    {
-      key: 'groupId', label: '학교', render: v => {
-        const grp = DUMMY.groups.find(g => g.groupId === v);
-        const sch = grp ? DUMMY.schools.find(s => s.schoolId === grp.schoolId) : null;
-        return sch ? sch.name : '—';
-      }
-    },
-    { key: 'pauseType', label: '중단유형' },
-    { key: 'requester', label: '요청자' },
-    { key: 'startAt', label: '시작시각', render: v => fmtDT(v) },
-    { key: 'endAt', label: '종료시각', render: v => fmtDT(v) },
-    { key: 'reason', label: '사유' },
-    {
-      key: 'status', label: '상태', width: 90, render: v => {
-        if (v === 'ACTIVE') return '진행중';
-        if (v === 'EXPIRED') return '만료';
-        return '취소';
-      }
-    },
-  ];
+  const handleRowClick = row => {
+    setSelectedId(row.pauseId)
+    openPanel(
+      <PauseDetailPanel
+        pauseId={row.pauseId}
+        onClose={() => { closePanel(); setSelectedId(null) }}
+        onRelease={handleRelease}
+      />
+    )
+  }
+
+  const handleSort = key => {
+    if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc')
+    else { setSortKey(key); setSortDir('asc') }
+  }
+
+  const toggleCol = key => setHiddenCols(h => h.includes(key) ? h.filter(k => k !== key) : [...h, key])
+
+  const visibleCols = ALL_COLS.filter(c => !hiddenCols.includes(c.key))
+
+  const allChecked = paginated.length > 0 && paginated.every(r => checkedIds.includes(r.pauseId))
+  const someChecked = paginated.some(r => checkedIds.includes(r.pauseId))
+
+  const checkboxCol = {
+    key: '__check__',
+    label: (
+      <Checkbox
+        checked={allChecked}
+        indeterminate={!allChecked && someChecked}
+        onChange={() => {
+          if (allChecked) setCheckedIds(ids => ids.filter(id => !paginated.find(r => r.pauseId === id)))
+          else setCheckedIds(ids => [...new Set([...ids, ...paginated.map(r => r.pauseId)])])
+        }}
+      />
+    ),
+    width: 36,
+    render: (_, row) => (
+      <Checkbox
+        checked={checkedIds.includes(row.pauseId)}
+        onChange={() => setCheckedIds(ids => ids.includes(row.pauseId) ? ids.filter(i => i !== row.pauseId) : [...ids, row.pauseId])}
+      />
+    ),
+  }
+
+  const cols = [checkboxCol, ...visibleCols]
+
+  const actionBar = checkedIds.length > 0 && (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <span style={{ fontSize: 13, color: 'var(--t2)' }}>{checkedIds.length}건 선택됨</span>
+      <button className="btn btn-outline" style={{ fontSize: 13 }} onClick={() => setCheckedIds([])}>선택 해제</button>
+    </div>
+  )
+
+  // STATUS_TABS with counts
+  const tabsWithCount = STATUS_TABS.map(tab => ({
+    ...tab,
+    count: tab.value === '' ? scoped.length : scoped.filter(p => p.status === tab.value).length,
+  }))
 
   return (
-    <div>
-      <div className="ph">
-        <div className="ph-left">
-          <div className="ph-title">탐지 중단 현황</div>
-          <div className="ph-sub">총 {visiblePauses.length}건</div>
+    <div style={{ padding: '28px 32px' }}>
+      {/* PAGE HEADER */}
+      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 40 }}>
+        <div>
+          <div style={{ fontSize: 12, color: 'var(--t3)', marginBottom: 4 }}>운영 관리</div>
+          <h2 style={{ fontSize: 22, fontWeight: 700, color: 'var(--t1)' }}>
+            탐지중단 <span style={{ fontSize: 16, fontWeight: 400, color: 'var(--t3)', marginLeft: 4 }}>{total}</span>
+          </h2>
         </div>
-        <div className="ph-actions">
-          <button className="btn btn-p" onClick={() => openPanel(<PauseNewPanel />)}>+ 중단 설정</button>
+        <div style={{ display: 'flex', gap: 8, paddingTop: 4 }}>
+          <button style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 14px', borderRadius: 4, background: 'var(--bg1)', color: 'var(--t2)', border: '1px solid var(--bd)', cursor: 'pointer', fontSize: 13, fontWeight: 500 }}>
+            <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            가져오기
+          </button>
+          <button style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 14px', borderRadius: 4, background: 'var(--bg1)', color: 'var(--t2)', border: '1px solid var(--bd)', cursor: 'pointer', fontSize: 13, fontWeight: 500 }}>
+            <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            내보내기
+          </button>
+          <button style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 14px', borderRadius: 4, background: '#111827', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 500 }} onClick={() => openPanel(<PauseNewPanel />)}>
+            <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            추가
+          </button>
         </div>
       </div>
 
-      <div className="grid-3" style={{ marginBottom: 16 }}>
-        <KPI label="진행중" value={active} color="warn" />
-        <KPI label="만료" value={expired} />
-        <KPI label="취소" value={cancelled} />
+      {/* FILTER BAR */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
+        {/* 상태 탭 묶음 */}
+        <div style={{ display: 'flex', borderRadius: 4, overflow: 'hidden' }}>
+          {tabsWithCount.map((tab, i) => {
+            const active = statusFilter === tab.value
+            return (
+              <button key={tab.value} onClick={() => { setStatusFilter(tab.value); setPage(1) }}
+                style={{
+                  padding: '7px 14px', fontSize: 13,
+                  border: `1px solid ${active ? 'var(--t1)' : 'var(--bd)'}`,
+                  marginLeft: i === 0 ? 0 : -1,
+                  background: active ? 'var(--t1)' : 'var(--bg2)',
+                  color: active ? '#fff' : 'var(--t2)',
+                  cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5,
+                  fontWeight: active ? 600 : 400,
+                  position: 'relative', zIndex: active ? 1 : 0,
+                }}>
+                {tab.label} <span style={{ fontSize: 11, opacity: 0.75 }}>{tab.count}</span>
+              </button>
+            )
+          })}
+        </div>
+
+        {/* 구분선 */}
+        <div style={{ width: 1, height: 20, background: 'var(--bd)', margin: '0 4px' }} />
+
+        {/* 날짜 범위 피커 */}
+        <DateRangePicker from={dateFrom} to={dateTo} onChange={({ from, to }) => { setDateFrom(from); setDateTo(to); setPage(1) }} />
+
+        {/* 구분선 */}
+        <div style={{ width: 1, height: 20, background: 'var(--bd)', margin: '0 4px' }} />
+
+        {/* Dynamic filter chips */}
+        {activeFilters.map(field => {
+          const def = FILTER_DEFS.find(d => d.field === field)
+          if (!def) return null
+          return (
+            <FilterChip
+              key={field}
+              label={def.label}
+              field={field}
+              options={def.options}
+              value={filterValues[field] || ''}
+              onChange={val => { setFilterValues(v => ({ ...v, [field]: val })); setPage(1) }}
+              onRemove={() => {
+                setActiveFilters(f => f.filter(k => k !== field))
+                setFilterValues(v => { const n = { ...v }; delete n[field]; return n })
+              }}
+            />
+          )
+        })}
+
+        <AddFilterButton
+          defs={FILTER_DEFS}
+          active={activeFilters}
+          onAdd={field => setActiveFilters(f => [...f, field])}
+        />
+
+        {/* 검색 입력 (우측 정렬) */}
+        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+            <input className="inp"
+              style={{ width: 220, paddingTop: 7, paddingBottom: 7, paddingRight: search ? 60 : 36, background: '#fff' }}
+              placeholder="검색어 입력"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && doSearch()}
+            />
+            {search && (
+              <button onClick={() => { setSearch(''); setQuery(''); setPage(1) }}
+                style={{ position: 'absolute', right: 32, top: '50%', transform: 'translateY(-50%)', width: 18, height: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.03)', border: 'none', borderRadius: '50%', cursor: 'pointer', color: 'var(--t3)', fontSize: 11 }}>×</button>
+            )}
+            <button onClick={doSearch}
+              style={{ position: 'absolute', right: 1, top: 1, bottom: 1, width: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--t3)', borderRadius: '0 4px 4px 0' }}>
+              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </button>
+          </div>
+        </div>
       </div>
 
-      <div style={{ fontSize: 13, color: 'var(--t2)', marginBottom: 8 }}>총 {visiblePauses.length}건</div>
+      {/* TABLE */}
       <Table
         cols={cols}
-        rows={visiblePauses.slice((page - 1) * 25, page * 25)}
-        onRowClick={row => openPanel(
-          <PauseDetailPanel
-            pauseId={row.pauseId}
-            onClose={closePanel}
-            onRelease={handleRelease}
-          />
-        )}
+        rows={paginated}
+        selectedId={selectedId}
+        onRowClick={handleRowClick}
+        sortKey={sortKey}
+        sortDir={sortDir}
+        onSort={handleSort}
+        actionBar={actionBar}
+        emptyContext={<EmptyState message="탐지 중단 내역이 없습니다." />}
       />
-      <Pagination page={page} total={visiblePauses.length} pageSize={25} onChange={setPage} />
-    </div>
-  );
 
+      {/* PAGINATION FOOTER */}
+      <div style={{ marginTop: 16, display: 'flex', alignItems: 'center', gap: 3 }}>
+        <ColToggle cols={ALL_COLS} hiddenCols={hiddenCols} onToggle={toggleCol} />
+        <div style={{ flex: 1 }}>
+          <Pagination page={page} total={total} pageSize={pageSize} onChange={setPage} onPageSizeChange={setPageSize} />
+        </div>
+      </div>
+    </div>
+  )
 }

@@ -4,7 +4,12 @@ import { createContext, useContext, useState, useEffect } from 'react';
 const ThemeContext = createContext();
 
 export function ThemeProvider({ children }) {
-  const [theme, setThemeState] = useState(() => (typeof window !== 'undefined' ? localStorage.getItem('mc_theme') : null) || 'light');
+  const [theme, setThemeState] = useState('light');
+
+  useEffect(() => {
+    const saved = localStorage.getItem('mc_theme');
+    if (saved) setThemeState(saved);
+  }, []);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);

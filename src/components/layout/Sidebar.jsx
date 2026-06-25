@@ -24,6 +24,7 @@ const IC = {
   blacklist:         '<circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>',
   'app-versions':    '<path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>',
   'audit-logs':      '<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>',
+  'policy-settings': '<path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>',
 };
 
 function SvgIcon({ paths }) {
@@ -51,6 +52,7 @@ const MENU = [
   { section: '설정' },
   { id: 'licenses',         icon: 'licenses',         label: '라이선스',        path: '/licenses',         common: true  },
   { id: 'notifications',    icon: 'notifications',    label: '알림 설정',       path: '/notifications',    common: false },
+  { id: 'policy-settings',  icon: 'policy-settings',  label: '정책 설정',       path: '/policy-settings',  common: false },
   { id: 'account',          icon: 'account',          label: '내 계정',         path: '/account',          common: true  },
   { section: '운영 설정' },
   { id: 'detection-policy', icon: 'detection-policy', label: '예외 서비스 관리', path: '/detection-policy', common: true  },
@@ -60,6 +62,11 @@ const MENU = [
   { id: 'audit-logs',       icon: 'audit-logs',       label: '감사 로그',       path: '/audit-logs',       common: true  },
   { id: 'app-versions',     icon: 'app-versions',     label: '앱 버전 관리',    path: '/app-versions',     common: true  },
   { id: 'valid-urls',       icon: 'urls',             label: '검증 URL 현황',   path: '/valid-urls',       common: false },
+  { section: '참고자료' },
+  { id: 'components',      icon: 'components',       label: '컴포넌트 모음',   path: '/components',       common: true },
+  { id: 'table-guide',     icon: 'reports',          label: '기본 레이아웃',   path: '/components/table', common: true },
+  { id: 'image-guide',     icon: 'reports',          label: '이미지 레이아웃', path: '/components/image', common: true },
+  { id: 'tab-guide',       icon: 'reports',          label: '탭 레이아웃',     path: '/components/tab',   common: true },
 ];
 
 export default function Sidebar({ mobileOpen, onMobileClose }) {
@@ -94,13 +101,55 @@ export default function Sidebar({ mobileOpen, onMobileClose }) {
         </div>
       </div>
 
+      {/* 학년도 / 학교 선택 */}
+      {!collapsed && (
+        <div style={{ padding: '10px 8px', display: 'flex', gap: 6, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+          <select
+            defaultValue="2026"
+            disabled
+            style={{
+              flex: 2, minWidth: 0, padding: '7px 6px', fontSize: 12,
+              background: 'rgb(16 19 30)', color: 'rgba(255,255,255,0.4)',
+              border: '1px solid rgb(51 51 51)', borderRadius: 4,
+              cursor: 'not-allowed', outline: 'none', opacity: 1,
+            }}
+          >
+            <option value="2026">2026 학년도</option>
+            <option value="2025">2025 학년도</option>
+            <option value="2024">2024 학년도</option>
+            <option value="2023">2023 학년도</option>
+          </select>
+          <select
+            defaultValue="1"
+            style={{
+              flex: 3, minWidth: 0, padding: '7px 6px', fontSize: 12,
+              background: 'rgb(16 19 30)', color: '#fff',
+              border: '1px solid rgb(51 51 51)', borderRadius: 4,
+              cursor: 'pointer', outline: 'none',
+            }}
+          >
+            <option value="1">부산광역시교육청</option>
+            <option value="2">부산초등학교</option>
+            <option value="3">해운대중학교</option>
+            <option value="4">동래고등학교</option>
+            <option value="5">부산진초등학교</option>
+            <option value="6">사직중학교</option>
+            <option value="7">경남고등학교</option>
+            <option value="8">연제초등학교</option>
+            <option value="9">금정중학교</option>
+            <option value="10">부산여자고등학교</option>
+            <option value="11">남산초등학교</option>
+          </select>
+        </div>
+      )}
+
       {/* Nav */}
       <nav className="sb-nav">
         {MENU.map((item, i) => {
           if (item.section) return <div key={i} className="ns">{item.section}</div>;
           const isActive = item.path === '/'
             ? pathname === '/'
-            : pathname.startsWith(item.path);
+            : pathname === item.path || (pathname.startsWith(item.path + '/') && item.path !== '/');
           return (
             <div key={item.id} className={`ni${isActive ? ' a' : ''}`} onClick={() => handleNavigate(item.path)}>
               <span className="ic"><SvgIcon paths={IC[item.icon]} /></span>
@@ -117,24 +166,14 @@ export default function Sidebar({ mobileOpen, onMobileClose }) {
       <div className="sb-bottom">
         {/* User row */}
         <div className="sb-user-row" style={{ position: 'relative' }}>
-          <button
-            className="sb-bell"
-            title="알림"
-            onClick={() => router.push('/notifications')}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-              <path d="M13.73 21a2 2 0 01-3.46 0"/>
-            </svg>
-            <span className="sb-notif-dot" />
-          </button>
-
-          <div
-            className="sb-user"
-            onClick={() => setShowDropdown(d => !d)}
-          >
+          <div className="sb-user" onClick={() => setShowDropdown(d => !d)}>
             <div className="sb-user-avatar">{initial}</div>
-            {!collapsed && <span className="sb-user-name">{userName || 'admin'}</span>}
+            {!collapsed && (
+              <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.3 }}>
+                <span className="sb-user-name">{userName || '홍길동'}</span>
+                <span style={{ fontSize: 11, color: 'var(--t3)', opacity: 0.7 }}>관리자</span>
+              </div>
+            )}
           </div>
 
           {showDropdown && (
@@ -143,7 +182,7 @@ export default function Sidebar({ mobileOpen, onMobileClose }) {
               style={{
                 position: 'absolute', bottom: '100%', left: 0, marginBottom: 6,
                 background: 'var(--bg1)', border: '1px solid var(--bd)',
-                borderRadius: 8, boxShadow: '0 4px 16px rgba(0,0,0,.25)',
+                borderRadius: 4, boxShadow: '0 4px 16px rgba(0,0,0,.25)',
                 minWidth: 140, zIndex: 300, overflow: 'hidden',
               }}
             >
@@ -152,7 +191,7 @@ export default function Sidebar({ mobileOpen, onMobileClose }) {
                 style={{ padding: '10px 14px', fontSize: 13, cursor: 'pointer', color: 'var(--t1)' }}
                 onMouseEnter={e => e.currentTarget.style.background = 'var(--bg3)'}
                 onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-              >마이페이지</div>
+              >정보수정</div>
               <div
                 onClick={() => { setShowDropdown(false); logout(); }}
                 style={{ padding: '10px 14px', fontSize: 13, cursor: 'pointer', color: '#ef4444', borderTop: '1px solid var(--bd)' }}

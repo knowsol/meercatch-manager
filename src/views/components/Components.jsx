@@ -321,7 +321,7 @@ function PanelLabel({ children, style }) {
 function CountBadge({ n, active }) {
   return (
     <span style={{
-      fontSize: 10, fontWeight: 700, borderRadius: 10, padding: '1px 7px',
+      fontSize: 10, fontWeight: 700, borderRadius: 4, padding: '1px 7px',
       minWidth: 18, textAlign: 'center',
       background: active ? 'rgba(232,64,53,0.18)' : 'rgba(255,255,255,0.07)',
       color: active ? ACCENT : NAV_MUTED,
@@ -384,13 +384,13 @@ function ItemColumn({ title, items, sectionId, adding, addValue, setAddValue, on
     <div style={{
       flex: 1, minWidth: 0,
       background: 'var(--bg1)', border: '1px solid var(--bd)',
-      borderRadius: 10, padding: 14,
+      borderRadius: 4, padding: 14,
       display: 'flex', flexDirection: 'column',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
         <PanelLabel>{title}</PanelLabel>
         <span style={{
-          fontSize: 10, fontWeight: 700, borderRadius: 10, padding: '1px 7px',
+          fontSize: 10, fontWeight: 700, borderRadius: 4, padding: '1px 7px',
           background: 'var(--bg2)', color: 'var(--t3)',
         }}>{items.length}</span>
       </div>
@@ -416,7 +416,7 @@ function ItemColumn({ title, items, sectionId, adding, addValue, setAddValue, on
             }}
             placeholder="이름 입력"
             style={{
-              flex: 1, minWidth: 0, padding: '6px 9px', borderRadius: 6,
+              flex: 1, minWidth: 0, padding: '6px 9px', borderRadius: 4,
               border: '1px solid var(--ac)', fontSize: 13,
               color: 'var(--t1)', background: 'var(--bg1)', outline: 'none',
             }}
@@ -424,14 +424,14 @@ function ItemColumn({ title, items, sectionId, adding, addValue, setAddValue, on
           <button
             onClick={() => onCommitAdd(sectionId)}
             style={{
-              flexShrink: 0, padding: '0 12px', borderRadius: 6, border: 'none',
+              flexShrink: 0, padding: '0 12px', borderRadius: 4, border: 'none',
               background: 'var(--ac)', color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer',
             }}
           >추가</button>
           <button
             onClick={onCancelAdd}
             style={{
-              flexShrink: 0, width: 30, borderRadius: 6, border: '1px solid var(--bd)',
+              flexShrink: 0, width: 30, borderRadius: 4, border: '1px solid var(--bd)',
               background: 'var(--bg1)', color: 'var(--t3)', fontSize: 13, cursor: 'pointer',
             }}
           >✕</button>
@@ -440,7 +440,7 @@ function ItemColumn({ title, items, sectionId, adding, addValue, setAddValue, on
         <button
           onClick={() => onStartAdd(sectionId)}
           style={{
-            marginTop: 10, padding: '7px 0', borderRadius: 6,
+            marginTop: 10, padding: '7px 0', borderRadius: 4,
             border: '1px dashed var(--bd2)', background: 'transparent',
             color: 'var(--t2)', fontSize: 12, fontWeight: 600, cursor: 'pointer',
             transition: 'all 0.12s',
@@ -488,7 +488,7 @@ function TokenSelect({ label, value, registry, groupKeys, allowNone, onChange })
           onBlur={() => setTimeout(() => setOpen(false), 120)}
           style={{
             width: '100%', display: 'flex', alignItems: 'center', gap: 10,
-            padding: '8px 12px', borderRadius: 8,
+            padding: '8px 12px', borderRadius: 4,
             border: `1px solid ${open ? 'var(--ac)' : 'var(--bd)'}`,
             background: 'var(--bg1)', cursor: 'pointer', textAlign: 'left',
             boxShadow: open ? '0 0 0 3px rgba(232,64,53,0.10)' : 'none',
@@ -516,7 +516,7 @@ function TokenSelect({ label, value, registry, groupKeys, allowNone, onChange })
         {open && (
           <div style={{
             position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, zIndex: 50,
-            background: 'var(--bg1)', border: '1px solid var(--bd)', borderRadius: 8,
+            background: 'var(--bg1)', border: '1px solid var(--bd)', borderRadius: 4,
             boxShadow: '0 8px 28px rgba(0,0,0,.16)', overflow: 'hidden',
             maxHeight: 280, overflowY: 'auto',
           }}>
@@ -1009,7 +1009,7 @@ function ComponentView({
       {/* Overview — full width */}
       <div style={{
         background: 'var(--bg1)', border: '1px solid var(--bd)',
-        borderRadius: 12, padding: 22,
+        borderRadius: 4, padding: 22,
       }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
             <div style={{ flex: 1, minWidth: 0 }}>
@@ -1027,7 +1027,7 @@ function ComponentView({
                     }}
                     style={{
                       fontSize: 20, fontWeight: 700, color: 'var(--t1)',
-                      border: '1px solid var(--ac)', borderRadius: 6, padding: '2px 8px',
+                      border: '1px solid var(--ac)', borderRadius: 4, padding: '2px 8px',
                       outline: 'none', background: 'var(--bg1)', maxWidth: 260,
                     }}
                   />
@@ -1038,7 +1038,7 @@ function ComponentView({
                       onClick={() => { setNameDraft(comp.label); setEditingName(true); }}
                       title="이름 편집"
                       style={{
-                        width: 26, height: 26, borderRadius: 6, border: '1px solid var(--bd)',
+                        width: 26, height: 26, borderRadius: 4, border: '1px solid var(--bd)',
                         background: 'var(--bg1)', color: 'var(--t3)', cursor: 'pointer', fontSize: 12,
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                       }}
@@ -1063,7 +1063,7 @@ function ComponentView({
                     }}
                     style={{
                       width: '100%', maxWidth: 440, fontSize: 13, color: 'var(--t2)',
-                      border: '1px solid var(--ac)', borderRadius: 6, padding: '4px 8px',
+                      border: '1px solid var(--ac)', borderRadius: 4, padding: '4px 8px',
                       outline: 'none', background: 'var(--bg1)',
                     }}
                   />
@@ -1100,14 +1100,14 @@ function ComponentView({
           {/* Live Preview */}
           <div style={{
             background: 'var(--bg1)', border: '1px solid var(--bd)',
-            borderRadius: 12, overflow: 'hidden',
+            borderRadius: 4, overflow: 'hidden',
           }}>
             <div style={{ padding: '14px 16px 12px', borderBottom: '1px solid var(--bd)' }}>
               <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--t1)' }}>Live Preview</div>
               <div style={{ fontSize: 11, color: 'var(--t3)', marginTop: 1 }}>연결된 토큰으로 실시간 렌더링</div>
             </div>
             <div style={{
-              margin: 16, marginTop: 16, borderRadius: 10,
+              margin: 16, marginTop: 16, borderRadius: 4,
               border: '1px solid var(--bd)', background: CHECKER,
               minHeight: 150, padding: 20,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -1156,7 +1156,7 @@ function ComponentView({
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{
             background: 'var(--bg1)', border: '1px solid var(--bd)',
-            borderRadius: 12, padding: '6px 22px 18px',
+            borderRadius: 4, padding: '6px 22px 18px',
           }}>
             <div style={{ paddingTop: 16, marginBottom: 4 }}>
               <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--t1)' }}>Appearance</div>
@@ -1206,7 +1206,7 @@ function ColorTokenRow({ tokenKey, item, onChange }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
         <span style={{ fontSize: 12, fontFamily: 'monospace', color: 'var(--t2)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>{item.value}</span>
         <label style={{
-          display: 'block', width: 48, height: 32, borderRadius: 8,
+          display: 'block', width: 48, height: 32, borderRadius: 4,
           background: item.value, border: '1px solid var(--bd2)',
           cursor: 'pointer', overflow: 'hidden', position: 'relative',
           boxShadow: 'inset 0 0 0 1px rgba(0,0,0,.06)', flexShrink: 0,
@@ -1241,7 +1241,7 @@ function NumberTokenRow({ tokenKey, item, onChange }) {
             step={step}
             onChange={e => onChange(tokenKey, e.target.value)}
             style={{
-              width: 62, padding: '5px 8px', borderRadius: 6,
+              width: 62, padding: '5px 8px', borderRadius: 4,
               border: '1px solid var(--bd)', fontSize: 12,
               fontFamily: 'monospace', textAlign: 'center',
               color: 'var(--t1)', background: 'var(--bg2)', outline: 'none',
@@ -1264,7 +1264,7 @@ function TextTokenRow({ tokenKey, item, onChange }) {
         value={item.value}
         onChange={e => onChange(tokenKey, e.target.value)}
         style={{
-          width: '100%', padding: '8px 10px', borderRadius: 6,
+          width: '100%', padding: '8px 10px', borderRadius: 4,
           border: '1px solid var(--bd)', fontSize: 12,
           fontFamily: 'monospace', color: 'var(--t1)',
           background: 'var(--bg2)', outline: 'none',
@@ -1360,7 +1360,7 @@ function TypographyPreviewTable() {
   return (
     <div style={{
       background: 'var(--bg1)', border: '1px solid var(--bd)',
-      borderRadius: 12, overflow: 'hidden', marginTop: 24,
+      borderRadius: 4, overflow: 'hidden', marginTop: 24,
     }}>
       <div style={{ padding: '16px 22px 14px', borderBottom: '1px solid var(--bd)' }}>
         <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--t1)' }}>Type Scale</div>
@@ -1407,7 +1407,7 @@ function TypographyPreviewTable() {
         <button
           onClick={addRow}
           style={{
-            padding: '7px 16px', borderRadius: 6, fontSize: 12, fontWeight: 600,
+            padding: '7px 16px', borderRadius: 4, fontSize: 12, fontWeight: 600,
             border: '1px dashed var(--bd2)', background: 'transparent',
             color: 'var(--t2)', cursor: 'pointer', transition: 'all 0.12s',
           }}
@@ -1440,7 +1440,7 @@ function TokenGroupView({ group, onTokenChange }) {
       {!isTypography && (
         <div style={{
           background: 'var(--bg1)', border: '1px solid var(--bd)',
-          borderRadius: 12, padding: isColors ? '4px 22px' : '6px 22px',
+          borderRadius: 4, padding: isColors ? '4px 22px' : '6px 22px',
         }}>
           {Object.entries(group.items).map(([key, item]) => {
             if (item.type === 'text') return <TextTokenRow key={key} tokenKey={key} item={item} onChange={onTokenChange} />;
@@ -1511,7 +1511,7 @@ function PublishView({ registry, onPublish }) {
       </div>
 
       {/* Tabs */}
-      <div style={{ display: 'flex', gap: 0, marginBottom: 12, border: '1px solid var(--bd)', borderRadius: 8, overflow: 'hidden', width: 'fit-content' }}>
+      <div style={{ display: 'flex', gap: 0, marginBottom: 12, border: '1px solid var(--bd)', borderRadius: 4, overflow: 'hidden', width: 'fit-content' }}>
         {[['json', 'design-registry.json'], ['css', 'design-tokens.css']].map(([id, label]) => (
           <button
             key={id}
@@ -1529,7 +1529,7 @@ function PublishView({ registry, onPublish }) {
 
       {/* Code block */}
       <div style={{
-        background: '#16181f', borderRadius: 10,
+        background: '#16181f', borderRadius: 4,
         border: '1px solid #2a2d36', marginBottom: 16, overflow: 'hidden',
       }}>
         <div style={{
@@ -1556,7 +1556,7 @@ function PublishView({ registry, onPublish }) {
         <button
           onClick={handleCopy}
           style={{
-            padding: '8px 16px', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer',
+            padding: '8px 16px', borderRadius: 4, fontSize: 13, fontWeight: 600, cursor: 'pointer',
             border: '1px solid var(--bd)', background: 'var(--bg1)',
             color: copied ? 'var(--ok)' : 'var(--t2)',
             display: 'flex', alignItems: 'center', gap: 5,
@@ -1565,7 +1565,7 @@ function PublishView({ registry, onPublish }) {
         <button
           onClick={() => download(filename, content)}
           style={{
-            padding: '8px 16px', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer',
+            padding: '8px 16px', borderRadius: 4, fontSize: 13, fontWeight: 600, cursor: 'pointer',
             border: '1px solid var(--bd)', background: 'var(--bg1)', color: 'var(--t2)',
             display: 'flex', alignItems: 'center', gap: 5,
           }}
@@ -1574,7 +1574,7 @@ function PublishView({ registry, onPublish }) {
         <button
           onClick={handlePublish}
           style={{
-            padding: '8px 22px', borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: 'pointer',
+            padding: '8px 22px', borderRadius: 4, fontSize: 13, fontWeight: 700, cursor: 'pointer',
             border: 'none', color: '#fff',
             background: published ? 'var(--ok)' : 'var(--ac)',
             boxShadow: published ? 'none' : '0 2px 8px rgba(232,64,53,0.3)',
@@ -1586,7 +1586,7 @@ function PublishView({ registry, onPublish }) {
         <div style={{
           marginTop: 12, padding: '11px 14px',
           background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.25)',
-          borderRadius: 8, fontSize: 12, color: 'var(--ok)',
+          borderRadius: 4, fontSize: 12, color: 'var(--ok)',
         }}>
           디자인 시스템이 성공적으로 발행되었습니다. localStorage에 저장되고 앱 전체에 CSS 토큰이 적용되었습니다.
         </div>
@@ -1812,7 +1812,7 @@ export default function ComponentsPage() {
           <button
             onClick={() => setSelected('publish')}
             style={{
-              width: '100%', padding: '10px 12px', borderRadius: 8,
+              width: '100%', padding: '10px 12px', borderRadius: 4,
               border: selected === 'publish' ? `1px solid ${ACCENT}` : 'none',
               background: selected === 'publish' ? NAV_SEL_BG : ACCENT,
               color: selected === 'publish' ? ACCENT : '#fff',

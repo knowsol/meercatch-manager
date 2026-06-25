@@ -54,7 +54,7 @@ export default function DeviceDetailPanel({ deviceId }) {
           <div style={{ marginTop: 16 }}>
             <dl className="info-row">
               {!isDirect && <><dt>단말명</dt><dd>{device.name}</dd></>}
-              <dt>식별자</dt>     <dd><span style={{ fontFamily: 'monospace', fontSize: 12 }}>{device.identifier}</span></dd>
+              <dt>식별자</dt>     <dd><span style={{ fontFamily: 'inherit', fontSize: 12 }}>{device.identifier}</span></dd>
               <dt>OS</dt>         <dd>{device.os || '—'}</dd>
               <dt>최근 접속</dt>  <dd>{fmtDT(device.lastContact)}</dd>
             </dl>

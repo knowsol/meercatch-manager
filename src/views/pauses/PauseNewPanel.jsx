@@ -41,8 +41,8 @@ export default function PauseNewPanel() {
           <label>인증 코드</label>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <div style={{
-              flex: 1, padding: '8px 14px', borderRadius: 6, border: '1px solid var(--bd)',
-              background: 'var(--bg2)', fontFamily: 'monospace', fontSize: 22, fontWeight: 700,
+              flex: 1, padding: '8px 14px', borderRadius: 4, border: '1px solid var(--bd)',
+              background: 'var(--bg2)', fontFamily: 'inherit', fontSize: 22, fontWeight: 700,
               letterSpacing: 6, color: 'var(--ac)', textAlign: 'center'
             }}>
               {code}

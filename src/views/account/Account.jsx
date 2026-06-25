@@ -30,11 +30,11 @@ export default function Account() {
   }
 
   return (
-    <div>
-      <div className="ph">
-        <div className="ph-left">
-          <div className="ph-title">내 계정</div>
-          <div className="ph-sub">계정 정보를 확인하고 수정합니다</div>
+    <div style={{ padding: '28px 32px' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 40 }}>
+        <div>
+          <div style={{ fontSize: 12, color: 'var(--t3)', marginBottom: 4 }}>설정</div>
+          <h2 style={{ fontSize: 22, fontWeight: 700, color: 'var(--t1)' }}>내 계정</h2>
         </div>
       </div>
 

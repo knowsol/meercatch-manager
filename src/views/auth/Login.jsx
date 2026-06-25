@@ -16,7 +16,7 @@ const BG = {
 const CARD_STYLE = {
   width: 380,
   background: '#fff',
-  borderRadius: 20,
+  borderRadius: 4,
   boxShadow: '0 8px 32px rgba(0,0,0,.1)',
   padding: '40px 36px',
 };
@@ -40,7 +40,7 @@ function RoleToggle({ value, onChange }) {
   return (
     <div style={{
       display: 'flex', background: '#f1f5f9',
-      borderRadius: 10, padding: 3, marginBottom: 20, gap: 2,
+      borderRadius: 4, padding: 3, marginBottom: 20, gap: 2,
     }}>
       {roles.map(r => (
         <button
@@ -48,7 +48,7 @@ function RoleToggle({ value, onChange }) {
           onClick={() => onChange(r.key)}
           style={{
             flex: 1, padding: '8px 0', fontSize: 13, fontWeight: 600,
-            border: 'none', borderRadius: 8, cursor: 'pointer',
+            border: 'none', borderRadius: 4, cursor: 'pointer',
             background: value === r.key ? '#fff' : 'transparent',
             color: value === r.key ? '#1e293b' : '#64748b',
             boxShadow: value === r.key ? '0 1px 4px rgba(0,0,0,.1)' : 'none',
@@ -80,7 +80,7 @@ function InputField({ type, placeholder, value, onChange, onEnter, error }) {
           border: error
             ? '1.5px solid #ef4444'
             : focused ? '1.5px solid #3b82f6' : '1.5px solid #e2e8f0',
-          borderRadius: 10, fontSize: 14, outline: 'none',
+          borderRadius: 4, fontSize: 14, outline: 'none',
           background: error ? '#fff5f5' : '#fff',
           transition: 'border-color .15s',
         }}
@@ -107,14 +107,14 @@ function HintBox({ loginRole }) {
   return (
     <div style={{
       marginTop: 18, padding: '11px 14px',
-      background: '#f0f9ff', borderRadius: 10,
+      background: '#f0f9ff', borderRadius: 4,
       border: '1px solid #bae6fd', fontSize: 12, color: '#0369a1',
     }}>
       <div style={{ fontWeight: 600, marginBottom: 5 }}>🔑 테스트 계정</div>
       {items.map((it, i) => (
         <div key={i} style={{ display: 'flex', justifyContent: 'space-between', marginTop: 3 }}>
           <span>{it.label}</span>
-          <span style={{ fontFamily: 'monospace', color: '#0284c7' }}>{it.id} / {it.pw}</span>
+          <span style={{ fontFamily: 'inherit', color: '#0284c7' }}>{it.id} / {it.pw}</span>
         </div>
       ))}
     </div>
@@ -178,7 +178,7 @@ export default function Login() {
             style={{
               width: '100%', padding: 12, marginTop: 2,
               background: 'var(--ac)', color: '#fff',
-              border: 'none', borderRadius: 10,
+              border: 'none', borderRadius: 4,
               fontSize: 15, fontWeight: 600, cursor: 'pointer',
               transition: 'background .15s',
             }}

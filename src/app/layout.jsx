@@ -1,7 +1,9 @@
 import '../styles/global.css'
+import dynamic from 'next/dynamic'
 import Providers from '../components/Providers'
-import SpecBridgeWrapper from '../components/SpecBridgeWrapper'
 import AuthGuard from '../components/AuthGuard'
+
+const SpecBridgeWrapper = dynamic(() => import('../components/SpecBridgeWrapper'), { ssr: false })
 
 export const metadata = {
   title: 'Meercat.ch - Manager',

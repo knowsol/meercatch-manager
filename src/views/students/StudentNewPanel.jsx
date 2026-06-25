@@ -51,7 +51,7 @@ export default function StudentNewPanel() {
             onChange={setSchoolId}
             options={schools.map(s => ({ value: s.schoolId, label: s.name }))}
             placeholder="학교 선택"
-            style={{ width: '100%', ...(errors.schoolId ? { border: '1px solid #ef4444', borderRadius: 6 } : {}) }}
+            style={{ width: '100%', ...(errors.schoolId ? { border: '1px solid #ef4444', borderRadius: 4 } : {}) }}
           />
         </div>
         <div className="form-row" style={{ marginTop: 16 }}>

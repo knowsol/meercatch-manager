@@ -28,8 +28,12 @@ const PAGE_TITLES = {
   '/users':         '직원 관리',
   '/licenses':          '라이선스',
   '/notifications':     '알림 설정',
+  '/policy-settings':   '정책 설정',
   '/account':           '내 계정',
-  '/components':        '컴포넌트',
+  '/components':              '컴포넌트',
+  '/components/table':        '기본 레이아웃',
+  '/components/image':        '이미지 레이아웃',
+  '/components/tab':          '탭 레이아웃',
   '/detection-policy':  '예외 서비스 관리',
   '/whitelist':         '화이트리스트 관리',
   '/blacklist':         '블랙리스트 관리',
@@ -65,7 +69,7 @@ function ExpiryBanner({ onDismiss }) {
         style={{
           background: 'none', border: '1px solid #f59e0b', cursor: 'pointer',
           color: '#b45309', fontSize: 12, fontWeight: 600,
-          padding: '4px 10px', borderRadius: 6, whiteSpace: 'nowrap',
+          padding: '4px 10px', borderRadius: 4, whiteSpace: 'nowrap',
         }}
       >라이선스 보기</button>
       <button

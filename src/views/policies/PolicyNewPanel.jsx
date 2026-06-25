@@ -54,7 +54,7 @@ export default function PolicyNewPanel() {
               return (
                 <div key={type}
                   style={{ padding: '10px 20px', border: '2px solid ' + (isSelected ? color : 'var(--bd)'),
-                    borderRadius: 8, cursor: 'pointer', fontWeight: 700, fontSize: 14,
+                    borderRadius: 4, cursor: 'pointer', fontWeight: 700, fontSize: 14,
                     color: isSelected ? color : '#64748b',
                     background: isSelected ? (type === '선정성' ? '#fef2f2' : '#fffbeb') : '' }}
                   onClick={() => setSelectedType(type)}>{type}</div>
@@ -64,7 +64,7 @@ export default function PolicyNewPanel() {
         </div>
 
         {selectedType === '선정성' && (
-          <div style={{ border: '1px solid var(--bd)', borderRadius: 8, padding: 14, marginTop: 4 }}>
+          <div style={{ border: '1px solid var(--bd)', borderRadius: 4, padding: 14, marginTop: 4 }}>
             <div style={{ fontSize: 12, fontWeight: 600, color: '#64748b', marginBottom: 8 }}>탐지 항목</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px 16px' }}>
               <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600, cursor: 'pointer', color: '#374151' }}>
@@ -84,7 +84,7 @@ export default function PolicyNewPanel() {
         )}
 
         {selectedType === '도박' && (
-          <div style={{ border: '1px solid var(--bd)', borderRadius: 8, padding: 14, marginTop: 4 }}>
+          <div style={{ border: '1px solid var(--bd)', borderRadius: 4, padding: 14, marginTop: 4 }}>
             <div style={{ fontSize: 12, fontWeight: 600, color: '#64748b', marginBottom: 4 }}>탐지 등급</div>
             <select className="inp" style={{ maxWidth: 120 }} value={grade} onChange={e => setGrade(e.target.value)}>
               {GAMBLING_GRADES.map(g => <option key={g} value={g}>{g}</option>)}

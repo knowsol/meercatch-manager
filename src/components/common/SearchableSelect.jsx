@@ -35,7 +35,7 @@ export default function SearchableSelect({ value, onChange, options, placeholder
       {open && (
         <div style={{
           position: 'absolute', top: 'calc(100% + 4px)', left: 0, minWidth: '100%', zIndex: 300,
-          background: 'var(--bg1)', border: '1px solid var(--bd)', borderRadius: 8,
+          background: 'var(--bg1)', border: '1px solid var(--bd)', borderRadius: 4,
           boxShadow: '0 4px 16px rgba(0,0,0,.2)', overflow: 'hidden',
         }}>
           <div style={{ padding: '6px 8px', borderBottom: '1px solid var(--bd)' }}>

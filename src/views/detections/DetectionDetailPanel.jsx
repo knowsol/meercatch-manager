@@ -9,7 +9,7 @@ import { DUMMY } from '../../data/dummy';
 function DetectedImage({ seed }) {
   const [revealed, setRevealed] = useState(false);
   return (
-    <div style={{ position: 'relative', borderRadius: 8, overflow: 'hidden', background: '#0f172a', cursor: 'pointer' }}
+    <div style={{ position: 'relative', borderRadius: 4, overflow: 'hidden', background: '#0f172a', cursor: 'pointer' }}
       onClick={() => setRevealed(r => !r)}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
@@ -33,7 +33,7 @@ function DetectedImage({ seed }) {
       {revealed && (
         <div style={{
           position: 'absolute', bottom: 8, right: 8,
-          background: 'rgba(0,0,0,0.55)', borderRadius: 6, padding: '3px 10px',
+          background: 'rgba(0,0,0,0.55)', borderRadius: 4, padding: '3px 10px',
           fontSize: 11, color: 'rgba(255,255,255,0.8)', cursor: 'pointer',
         }}>
           클릭하여 블러 처리
@@ -79,10 +79,10 @@ export default function DetectionDetailPanel({ detId }) {
         )}
 
         {det.type === '도박' && det.content && det.content.length > 0 && (
-          <div style={{ marginTop: 16, padding: '10px 14px', background: 'var(--bg2)', borderRadius: 6, border: '1px solid var(--bd)' }}>
+          <div style={{ marginTop: 16, padding: '10px 14px', background: 'var(--bg2)', borderRadius: 4, border: '1px solid var(--bd)' }}>
             <div style={{ fontSize: 12, color: 'var(--t2)', marginBottom: 6 }}>탐지 URL/도메인</div>
             {det.content.map((c, i) => (
-              <div key={i} style={{ fontFamily: 'monospace', fontSize: 13, color: 'var(--warn)', marginBottom: 2 }}>{c}</div>
+              <div key={i} style={{ fontFamily: 'inherit', fontSize: 13, color: 'var(--warn)', marginBottom: 2 }}>{c}</div>
             ))}
           </div>
         )}
