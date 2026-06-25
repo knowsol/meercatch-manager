@@ -2,11 +2,11 @@
 import { useState, useEffect } from 'react';
 import { usePanel } from '../../context/PanelContext';
 import Pagination from '../../components/common/Pagination';
-import KPI from '../../components/common/KPI';
 import Table from '../../components/common/Table';
 import { fmtDT } from '../../components/common/helpers';
 import { DUMMY } from '../../data/dummy';
 import DetectionDetailPanel from './DetectionDetailPanel';
+import DateRangePicker from '../../components/common/DateRangePicker';
 
 function KeywordTags({ keywords = [] }) {
   const shown = keywords.slice(0, 3);
@@ -215,7 +215,15 @@ export default function DetectionList() {
   const [fromDate, setFromDate]     = useState('');
   const [toDate, setToDate]         = useState('');
   const [page, setPage]             = useState(1);
+  const [sortKey, setSortKey]       = useState(null);
+  const [sortDir, setSortDir]       = useState('asc');
   useEffect(() => setPage(1), [activeTab, typeFilter, fromDate, toDate]);
+
+  const handleSort = (key) => {
+    if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    else { setSortKey(key); setSortDir('asc'); }
+    setPage(1);
+  };
 
   const typeCounts = DUMMY.detections.reduce((acc, d) => {
     acc[d.type] = (acc[d.type] || 0) + 1;
@@ -230,17 +238,26 @@ export default function DetectionList() {
     return true;
   });
 
+  if (sortKey) {
+    data = [...data].sort((a, b) => {
+      const av = a[sortKey] ?? '';
+      const bv = b[sortKey] ?? '';
+      const cmp = typeof av === 'number' ? av - bv : String(av).localeCompare(String(bv), 'ko');
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+  }
+
   const rows = data.map((r, i) => ({ ...r, _no: i + 1 }));
 
   const gamblingCols = [
     { key: '_no',       label: 'No.',        width: '52px' },
     { key: 'keywords',  label: '탐지 키워드', width: '240px', render: v => <KeywordTags keywords={v || []} /> },
     { key: 'content',   label: '탐지 URL',   width: '180px', render: v => v?.[0] ? <UrlCell url={v[0]} /> : <span style={{ color: 'var(--t3)' }}>—</span> },
-    { key: 'groupName', label: '탐지학교',   width: '110px' },
-    { key: 'userName',  label: '탐지사용자', width: '100px' },
-    { key: 'os',        label: '탐지 OS',    width: '80px' },
-    { key: 'grade',     label: '탐지등급',   width: '70px',  render: v => <GradeCell v={v} /> },
-    { key: 'detectedAt',label: '탐지일시',   width: '150px', render: v => fmtDT(v) },
+    { key: 'groupName', label: '탐지 기관',  width: '110px', sortable: true },
+    { key: 'userName',  label: '탐지사용자', width: '100px', sortable: true },
+    { key: 'os',        label: '탐지 OS',    width: '80px',  sortable: true },
+    { key: 'grade',     label: '탐지등급',   width: '70px',  sortable: true, render: v => <GradeCell v={v} /> },
+    { key: 'detectedAt',label: '탐지일시',   width: '150px', sortable: true, render: v => fmtDT(v) },
   ];
 
   const defaultCols = [
@@ -251,19 +268,19 @@ export default function DetectionList() {
         ? <KeywordTags keywords={row.keywords || []} />
         : <ThumbCell thumb={v} />
     },
-    { key: 'groupName', label: '탐지학교',   width: '110px' },
-    { key: 'userName',  label: '탐지 사용자', width: '90px' },
-    { key: 'deviceName',label: '단말',         width: '90px' },
-    { key: 'os',        label: '탐지 OS',      width: '80px' },
-    { key: 'type',      label: '탐지 유형',   width: '80px' },
-    { key: 'grade',     label: '탐지 등급',   width: '70px' },
+    { key: 'groupName', label: '탐지 기관',   width: '110px', sortable: true },
+    { key: 'userName',  label: '탐지 사용자', width: '90px',  sortable: true },
+    { key: 'deviceName',label: '단말',         width: '90px',  sortable: true },
+    { key: 'os',        label: '탐지 OS',      width: '80px',  sortable: true },
+    { key: 'type',      label: '탐지 유형',   width: '80px',  sortable: true },
+    { key: 'grade',     label: '탐지 등급',   width: '70px',  sortable: true },
     {
       key: 'content', label: 'URL/도메인', width: '160px',
       render: v => v && v.length > 0
         ? <span style={{ color: 'var(--t2)', fontSize: 12 }}>{v[0]}</span>
         : <span style={{ color: 'var(--t3)' }}>—</span>
     },
-    { key: 'detectedAt', label: '탐지 일시', width: '140px', render: v => fmtDT(v) },
+    { key: 'detectedAt', label: '탐지 일시', width: '140px', sortable: true, render: v => fmtDT(v) },
   ];
 
   const cols = typeFilter === '도박' ? gamblingCols : defaultCols;
@@ -340,29 +357,43 @@ export default function DetectionList() {
         )}
       </div>
 
-      {/* KPI - 전체 탐지 탭에서만 표시 */}
-      {activeTab === 0 && (
-        <div className="grid-3 section-gap">
-          <KPI label="전체 탐지" value={DUMMY.detections.length} />
-          <KPI label="선정성"    value={typeCounts['선정성'] || 0} color="err" />
-          <KPI label="도박"      value={typeCounts['도박'] || 0}   color="warn" />
-        </div>
-      )}
-
-      {/* 탭 콘텐츠 */}
+{/* 탭 콘텐츠 */}
       {activeTab === 0 && (
         <>
-          <div className="fb" style={{ marginBottom: 16 }}>
-            <select className="inp" style={{ maxWidth: 120 }} value={typeFilter} onChange={e => setTypeFilter(e.target.value)}>
-              <option value="전체">전체</option>
-              <option value="선정성">선정성</option>
-              <option value="도박">도박</option>
-            </select>
-            <input className="inp" type="date" style={{ maxWidth: 160 }}
-              value={fromDate} onChange={e => setFromDate(e.target.value)} />
-            <span style={{ color: '#94a3b8', fontSize: 13 }}>~</span>
-            <input className="inp" type="date" style={{ maxWidth: 160 }}
-              value={toDate} onChange={e => setToDate(e.target.value)} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', borderRadius: 4, overflow: 'hidden' }}>
+              {[
+                { label: '전체',  value: '전체',  count: DUMMY.detections.length },
+                { label: '선정성', value: '선정성', count: typeCounts['선정성'] || 0 },
+                { label: '도박',  value: '도박',  count: typeCounts['도박'] || 0 },
+              ].map((tab, i) => {
+                const active = typeFilter === tab.value;
+                return (
+                  <button
+                    key={tab.value}
+                    onClick={() => setTypeFilter(tab.value)}
+                    style={{
+                      padding: '7px 14px', fontSize: 13,
+                      border: `1px solid ${active ? 'var(--t1)' : 'var(--bd)'}`,
+                      marginLeft: i === 0 ? 0 : -1,
+                      background: active ? 'var(--t1)' : 'var(--bg2)',
+                      color: active ? '#fff' : 'var(--t2)',
+                      cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5,
+                      fontWeight: active ? 600 : 400,
+                      position: 'relative', zIndex: active ? 1 : 0,
+                    }}
+                  >
+                    {tab.label} <span style={{ fontSize: 11, opacity: 0.75 }}>{tab.count}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <div style={{ width: 1, height: 20, background: 'var(--bd)', margin: '0 4px' }} />
+            <DateRangePicker
+              from={fromDate}
+              to={toDate}
+              onChange={({ from, to }) => { setFromDate(from); setToDate(to); }}
+            />
           </div>
 
           <div style={{ fontSize: 13, color: 'var(--t2)', marginBottom: 8 }}>총 {data.length}건</div>
@@ -370,6 +401,9 @@ export default function DetectionList() {
             cols={cols}
             rows={rows.slice((page - 1) * 25, page * 25)}
             onRowClick={row => openPanel(<DetectionDetailPanel detId={row.detId} />)}
+            sortKey={sortKey}
+            sortDir={sortDir}
+            onSort={handleSort}
           />
           <Pagination page={page} total={data.length} pageSize={25} onChange={setPage} />
         </>

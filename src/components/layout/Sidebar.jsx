@@ -89,13 +89,8 @@ export default function Sidebar({ mobileOpen, onMobileClose }) {
       <div className="sb-h" onClick={() => handleNavigate('/')} style={{ cursor: 'pointer' }}>
         <div className="sb-logo-row">
           <div className="sb-logo-icon">
-            <svg viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg" style={{ width: '76%', height: '76%' }}>
-              <path d="M12 22C9 22 5 18.5 5 14.5C5 11.5 7.5 10 10 10C10.8 10 11.5 10.2 12 10.6C12.5 10.2 13.2 10 14 10C16.5 10 19 11.5 19 14.5C19 18.5 15 22 12 22Z"/>
-              <ellipse cx="6.5" cy="8.5" rx="2.3" ry="2.9" transform="rotate(-20 6.5 8.5)"/>
-              <ellipse cx="10.5" cy="6.2" rx="2.3" ry="2.9" transform="rotate(-5 10.5 6.2)"/>
-              <ellipse cx="13.5" cy="6.2" rx="2.3" ry="2.9" transform="rotate(5 13.5 6.2)"/>
-              <ellipse cx="17.5" cy="8.5" rx="2.3" ry="2.9" transform="rotate(20 17.5 8.5)"/>
-            </svg>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/symbol.png" alt="symbol" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 7 }} />
           </div>
           <div className="sb-logo-text">Meercatch Manager</div>
         </div>
