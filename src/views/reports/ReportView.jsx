@@ -331,20 +331,30 @@ function Checkbox({ checked, indeterminate, onChange }) {
 
 function KebabMenu({ items }) {
   const [open, setOpen] = useState(false)
+  const [pos, setPos] = useState({ top: 0, left: 0 })
   const ref = useRef(null)
+  const btnRef = useRef(null)
   useEffect(() => {
     const h = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
     document.addEventListener('mousedown', h)
     return () => document.removeEventListener('mousedown', h)
   }, [])
+  function handleOpen(e) {
+    e.stopPropagation()
+    if (!open && btnRef.current) {
+      const rect = btnRef.current.getBoundingClientRect()
+      setPos({ top: rect.bottom + 4, left: rect.right - 140 })
+    }
+    setOpen(o => !o)
+  }
   return (
     <div ref={ref} style={{ position: 'relative' }}>
-      <button onClick={e => { e.stopPropagation(); setOpen(o => !o) }}
+      <button ref={btnRef} onClick={handleOpen}
         style={{ width: 28, height: 28, border: 'none', background: 'transparent', cursor: 'pointer', borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--t3)' }}>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2" /><circle cx="12" cy="12" r="2" /><circle cx="12" cy="19" r="2" /></svg>
       </button>
       {open && (
-        <div style={{ position: 'absolute', top: 30, right: 0, zIndex: 300, background: '#fff', border: '1px solid var(--bd)', borderRadius: 4, boxShadow: '0 4px 16px rgba(0,0,0,.12)', minWidth: 140, padding: 4 }}>
+        <div style={{ position: 'fixed', top: pos.top, left: pos.left, zIndex: 9999, background: '#fff', border: '1px solid var(--bd)', borderRadius: 4, boxShadow: '0 4px 16px rgba(0,0,0,.12)', minWidth: 140, padding: 4 }}>
           {items.map((it, i) => (
             <div key={i} onClick={() => { it.onClick(); setOpen(false) }}
               style={{ padding: '7px 12px', fontSize: 13, cursor: 'pointer', borderRadius: 4, color: it.danger ? '#ef4444' : 'var(--t1)' }}>
@@ -524,12 +534,8 @@ export default function ReportView() {
         </div>
         <div style={{ display: 'flex', gap: 8, paddingTop: 4 }}>
           <button style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 14px', borderRadius: 4, background: 'var(--bg1)', color: 'var(--t2)', border: '1px solid var(--bd)', cursor: 'pointer', fontSize: 13, fontWeight: 500 }}>
-            <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            가져오기
-          </button>
-          <button style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 14px', borderRadius: 4, background: 'var(--bg1)', color: 'var(--t2)', border: '1px solid var(--bd)', cursor: 'pointer', fontSize: 13, fontWeight: 500 }}>
             <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            내보내기
+            PDF 다운로드
           </button>
         </div>
       </div>
