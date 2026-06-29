@@ -1,5 +1,7 @@
 // ── Dummy Data ─────────────────────
 
+const _managerNames = ['김선생','이선생','박선생','최선생','정선생','강선생','조선생','윤선생','임선생','한선생'];
+
 function _gen(schools) {
   const groups = [];
   let id = 1;
@@ -19,6 +21,7 @@ function _gen(schools) {
           status: 'active',
           updatedAt: `2026-03-${String(1 + seed % 16).padStart(2, '0')}`,
           schoolId: s.schoolId,
+          manager: _managerNames[seed % _managerNames.length],
         });
       }
     }
@@ -127,11 +130,19 @@ const _schools = [
   { schoolId:'s98',  name:'안동중학교',        type:'중학교',   status:'active',   address:'경북 안동시 웅부로 77',               manager:'라민준', loginId:'andong98',     email:'andong@edu.kr',     contact:'054-333-9999',  schoolCode:'9021788', createdAt:'2026.01.04. 오후 1:00' },
   { schoolId:'s99',  name:'제주고등학교',      type:'고등학교', status:'active',   address:'제주시 신대로 99',                    manager:'문지수', loginId:'jeju99',       email:'jeju@edu.kr',       contact:'064-111-8888',  schoolCode:'9101799', createdAt:'2026.01.06. 오전 10:00' },
   { schoolId:'s100', name:'서귀포초등학교',    type:'초등학교', status:'active',   address:'서귀포시 중정로 11',                  manager:'추다은', loginId:'seogwipo100',  email:'seogwipo@edu.kr',   contact:'064-222-9999',  schoolCode:'9111800', createdAt:'2026.01.08. 오후 2:00' },
+  { schoolId:'s101', name:'천안중학교',        type:'중학교',   status:'active',   address:'충남 천안시 동남구 중앙로 22',          manager:'오다인', loginId:'cheonan101',   email:'cheonan@edu.kr',    contact:'041-111-2222',  schoolCode:'9811811', createdAt:'2026.01.10. 오전 9:00' },
+  { schoolId:'s102', name:'아산고등학교',      type:'고등학교', status:'active',   address:'충남 아산시 번영로 55',               manager:'기민석', loginId:'asan102',      email:'asan@edu.kr',       contact:'041-222-3333',  schoolCode:'9821822', createdAt:'2026.01.12. 오후 1:00' },
+  { schoolId:'s103', name:'청주중학교',        type:'중학교',   status:'active',   address:'충북 청주시 상당구 상당로 77',          manager:'노지원', loginId:'cheongju103',  email:'cheongju@edu.kr',   contact:'043-111-2223',  schoolCode:'9711833', createdAt:'2026.01.14. 오전 10:00' },
 ];
 
 export const DUMMY = {
   schools: _schools,
-  groups: _gen(_schools),
+  groups: [
+    ..._gen(_schools),
+    { groupId:'gx1', name:'컴퓨터실',   studentCount:28, deviceCount:28, policyCount:1, pauseStatus:'normal', status:'active',   updatedAt:'2026-03-10', schoolId:'s1' },
+    { groupId:'gx2', name:'도서관',     studentCount:15, deviceCount:15, policyCount:0, pauseStatus:'normal', status:'active',   updatedAt:'2026-03-12', schoolId:'s2' },
+    { groupId:'gx3', name:'방과후교실', studentCount:20, deviceCount:18, policyCount:1, pauseStatus:'normal', status:'inactive', updatedAt:'2026-02-20', schoolId:'s3' },
+  ],
   devices: [
     { deviceId:'d1',  name:'iPad-001', identifier:'A1B2C3D4E5', groupId:'g1', groupName:'학동중학교',   status:'online',  policyStatus:'applied', lastContact:'2026-03-17 14:30', model:'iPad 10th Gen', os:'iOS' },
     { deviceId:'d2',  name:'iPad-002', identifier:'B2C3D4E5F6', groupId:'g1', groupName:'학동중학교',   status:'online',  policyStatus:'applied', lastContact:'2026-03-17 14:28', model:'iPad 10th Gen', os:'iOS' },

@@ -37,35 +37,35 @@ function SvgIcon({ paths }) {
 }
 
 const MENU = [
-  { id: 'dashboard',        icon: 'dashboard',        label: '대시보드',        path: '/',                 common: true  },
+  { id: 'dashboard',        icon: 'dashboard',        label: '대시보드',        short: '홈',       path: '/',                 common: true  },
   { section: '운영 관리' },
-  { id: 'groups',           icon: 'groups',           label: '기관 관리',       path: '/groups',           common: false },
-  { id: 'classes',          icon: 'classes',          label: '그룹 관리',       path: '/classes',          common: true  },
-  { id: 'students',         icon: 'students',         label: '학생 관리',       path: '/students',         common: true  },
-  { id: 'devices',          icon: 'devices',          label: '단말기 관리',     path: '/devices',          common: true  },
-  { id: 'policies',         icon: 'policies',         label: '정책 관리',       path: '/policies',         common: false },
+  { id: 'groups',           icon: 'groups',           label: '기관 관리',       short: '기관',     path: '/groups',           common: false },
+  { id: 'classes',          icon: 'classes',          label: '그룹 관리',       short: '그룹',     path: '/classes',          common: true  },
+  { id: 'students',         icon: 'students',         label: '학생 관리',       short: '학생',     path: '/students',         common: true  },
+  { id: 'devices',          icon: 'devices',          label: '단말기 관리',     short: '단말기',   path: '/devices',          common: true  },
+  { id: 'policies',         icon: 'policies',         label: '정책 관리',       short: '정책',     path: '/policies',         common: false },
   { section: '모니터링' },
-  { id: 'detections',       icon: 'detections',       label: '탐지 현황',       path: '/detections',       common: true  },
-  { id: 'reports',          icon: 'reports',          label: '보고서',          path: '/reports',          common: true  },
+  { id: 'detections',       icon: 'detections',       label: '탐지 현황',       short: '탐지',     path: '/detections',       common: true  },
+  { id: 'reports',          icon: 'reports',          label: '보고서',          short: '보고서',   path: '/reports',          common: true  },
   { section: '직원 관리' },
-  { id: 'users',            icon: 'users',            label: '계정 현황',       path: '/users',            common: true  },
+  { id: 'users',            icon: 'users',            label: '계정 현황',       short: '계정',     path: '/users',            common: true  },
   { section: '설정' },
-  { id: 'licenses',         icon: 'licenses',         label: '라이선스',        path: '/licenses',         common: true  },
-  { id: 'policy-settings',  icon: 'policy-settings',  label: '정책 설정',       path: '/policy-settings',  common: false, isNew: true },
-  { id: 'account',          icon: 'account',          label: '내 계정',         path: '/account',          common: true  },
+  { id: 'licenses',         icon: 'licenses',         label: '라이선스',        short: '라이선스', path: '/licenses',         common: true  },
+  { id: 'policy-settings',  icon: 'policy-settings',  label: '정책 설정',       short: '정책설정', path: '/policy-settings',  common: false, isNew: true },
+  { id: 'account',          icon: 'account',          label: '내 계정',         short: '내계정',   path: '/account',          common: true  },
   { section: '운영 설정' },
-  { id: 'detection-policy', icon: 'detection-policy', label: '예외 서비스 관리', path: '/detection-policy', common: true  },
-  { id: 'whitelist',        icon: 'whitelist',        label: '화이트리스트 관리', path: '/whitelist',       common: true  },
-  { id: 'blacklist',        icon: 'blacklist',        label: '블랙리스트 관리', path: '/blacklist',        common: true  },
+  { id: 'detection-policy', icon: 'detection-policy', label: '예외 서비스 관리', short: '예외서비스', path: '/detection-policy', common: true  },
+  { id: 'whitelist',        icon: 'whitelist',        label: '화이트리스트 관리', short: '화이트',  path: '/whitelist',       common: true  },
+  { id: 'blacklist',        icon: 'blacklist',        label: '블랙리스트 관리', short: '블랙',     path: '/blacklist',        common: true  },
   { section: '관리자 전용' },
-  { id: 'audit-logs',       icon: 'audit-logs',       label: '감사 로그',       path: '/audit-logs',       common: true,  isSystem: true },
-  { id: 'app-versions',     icon: 'app-versions',     label: '앱 버전 관리',    path: '/app-versions',     common: true,  isSystem: true },
-  { id: 'valid-urls',       icon: 'urls',             label: '검증 URL 현황',   path: '/valid-urls',       common: false, isSystem: true },
+  { id: 'audit-logs',       icon: 'audit-logs',       label: '감사 로그',       short: '감사로그', path: '/audit-logs',       common: true,  isSystem: true },
+  { id: 'app-versions',     icon: 'app-versions',     label: '앱 버전 관리',    short: '앱버전',   path: '/app-versions',     common: true,  isSystem: true },
+  { id: 'valid-urls',       icon: 'urls',             label: '검증 URL 현황',   short: 'URL',      path: '/valid-urls',       common: false, isSystem: true },
   { section: '참고자료' },
-  { id: 'components',      icon: 'components',       label: '컴포넌트 모음',   path: '/components',       common: true },
-  { id: 'table-guide',     icon: 'reports',          label: '기본 레이아웃',   path: '/components/table', common: true },
-  { id: 'image-guide',     icon: 'reports',          label: '이미지 레이아웃', path: '/components/image', common: true },
-  { id: 'tab-guide',       icon: 'reports',          label: '탭 레이아웃',     path: '/components/tab',   common: true },
+  { id: 'components',      icon: 'components',       label: '컴포넌트 모음',   short: '컴포넌트', path: '/components',       common: true },
+  { id: 'table-guide',     icon: 'reports',          label: '기본 레이아웃',   short: '기본',     path: '/components/table', common: true },
+  { id: 'image-guide',     icon: 'reports',          label: '이미지 레이아웃', short: '이미지',   path: '/components/image', common: true },
+  { id: 'tab-guide',       icon: 'reports',          label: '탭 레이아웃',     short: '탭',       path: '/components/tab',   common: true },
 ];
 
 export default function Sidebar({ mobileOpen, onMobileClose }) {
@@ -85,14 +85,21 @@ export default function Sidebar({ mobileOpen, onMobileClose }) {
   return (
     <div className={`sb${collapsed ? ' collapsed' : ''}${mobileOpen ? ' mobile-open' : ''}`}>
       {/* Logo */}
-      <div className="sb-h" onClick={() => handleNavigate('/')} style={{ cursor: 'pointer' }}>
-        <div className="sb-logo-row">
+      <div className="sb-h" style={{ cursor: 'pointer' }}>
+        <div className="sb-logo-row" onClick={() => handleNavigate('/')}>
           <div className="sb-logo-icon">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/symbol.png" alt="symbol" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 7 }} />
           </div>
           <div className="sb-logo-text">Meercatch Manager</div>
         </div>
+        <button
+          className="sb-toggle"
+          onClick={e => { e.stopPropagation(); setCollapsed(c => !c); }}
+          style={{ marginLeft: 'auto', flexShrink: 0 }}
+        >
+          {collapsed ? '▶' : '◀'}
+        </button>
       </div>
 
       {/* 학년도 / 학교 선택 */}
@@ -148,6 +155,7 @@ export default function Sidebar({ mobileOpen, onMobileClose }) {
             <div key={item.id} className={`ni${isActive ? ' a' : ''}`} onClick={() => handleNavigate(item.path)}>
               <span className="ic"><SvgIcon paths={IC[item.icon]} /></span>
               <span className="ni-txt">{item.label}</span>
+              <span className="ni-short">{item.short}</span>
               {!collapsed && item.isNew && (
                 <span style={{ fontSize: 10, fontWeight: 700, background: 'rgba(239,68,68,0.2)', color: '#f87171', padding: '1px 5px', borderRadius: 3, marginLeft: 'auto', flexShrink: 0 }}>NEW</span>
               )}
@@ -203,11 +211,6 @@ export default function Sidebar({ mobileOpen, onMobileClose }) {
         </div>
       </div>
 
-      <div className="sb-collapse-btn">
-        <button className="sb-toggle" onClick={() => setCollapsed(c => !c)}>
-          {collapsed ? '▶' : '◀'}
-        </button>
-      </div>
     </div>
   );
 }

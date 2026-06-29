@@ -61,6 +61,94 @@ function SingleDayPicker({ value, onChange, onClose }) {
   )
 }
 
+/* 검색 가능한 필터 칩 */
+function SearchableFilterChip({ label, value, values, onSelect, onRemove }) {
+  const [open, setOpen] = useState(false)
+  const [search, setSearch] = useState('')
+  const ref = useRef(null)
+  const inputRef = useRef(null)
+
+  useEffect(() => {
+    function handleClick(e) {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [])
+
+  useEffect(() => {
+    if (open) { setSearch(''); setTimeout(() => inputRef.current?.focus(), 0) }
+  }, [open])
+
+  const filtered = values.filter(v => v.toLowerCase().includes(search.toLowerCase()))
+
+  return (
+    <div ref={ref} style={{ position: 'relative' }}>
+      <span
+        onClick={() => setOpen(o => !o)}
+        style={{
+          display: 'flex', alignItems: 'center', gap: 5,
+          padding: '0 10px', fontSize: 12, borderRadius: 4, height: 31,
+          border: '1px solid var(--bd)', background: '#fff',
+          cursor: 'pointer', userSelect: 'none', boxSizing: 'border-box',
+        }}
+      >
+        <span style={{ color: 'var(--t3)' }}>{label}</span>
+        {value && <span style={{ color: 'var(--t1)' }}>{value}</span>}
+        <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" style={{ marginLeft: 2, color: 'var(--t3)' }}>
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+        <span onClick={e => { e.stopPropagation(); onRemove() }} style={{ marginLeft: 2, color: 'var(--t3)', fontSize: 14, lineHeight: 1 }}>×</span>
+      </span>
+
+      {open && (
+        <div style={{
+          position: 'absolute', top: 'calc(100% + 4px)', left: 0, zIndex: 400,
+          background: 'var(--bg1)', border: '1px solid var(--bd)',
+          borderRadius: 4, boxShadow: '0 6px 20px rgba(0,0,0,0.2)',
+          minWidth: 200, overflow: 'hidden',
+        }}>
+          <div style={{ padding: '8px 10px', borderBottom: '1px solid var(--bd)' }}>
+            <input
+              ref={inputRef}
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="검색..."
+              style={{
+                width: '100%', fontSize: 12, padding: '5px 8px', boxSizing: 'border-box',
+                border: '1px solid var(--bd)', borderRadius: 4, outline: 'none',
+                background: 'var(--bg2)', color: 'var(--t1)',
+              }}
+            />
+          </div>
+          <div style={{ maxHeight: 200, overflowY: 'auto' }}>
+            {filtered.length === 0
+              ? <div style={{ padding: '10px 14px', fontSize: 12, color: 'var(--t3)' }}>검색 결과 없음</div>
+              : filtered.map(v => (
+                <div
+                  key={v}
+                  onClick={() => { onSelect(v); setOpen(false) }}
+                  style={{
+                    padding: '9px 14px', fontSize: 13, cursor: 'pointer',
+                    color: value === v ? '#f97316' : 'var(--t1)',
+                    fontWeight: value === v ? 600 : 400,
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'var(--bg2)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                >
+                  {v}
+                  {value === v && <svg width="13" height="13" fill="none" stroke="#f97316" strokeWidth="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>}
+                </div>
+              ))
+            }
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 /* 드롭다운을 가진 필터 칩 */
 function FilterChip({ chip, onSelect, onRemove, autoOpen, filterDefs }) {
   const [open, setOpen] = useState(false)
@@ -350,56 +438,28 @@ function Checkbox({ checked, indeterminate, onChange, onClick, disabled }) {
 }
 
 function KebabMenu({ row }) {
-  const [open, setOpen] = useState(false)
-  const ref = useRef(null)
-
-  useEffect(() => {
-    function handleClick(e) {
-      if (ref.current && !ref.current.contains(e.target)) setOpen(false)
-    }
-    document.addEventListener('mousedown', handleClick)
-    return () => document.removeEventListener('mousedown', handleClick)
-  }, [])
-
-  const menuItem = (label, color, onClick) => (
-    <div
-      onClick={() => { onClick?.(); setOpen(false) }}
-      style={{ padding: '8px 10px', fontSize: 13, cursor: 'pointer', color: color || 'var(--t1)' }}
-      onMouseEnter={e => e.currentTarget.style.background = 'var(--bg2)'}
-      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-    >{label}</div>
-  )
-
   return (
-    <div ref={ref} style={{ position: 'relative', display: 'flex', justifyContent: 'center' }} onClick={e => e.stopPropagation()}>
+    <div style={{ display: 'flex', justifyContent: 'center' }} onClick={e => e.stopPropagation()}>
       <button
-        onClick={() => setOpen(o => !o)}
-        style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid transparent', borderRadius: 4, background: 'none', cursor: 'pointer', color: 'var(--t3)', fontSize: 16, letterSpacing: 1 }}
-        onMouseEnter={e => { e.currentTarget.style.border = '1px solid var(--bd)'; e.currentTarget.style.color = 'var(--t1)' }}
-        onMouseLeave={e => { e.currentTarget.style.border = '1px solid transparent'; e.currentTarget.style.color = 'var(--t3)' }}
-      >···</button>
-
-      {open && (
-        <div style={{
-          position: 'absolute', top: 'calc(100% + 4px)', right: 0, zIndex: 500,
-          background: 'var(--bg1)', border: '1px solid var(--bd)',
-          borderRadius: 4, boxShadow: '0 6px 20px rgba(0,0,0,0.15)',
-          width: 'max-content', overflow: 'hidden', textAlign: 'left',
-        }}>
-          {menuItem('수정')}
-          {menuItem('삭제', '#ef4444')}
-        </div>
-      )}
+        onClick={() => {}}
+        style={{ padding: '4px 10px', fontSize: 12, borderRadius: 4, border: '1px solid #ef4444', background: 'none', color: '#ef4444', cursor: 'pointer', whiteSpace: 'nowrap' }}
+        onMouseEnter={e => { e.currentTarget.style.background = '#ef4444'; e.currentTarget.style.color = '#fff' }}
+        onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = '#ef4444' }}
+      >등록해제</button>
     </div>
   )
 }
 
 function DetailPanel({ row }) {
   const { closePanel } = usePanel()
+  const groupMap = Object.fromEntries(DUMMY.groups.map(g => [g.groupId, g.name]))
+  const studentByDevice = Object.fromEntries(DUMMY.students.filter(s => s.deviceId).map(s => [s.deviceId, s]))
+  const student = studentByDevice[row.deviceId]
+
   const field = (label, value) => (
     <div style={{ display: 'flex', alignItems: 'flex-start', padding: '11px 0', borderBottom: '1px solid var(--bd)' }}>
       <div style={{ width: 90, flexShrink: 0, fontSize: 12, color: 'var(--t3)', fontWeight: 500 }}>{label}</div>
-      <div style={{ flex: 1, fontSize: 13, color: 'var(--t1)' }}>{value || '-'}</div>
+      <div style={{ flex: 1, fontSize: 13, color: 'var(--t1)' }}>{value ?? '-'}</div>
     </div>
   )
   return (
@@ -407,13 +467,13 @@ function DetailPanel({ row }) {
       title="단말기 상세"
       body={
         <div style={{ padding: '8px 0' }}>
-          {field('단말 이름', row.name)}
-          {field('식별자', row.identifier)}
+          {field('단말기 ID', row.name)}
+          {field('UUID', <span style={{ fontSize: 12, color: '#64748b' }}>{row.identifier}</span>)}
           {field('OS', row.os)}
-          {field('모델', row.model)}
-          {field('그룹', row.groupName)}
-          {field('정책 상태', row.policyStatus === 'applied' ? '적용됨' : '대기중')}
-          {field('상태', <StatusBadge status={row.status} />)}
+          {field('상태', <StatusBadge status={row.policyStatus === 'applied' ? 'registered' : 'unknown'} />)}
+          {field('기관이름', row.groupName)}
+          {field('그룹', groupMap[row.groupId] || '-')}
+          {field('학생정보', student ? `${student.num}번 ${student.name}` : '-')}
           {field('최근 접속', fmtDT(row.lastContact))}
         </div>
       }
@@ -440,10 +500,9 @@ export default function DeviceList() {
   const [search, setSearch] = useState('')
   const [query, setQuery] = useState('')
   const [status, setStatus] = useState('전체')
-  const [dateFrom, setDateFrom] = useState('')
-  const [dateTo, setDateTo] = useState('')
+  const [yearFilter, setYearFilter] = useState('2026')
+  const [schoolFilter, setSchoolFilter] = useState('')
   const [chips, setChips] = useState([])
-  const [checked, setChecked] = useState(new Set())
   const [selectedId, setSelectedId] = useState(null)
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(PAGE_SIZE)
@@ -478,10 +537,11 @@ export default function DeviceList() {
   }
 
   const filtered = scopedDevices.filter(d => {
-    if (status !== '전체' && ((status === '활성' && d.status !== 'online') || (status === '비활성' && d.status !== 'offline'))) return false
+    if (status === '등록완료' && d.policyStatus !== 'applied') return false
+    if (status === '알수없음' && d.policyStatus === 'applied') return false
+    if (yearFilter && !d.lastContact.startsWith(yearFilter)) return false
+    if (schoolFilter && d.groupName !== schoolFilter) return false
     if (query && !d.name.toLowerCase().includes(query.toLowerCase()) && !d.identifier.toLowerCase().includes(query.toLowerCase())) return false
-    if (dateFrom && d.lastContact < dateFrom) return false
-    if (dateTo && d.lastContact > dateTo) return false
     for (const chip of chips) {
       const def = FILTER_DEFS[chip.label]
       if (!def) continue
@@ -521,63 +581,39 @@ export default function DeviceList() {
     openPanel(<DetailPanel row={row} />)
   }
 
+  const groupMap = Object.fromEntries(DUMMY.groups.map(g => [g.groupId, g.name]))
+  const studentByDevice = Object.fromEntries(
+    DUMMY.students.filter(s => s.deviceId).map(s => [s.deviceId, s])
+  )
+
   const COLS_ALL = [
-    { key: 'name',         label: '단말 이름' },
-    { key: 'identifier',   label: '식별자' },
+    { key: 'name',         label: '단말기 ID' },
+    { key: 'identifier',   label: 'UUID' },
     { key: 'os',           label: 'OS' },
-    { key: 'model',        label: '모델' },
-    { key: 'groupName',    label: '그룹' },
-    { key: 'policyStatus', label: '정책 상태' },
-    { key: 'status',       label: '상태' },
+    { key: 'policyStatus', label: '상태' },
+    { key: 'groupName',    label: '기관이름' },
+    { key: '_group',       label: '그룹' },
+    { key: '_student',     label: '학생정보' },
     { key: 'lastContact',  label: '최근 접속' },
   ]
 
   const COLS = [
-    { key: '_check', label: () => {
-        const allChecked = rows.length > 0 && rows.every(r => checked.has(r.deviceId))
-        const someChecked = rows.some(r => checked.has(r.deviceId))
-        return (
-          <Checkbox
-            checked={allChecked}
-            indeterminate={someChecked && !allChecked}
-            onChange={() => setChecked(prev => {
-              const next = new Set(prev)
-              if (allChecked) rows.forEach(r => next.delete(r.deviceId))
-              else rows.forEach(r => next.add(r.deviceId))
-              return next
-            })}
-          />
-        )
-      }, width: 40, align: 'center', render: (_, row) => (
-        <Checkbox
-          checked={checked.has(row.deviceId)}
-          onChange={() => {}}
-          onClick={e => { e.stopPropagation(); setChecked(prev => { const next = new Set(prev); next.has(row.deviceId) ? next.delete(row.deviceId) : next.add(row.deviceId); return next }) }}
-        />
-      )},
-    { key: 'no', label: 'No.', width: 56, align: 'center', render: (_, r, i) => <span style={{ color: 'var(--t3)', fontSize: 12 }}>{(page - 1) * pageSize + i + 1}</span> },
-    { key: 'name',         label: '단말 이름',  sortable: true },
-    { key: 'identifier',   label: '식별자',     render: v => <span style={{ fontFamily: 'inherit', fontSize: 12, color: '#64748b' }}>{v}</span> },
+    { key: 'no', label: 'No.', width: 56, align: 'center', render: (_, r, i) => <span style={{ color: 'var(--t3)', fontSize: 12 }}>{total - ((page - 1) * pageSize + i)}</span> },
+    { key: 'name',         label: '단말기 ID',  sortable: true },
+    { key: 'identifier',   label: 'UUID',       render: v => <span style={{ fontFamily: 'inherit', fontSize: 12, color: '#64748b' }}>{v}</span> },
     { key: 'os',           label: 'OS',         width: '110px', sortable: true },
-    { key: 'model',        label: '모델',       width: '120px', sortable: true },
-    { key: 'groupName',    label: '그룹',       sortable: true },
-    { key: 'policyStatus', label: '정책 상태',  render: v => (
-        <span style={{
-          padding: '2px 8px', fontSize: 11, borderRadius: 4, fontWeight: 500,
-          background: v === 'applied' ? 'rgba(34,197,94,0.1)' : 'rgba(249,115,22,0.1)',
-          color: v === 'applied' ? '#16a34a' : '#ea580c',
-          border: `1px solid ${v === 'applied' ? 'rgba(34,197,94,0.25)' : 'rgba(249,115,22,0.25)'}`,
-        }}>{v === 'applied' ? '적용됨' : '대기중'}</span>
-      )},
-    { key: 'status',       label: '상태',       render: v => <StatusBadge status={v} /> },
+    { key: 'policyStatus', label: '상태',       render: v => <StatusBadge status={v === 'applied' ? 'registered' : 'unknown'} /> },
+    { key: 'groupName',    label: '기관이름',   sortable: true },
+    { key: '_group',       label: '그룹',       render: (_, row) => <span>{groupMap[row.groupId] || '-'}</span> },
+    { key: '_student',     label: '학생정보',   render: (_, row) => { const s = studentByDevice[row.deviceId]; return s ? <span>{s.num}번 {s.name}</span> : <span style={{ color: 'var(--t3)' }}>-</span> } },
     { key: 'lastContact',  label: '최근 접속',  sortable: true, nowrap: true, render: v => fmtDT(v) },
     { key: '_action',      label: '',           width: 48, align: 'center', render: (_, row) => <KebabMenu row={row} /> },
   ].filter(c => !hiddenCols.includes(c.key))
 
   const STATUS_TABS = [
-    { label: '전체',   value: '전체',   count: scopedDevices.length },
-    { label: '활성',   value: '활성',   count: scopedDevices.filter(d => d.status === 'online').length },
-    { label: '비활성',  value: '비활성',  count: scopedDevices.filter(d => d.status === 'offline').length },
+    { label: '전체',    value: '전체',    count: scopedDevices.length },
+    { label: '등록완료', value: '등록완료', count: scopedDevices.filter(d => d.policyStatus === 'applied').length },
+    { label: '알수없음', value: '알수없음', count: scopedDevices.filter(d => d.policyStatus !== 'applied').length },
   ]
 
   return (
@@ -591,30 +627,7 @@ export default function DeviceList() {
             단말기 관리 <span style={{ fontSize: 16, fontWeight: 400, color: 'var(--t3)', marginLeft: 4 }}>{total}</span>
           </h2>
         </div>
-        <div style={{ display: 'flex', gap: 8, paddingTop: 4 }}>
-          {[
-            { icon: <path d="M12 20V8m0 0l-4 4m4-4l4 4M5 4h14"/>, label: '가져오기' },
-            { icon: <path d="M12 4v12m0 0l-4-4m4 4l4-4M5 20h14"/>, label: '내보내기' },
-          ].map(({ icon, label }) => (
-            <button
-              key={label}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 14px', borderRadius: 4, background: 'var(--bg1)', color: 'var(--t2)', border: '1px solid var(--bd)', cursor: 'pointer', fontSize: 13, fontWeight: 500, transition: 'background 0.15s, color 0.15s' }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg3)'; e.currentTarget.style.color = 'var(--t1)' }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'var(--bg1)'; e.currentTarget.style.color = 'var(--t2)' }}
-            >
-              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">{icon}</svg>
-              {label}
-            </button>
-          ))}
-          <button
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 14px', borderRadius: 4, background: '#111827', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 500, transition: 'background 0.15s' }}
-            onMouseEnter={e => e.currentTarget.style.background = '#1f2937'}
-            onMouseLeave={e => e.currentTarget.style.background = '#111827'}
-          >
-            <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-            단말기 추가
-          </button>
-        </div>
+        <div />
       </div>
 
       {/* 필터 바 */}
@@ -647,11 +660,25 @@ export default function DeviceList() {
         {/* 구분선 */}
         <div style={{ width: 1, height: 20, background: 'var(--bd)', margin: '0 4px' }} />
 
-        {/* 날짜 피커 */}
-        <DateRangePicker
-          from={dateFrom}
-          to={dateTo}
-          onChange={({ from, to }) => { setDateFrom(from); setDateTo(to); setPage(1) }}
+        {/* 학년도 칩 (비활성) */}
+        <span style={{
+          display: 'inline-flex', alignItems: 'center', gap: 5,
+          padding: '0 10px', fontSize: 12, borderRadius: 4, height: 31,
+          border: '1px solid var(--bd)', background: 'var(--bg2)',
+          color: 'var(--t3)', userSelect: 'none', boxSizing: 'border-box',
+          cursor: 'not-allowed', opacity: 0.6,
+        }}>
+          <span>학년도</span>
+          <span style={{ color: 'var(--t2)' }}>{yearFilter}</span>
+        </span>
+
+        {/* 기관이름 칩 */}
+        <SearchableFilterChip
+          label="기관이름"
+          value={schoolFilter}
+          values={[...new Set(DUMMY.devices.map(d => d.groupName))].sort()}
+          onSelect={val => { setSchoolFilter(val); setPage(1) }}
+          onRemove={() => { setSchoolFilter(''); setPage(1) }}
         />
 
         {/* 구분선 */}
@@ -673,7 +700,7 @@ export default function DeviceList() {
         <AddFilterButton
           activeLabels={chips.map(c => c.label)}
           onAdd={addChip}
-          onClearAll={() => { setSearch(''); setQuery(''); setStatus('전체'); setDateFrom(''); setDateTo(''); setChips([]); setPage(1) }}
+          onClearAll={() => { setSearch(''); setQuery(''); setStatus('전체'); setYearFilter('2026'); setSchoolFilter(''); setChips([]); setPage(1) }}
           filterDefs={FILTER_DEFS}
         />
 
@@ -729,36 +756,6 @@ export default function DeviceList() {
         sortKey={sortKey}
         sortDir={sortDir}
         onSort={handleSort}
-        actionBar={checked.size > 0 && (
-          <>
-            <span style={{ fontSize: 12, color: 'var(--t2)', fontWeight: 600 }}>{checked.size}개 선택됨</span>
-            <div style={{ width: 1, height: 12, background: 'var(--bd)' }} />
-            {[
-              { label: '내보내기', icon: <path d="M12 4v12m0 0l-4-4m4 4l4-4M5 20h14"/> },
-              { label: '삭제', icon: <><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></> },
-            ].map(({ label, icon }) => (
-              <button key={label} style={{
-                display: 'inline-flex', alignItems: 'center', gap: 5,
-                padding: '4px 10px', fontSize: 12, borderRadius: 4,
-                border: '1px solid var(--bd)', background: 'transparent',
-                color: label === '삭제' ? '#ef4444' : 'var(--t2)',
-                cursor: 'pointer', transition: 'background 0.15s',
-              }}
-                onMouseEnter={e => e.currentTarget.style.background = 'var(--bg2)'}
-                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-              >
-                <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">{icon}</svg>
-                {label}
-              </button>
-            ))}
-            <button
-              onClick={() => setChecked(new Set())}
-              style={{ fontSize: 12, color: 'var(--t3)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px' }}
-              onMouseEnter={e => e.currentTarget.style.color = 'var(--t1)'}
-              onMouseLeave={e => e.currentTarget.style.color = 'var(--t3)'}
-            >취소</button>
-          </>
-        )}
         emptyContext={{
           query,
           chips,

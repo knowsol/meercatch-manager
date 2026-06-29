@@ -16,10 +16,21 @@ interface ScreenSpec {
     status: SpecStatus;
     /** 핀 좌표 기준 정렬 방식 (미설정 시 전역 설정 기준) */
     markerAlign?: MarkerAlign | null;
+    /** 비율 기반 화면의 기준 가로 해상도 (px). 설정 시 핀 좌표가 이 너비 기준으로 스케일됨 */
+    baseWidth?: number | null;
+    folderId?: string | null;
+    sortOrder?: number;
     createdBy?: string | null;
     updatedBy?: string | null;
     createdAt?: string | null;
     updatedAt?: string | null;
+}
+/** 화면 목록 폴더 */
+interface ScreenFolder {
+    id: string;
+    name: string;
+    sortOrder: number;
+    createdAt?: string | null;
 }
 /** 화면 요소(data-spec-id)에 연결된 Page Spec */
 interface PageSpec {
@@ -162,6 +173,18 @@ interface StorageAdapter {
         updatedBy?: string | null;
     }) => Promise<ScreenSpec>;
     deleteScreenSpec?: (pageId: string) => Promise<void>;
+    loadFolders?: () => Promise<ScreenFolder[]>;
+    createFolder?: (name: string) => Promise<ScreenFolder>;
+    updateFolder?: (id: string, patch: {
+        name: string;
+    }) => Promise<ScreenFolder>;
+    deleteFolder?: (id: string) => Promise<void>;
+    reorderFolders?: (ids: string[]) => Promise<void>;
+    reorderScreens?: (items: Array<{
+        pageId: string;
+        folderId: string | null;
+        sortOrder: number;
+    }>) => Promise<void>;
     savePageSpec?: (pageId: string, elementId: string, data: {
         elementLabel?: string | null;
         title?: string;
@@ -205,14 +228,20 @@ interface Props$7 {
     overlayMode?: boolean;
     pageWrapper?: HTMLElement;
     serviceId?: string;
+    /** SB 모드 경계를 적용할 외부 DOM 요소 (예: document.querySelector('.app')) */
+    sbConstraintTarget?: HTMLElement | null;
 }
-declare function SpecBridgeAnnotation({ pageId, enabled: initialEnabled, storage, onNavigate, children, overlayMode, pageWrapper, serviceId, }: Props$7): react_jsx_runtime.JSX.Element;
+declare function SpecBridgeAnnotation({ pageId, enabled: initialEnabled, storage, onNavigate, children, overlayMode, pageWrapper, serviceId, sbConstraintTarget, }: Props$7): react_jsx_runtime.JSX.Element;
 
+/** sb = 설정의 기준 너비 적용 / pc·tablet·mobile = 현재 뷰포트 기준 (스케일 없음) */
+type BaseWidthMode = 'sb' | 'pc' | 'tablet' | 'mobile';
 interface SpecBridgeSettings {
     /** 패널 표시 방식: overlay = 콘텐츠 위에 떠 있음 / push = 콘텐츠를 오른쪽으로 밀어냄 */
     panelMode: PanelMode;
     /** 핀 좌표 기준 정렬 방식 (전역) */
     markerAlign: MarkerAlign;
+    /** 뷰포트 모드: sb = 설정 기준 너비 스케일 적용, pc/tablet/mobile = 현재 뷰포트 기준 */
+    baseWidthMode: BaseWidthMode;
 }
 declare function useSettings(): {
     settings: SpecBridgeSettings;
@@ -250,8 +279,14 @@ interface Props$6 {
     /** 설정 (패널 모드) */
     settings?: SpecBridgeSettings;
     onChangeSetting?: <K extends keyof SpecBridgeSettings>(key: K, value: SpecBridgeSettings[K]) => void;
+    /** 기준 너비 모드 */
+    baseWidthMode?: BaseWidthMode;
+    onBaseWidthModeChange?: (mode: BaseWidthMode) => void;
+    /** SB 기준 너비 (서버 저장) */
+    sbBaseWidth?: number | null;
+    onSbBaseWidthChange?: (v: number | null) => void;
 }
-declare function AnnotationToolbar({ enabled, onToggleEnabled, author, defaultLabelId, onSaveAuthor, adding, onToggleAdd, pinCount, showList, onToggleList, onExportJson, onExportMarkdown, labels, latestSdkVersion, onShowGuide, showLogoTip, onAddSpec, addingSpec, currentViewport, onViewportChange, settings, onChangeSetting, }: Props$6): react_jsx_runtime.JSX.Element;
+declare function AnnotationToolbar({ enabled, onToggleEnabled, author, defaultLabelId, onSaveAuthor, adding, onToggleAdd, pinCount, showList, onToggleList, onExportJson, onExportMarkdown, labels, latestSdkVersion, onShowGuide, showLogoTip, onAddSpec, addingSpec, onViewportChange, settings, onChangeSetting, baseWidthMode, onBaseWidthModeChange, sbBaseWidth, onSbBaseWidthChange, }: Props$6): react_jsx_runtime.JSX.Element;
 
 interface Props$5 {
     pin: Pin;
@@ -268,8 +303,11 @@ interface Props$5 {
     }) => void;
     onHoverEnter: (id: string) => void;
     onHoverLeave: (id: string) => void;
+    /** 비율 기반 화면의 기준 너비. 설정 시 pin.x/y를 현재 containerWidth 기준으로 스케일 */
+    baseWidth?: number | null;
+    containerWidth?: number;
 }
-declare function AnnotPin({ pin, num, label, layerId, align, isSelected, isHovered, onSelect, onMove, onHoverEnter, onHoverLeave, }: Props$5): react_jsx_runtime.JSX.Element;
+declare function AnnotPin({ pin, num, label, layerId, align, isSelected, isHovered, onSelect, onMove, onHoverEnter, onHoverLeave, baseWidth, containerWidth, }: Props$5): react_jsx_runtime.JSX.Element;
 
 interface Props$4 {
     pins: Pin[];
@@ -372,8 +410,10 @@ interface Props {
     onExportMarkdown?: () => void;
     defaultLabelId: string | null;
     onSaveAuthor: (name: string, labelId: string | null) => void;
+    sbBaseWidth?: number | null;
+    onSbBaseWidthChange?: (v: number | null) => void;
 }
-declare function SettingsPopover({ settings, onChangeSetting, author, labels, defaultLabelId, onSaveAuthor, onExportJson, onExportMarkdown }: Props): react_jsx_runtime.JSX.Element;
+declare function SettingsPopover({ settings, onChangeSetting, author, labels, defaultLabelId, onSaveAuthor, onExportJson, onExportMarkdown, sbBaseWidth, onSbBaseWidthChange }: Props): react_jsx_runtime.JSX.Element;
 
 /**
  * 기본 어댑터 — 브라우저 localStorage 사용 (오프라인/로컬 데모에 적합).

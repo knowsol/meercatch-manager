@@ -1,9 +1,6 @@
 import '../styles/global.css'
-import dynamic from 'next/dynamic'
 import Providers from '../components/Providers'
 import AuthGuard from '../components/AuthGuard'
-
-const SpecBridgeWrapper = dynamic(() => import('../components/SpecBridgeWrapper'), { ssr: false })
 
 export const metadata = {
   title: 'Meercat.ch - Manager',
@@ -16,9 +13,7 @@ export default function RootLayout({ children }) {
     <html lang="ko">
       <body>
         <Providers>
-          <SpecBridgeWrapper>
-            <AuthGuard>{children}</AuthGuard>
-          </SpecBridgeWrapper>
+          <AuthGuard>{children}</AuthGuard>
         </Providers>
       </body>
     </html>

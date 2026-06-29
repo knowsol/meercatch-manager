@@ -177,17 +177,27 @@ function ColToggle({ cols, hiddenCols, onToggle }) {
 // ── KebabMenu ─────────────────────────────────────────────────────────────────
 function KebabMenu({ items }) {
   const [open, setOpen] = useState(false)
+  const [pos, setPos] = useState({ top: 0, left: 0 })
   const ref = useRef(null)
+  const btnRef = useRef(null)
   useEffect(() => {
     const handler = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
   }, [])
+  function handleOpen(e) {
+    e.stopPropagation()
+    if (!open && btnRef.current) {
+      const rect = btnRef.current.getBoundingClientRect()
+      setPos({ top: rect.bottom + 4, left: rect.right - 120 })
+    }
+    setOpen(o => !o)
+  }
   return (
     <div ref={ref} style={{ position: 'relative', display: 'inline-block' }}>
-      <button onClick={e => { e.stopPropagation(); setOpen(o => !o) }} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px', fontSize: 16, color: 'var(--t3)' }}>⋯</button>
+      <button ref={btnRef} onClick={handleOpen} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px', fontSize: 16, color: 'var(--t3)' }}>⋯</button>
       {open && (
-        <div style={{ position: 'absolute', zIndex: 50, right: 0, top: '110%', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 4, boxShadow: '0 4px 16px rgba(0,0,0,.12)', minWidth: 120 }}>
+        <div style={{ position: 'fixed', top: pos.top, left: pos.left, zIndex: 9999, background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 4, boxShadow: '0 4px 16px rgba(0,0,0,.12)', minWidth: 120 }}>
           {items.map((item, i) => (
             <div key={i} onClick={e => { e.stopPropagation(); item.onClick(); setOpen(false) }} style={{ padding: '8px 14px', fontSize: 13, cursor: 'pointer', color: item.danger ? 'var(--red, #ef4444)' : 'var(--t1)' }}>{item.label}</div>
           ))}

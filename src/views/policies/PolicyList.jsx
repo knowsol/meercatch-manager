@@ -1,6 +1,7 @@
 'use client'
 import { useState, useRef, useEffect } from 'react'
 import Table, { EmptyState } from '../../components/common/Table'
+import { StatusBadge } from '../../components/common/Badge'
 import { usePanel } from '../../context/PanelContext'
 import Pagination from '../../components/common/Pagination'
 import DateRangePicker from '../../components/common/DateRangePicker'
@@ -340,7 +341,7 @@ export default function PolicyList() {
       <span style={{ fontSize: 13, color: '#374151' }}>{policyDetectSummary(r)}</span>
     )},
     { key: 'appliedCount', label: '적용 그룹', width: '90px', render: v => v + '개' },
-    { key: 'active',       label: '상태',      width: '80px', render: v => v ? '활성' : '비활성' },
+    { key: 'active',       label: '상태',      width: '80px', render: v => <StatusBadge status={v ? 'active' : 'inactive'} /> },
     { key: 'updatedAt',    label: '수정일',    render: v => fmtD(v) },
     { key: '_verdict',     label: '판정',      width: '80px', noSort: true, render: (_, r) => {
       const v = verdicts[r.policyId]

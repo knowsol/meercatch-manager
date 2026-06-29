@@ -340,7 +340,9 @@ function Checkbox({ checked, indeterminate, onChange, onClick, disabled }) {
 
 function KebabMenu({ row }) {
   const [open, setOpen] = useState(false)
+  const [pos, setPos] = useState({ top: 0, left: 0 })
   const ref = useRef(null)
+  const btnRef = useRef(null)
 
   useEffect(() => {
     function handleClick(e) {
@@ -349,6 +351,15 @@ function KebabMenu({ row }) {
     document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
   }, [])
+
+  function handleOpen(e) {
+    e.stopPropagation()
+    if (!open && btnRef.current) {
+      const rect = btnRef.current.getBoundingClientRect()
+      setPos({ top: rect.bottom + 4, left: rect.right - 120 })
+    }
+    setOpen(o => !o)
+  }
 
   const menuItem = (label, color, onClick) => (
     <div
@@ -362,7 +373,8 @@ function KebabMenu({ row }) {
   return (
     <div ref={ref} style={{ position: 'relative', display: 'flex', justifyContent: 'center' }} onClick={e => e.stopPropagation()}>
       <button
-        onClick={() => setOpen(o => !o)}
+        ref={btnRef}
+        onClick={handleOpen}
         style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid transparent', borderRadius: 4, background: 'none', cursor: 'pointer', color: 'var(--t3)', fontSize: 16, letterSpacing: 1 }}
         onMouseEnter={e => { e.currentTarget.style.border = '1px solid var(--bd)'; e.currentTarget.style.color = 'var(--t1)' }}
         onMouseLeave={e => { e.currentTarget.style.border = '1px solid transparent'; e.currentTarget.style.color = 'var(--t3)' }}
@@ -370,7 +382,7 @@ function KebabMenu({ row }) {
 
       {open && (
         <div style={{
-          position: 'absolute', top: 'calc(100% + 4px)', right: 0, zIndex: 500,
+          position: 'fixed', top: pos.top, left: pos.left, zIndex: 9999,
           background: 'var(--bg1)', border: '1px solid var(--bd)',
           borderRadius: 4, boxShadow: '0 6px 20px rgba(0,0,0,0.15)',
           width: 'max-content', overflow: 'hidden', textAlign: 'left',

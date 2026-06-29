@@ -2704,8 +2704,13 @@ function AnnotPin({
   onSelect,
   onMove,
   onHoverEnter,
-  onHoverLeave
+  onHoverLeave,
+  baseWidth,
+  containerWidth
 }) {
+  const scale = baseWidth && containerWidth ? containerWidth / baseWidth : 1;
+  const sx = pin.x * scale;
+  const sy = pin.y * scale;
   const color = label?.color ?? FALLBACK_LABEL_COLOR;
   const isResolved = pin.status === "resolved";
   const emphasized = isSelected || isHovered;
@@ -2749,16 +2754,17 @@ function AnnotPin({
     if (!container) return;
     const base = container.getBoundingClientRect();
     let moved = false;
-    const pinRawX = align === "center" ? pin.x + base.width / 2 : align === "right" ? base.width - pin.x : pin.x;
+    const pinRawX = align === "center" ? sx + base.width / 2 : align === "right" ? base.width - sx : sx;
     const startX = e.clientX - base.left - pinRawX;
-    const startY = e.clientY - base.top - pin.y;
+    const startY = e.clientY - base.top - sy;
     const onMoveHandler = (ev) => {
       moved = true;
       const newPx = ev.clientX - base.left - startX;
       const newPy = ev.clientY - base.top - startY;
+      const toStored = (v) => scale > 0 ? v / scale : v;
       onMove({
-        x: align === "center" ? Math.max(-base.width / 2, Math.min(base.width / 2, newPx - base.width / 2)) : align === "right" ? Math.max(0, Math.min(base.width, base.width - newPx)) : Math.max(0, Math.min(base.width, newPx)),
-        y: Math.max(0, Math.min(base.height, newPy))
+        x: align === "center" ? toStored(Math.max(-base.width / 2, Math.min(base.width / 2, newPx - base.width / 2))) : align === "right" ? toStored(Math.max(0, Math.min(base.width, base.width - newPx))) : toStored(Math.max(0, Math.min(base.width, newPx))),
+        y: toStored(Math.max(0, Math.min(base.height, newPy)))
       });
     };
     const onUp = () => {
@@ -2797,8 +2803,8 @@ function AnnotPin({
         onMouseLeave: () => onHoverLeave(pin.id),
         style: {
           position: "absolute",
-          ...align === "center" ? { left: `calc(50% + ${pin.x}px)` } : align === "right" ? { right: `${pin.x}px` } : { left: `${pin.x}px` },
-          top: `${pin.y}px`,
+          ...align === "center" ? { left: `calc(50% + ${sx}px)` } : align === "right" ? { right: `${sx}px` } : { left: `${sx}px` },
+          top: `${sy}px`,
           width: 28,
           height: 28,
           borderRadius: "80px 80px 80px 12px",
@@ -3016,17 +3022,19 @@ function ExportBtn({ label, icon, onClick }) {
 function SectionTitle({ children }) {
   return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { style: { fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,.3)", letterSpacing: ".5px", textTransform: "uppercase", marginBottom: 8, fontFamily: FONT_FAMILY }, children });
 }
-function SettingsPopover({ settings, onChangeSetting, author, labels, defaultLabelId, onSaveAuthor, onExportJson, onExportMarkdown }) {
+function SettingsPopover({ settings, onChangeSetting, author, labels, defaultLabelId, onSaveAuthor, onExportJson, onExportMarkdown, sbBaseWidth, onSbBaseWidthChange }) {
   const [open, setOpen] = (0, import_react3.useState)(false);
   const [nameInput, setNameInput] = (0, import_react3.useState)(author);
   const [selectedLabelId, setSelectedLabelId] = (0, import_react3.useState)(defaultLabelId);
+  const [sbWidthInput, setSbWidthInput] = (0, import_react3.useState)(() => sbBaseWidth != null ? String(sbBaseWidth) : "");
   const ref = (0, import_react3.useRef)(null);
   (0, import_react3.useEffect)(() => {
     if (open) {
       setNameInput(author);
       setSelectedLabelId(defaultLabelId);
+      setSbWidthInput(sbBaseWidth != null ? String(sbBaseWidth) : "");
     }
-  }, [open, author, defaultLabelId]);
+  }, [open, author, defaultLabelId, sbBaseWidth]);
   (0, import_react3.useEffect)(() => {
     if (!open) return;
     const handler = (e) => {
@@ -3304,6 +3312,81 @@ function SettingsPopover({ settings, onChangeSetting, author, labels, defaultLab
                 align
               );
             }) })
+          ] }),
+          onSbBaseWidthChange && /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(import_jsx_runtime5.Fragment, { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { style: { height: 1, background: "rgba(255,255,255,.07)" } }),
+            /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { style: { padding: "12px 14px" }, children: [
+              /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(SectionTitle, { children: "SB \uAE30\uC900 \uB108\uBE44" }),
+              /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { style: { display: "flex", gap: 6, alignItems: "center" }, children: [
+                /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+                  "input",
+                  {
+                    type: "number",
+                    min: 320,
+                    max: 3840,
+                    step: 1,
+                    value: sbWidthInput,
+                    onChange: (e) => setSbWidthInput(e.target.value),
+                    onKeyDown: (e) => {
+                      if (e.key === "Enter") {
+                        const n = parseInt(sbWidthInput, 10);
+                        onSbBaseWidthChange(n > 0 ? n : null);
+                      }
+                    },
+                    placeholder: "\uC608: 1440",
+                    style: {
+                      flex: 1,
+                      boxSizing: "border-box",
+                      background: "rgba(255,255,255,.06)",
+                      border: "1px solid rgba(255,255,255,.12)",
+                      borderRadius: 3,
+                      padding: "6px 9px",
+                      color: "#fff",
+                      fontSize: 12,
+                      fontFamily: FONT_FAMILY,
+                      outline: "none"
+                    },
+                    onFocus: (e) => {
+                      e.currentTarget.style.borderColor = "rgba(99,102,241,.5)";
+                    },
+                    onBlur: (e) => {
+                      e.currentTarget.style.borderColor = "rgba(255,255,255,.12)";
+                    }
+                  }
+                ),
+                /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { style: { fontSize: 10, color: "rgba(255,255,255,.3)", flexShrink: 0 }, children: "px" }),
+                /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+                  "button",
+                  {
+                    onClick: () => {
+                      const n = parseInt(sbWidthInput, 10);
+                      onSbBaseWidthChange(n > 0 ? n : null);
+                    },
+                    style: {
+                      padding: "5px 10px",
+                      borderRadius: 3,
+                      border: "none",
+                      background: "rgba(99,102,241,.65)",
+                      color: "#fff",
+                      fontSize: 11,
+                      fontWeight: 600,
+                      cursor: "pointer",
+                      fontFamily: FONT_FAMILY,
+                      flexShrink: 0,
+                      transition: "background .12s"
+                    },
+                    onMouseEnter: (e) => {
+                      e.currentTarget.style.background = "rgba(99,102,241,.85)";
+                    },
+                    onMouseLeave: (e) => {
+                      e.currentTarget.style.background = "rgba(99,102,241,.65)";
+                    },
+                    children: "\uC800\uC7A5"
+                  }
+                )
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { style: { fontSize: 10, color: "rgba(255,255,255,.25)", marginTop: 6, lineHeight: 1.5 }, children: "SB \uBAA8\uB4DC\uC77C \uB54C \uD540 \uC88C\uD45C \uAE30\uC900 \uB108\uBE44. \uBE44\uC6CC\uB450\uBA74 \uC2A4\uCF00\uC77C \uC5C6\uC74C." })
+            ] })
           ] }),
           (onExportJson || onExportMarkdown) && /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(import_jsx_runtime5.Fragment, { children: [
             /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { style: { height: 1, background: "rgba(255,255,255,.07)", margin: "2px 0 10px" } }),
@@ -4091,10 +4174,13 @@ function AnnotationToolbar({
   showLogoTip,
   onAddSpec,
   addingSpec = false,
-  currentViewport,
   onViewportChange,
   settings,
-  onChangeSetting
+  onChangeSetting,
+  baseWidthMode = "sb",
+  onBaseWidthModeChange,
+  sbBaseWidth,
+  onSbBaseWidthChange
 }) {
   const [showUpdateModal, setShowUpdateModal] = (0, import_react4.useState)(false);
   const hasUpdate = isNewer(latestSdkVersion ?? null, SDK_VERSION);
@@ -4257,17 +4343,23 @@ function AnnotationToolbar({
                     ]
                   }
                 ),
-                onViewportChange && /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(import_jsx_runtime6.Fragment, { children: [
+                onBaseWidthModeChange && /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(import_jsx_runtime6.Fragment, { children: [
                   /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { style: { width: 1, height: 22, background: "rgba(255,255,255,.18)", flexShrink: 0, marginLeft: 4 } }),
-                  /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { "data-guide": "sb-viewport", style: { display: "flex", gap: 2, alignItems: "center" }, children: ["desktop", "tablet", "mobile"].map((vp) => {
-                    const icons = { desktop: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(IDesktop, {}), tablet: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(ITablet, {}), mobile: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(IMobile, {}) };
-                    const labels2 = { desktop: "PC", tablet: "\uD0DC\uBE14\uB9BF", mobile: "\uBAA8\uBC14\uC77C" };
-                    const isActive = (currentViewport ?? "desktop") === vp;
+                  /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { style: { display: "flex", gap: 2, alignItems: "center" }, children: [
+                    { mode: "sb", icon: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("span", { style: { fontSize: 9, fontWeight: 700, letterSpacing: "-0.5px", lineHeight: 1 }, children: "SB" }), label: "SB \uAE30\uC900 \uB108\uBE44", vp: "desktop" },
+                    { mode: "pc", icon: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(IDesktop, {}), label: "PC", vp: "desktop" },
+                    { mode: "tablet", icon: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(ITablet, {}), label: "\uD0DC\uBE14\uB9BF", vp: "tablet" },
+                    { mode: "mobile", icon: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(IMobile, {}), label: "\uBAA8\uBC14\uC77C", vp: "mobile" }
+                  ].map(({ mode, icon, label, vp }) => {
+                    const isActive = baseWidthMode === mode;
                     return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
                       "button",
                       {
-                        onClick: () => onViewportChange(vp),
-                        title: labels2[vp],
+                        onClick: () => {
+                          onBaseWidthModeChange(mode);
+                          onViewportChange?.(vp);
+                        },
+                        title: label,
                         style: {
                           display: "flex",
                           alignItems: "center",
@@ -4294,9 +4386,9 @@ function AnnotationToolbar({
                             e.currentTarget.style.color = "rgba(255,255,255,.45)";
                           }
                         },
-                        children: icons[vp]
+                        children: icon
                       },
-                      vp
+                      mode
                     );
                   }) })
                 ] })
@@ -4417,7 +4509,9 @@ function AnnotationToolbar({
                 defaultLabelId,
                 onSaveAuthor,
                 onExportJson,
-                onExportMarkdown
+                onExportMarkdown,
+                sbBaseWidth,
+                onSbBaseWidthChange
               }
             )
           ] })
@@ -6217,7 +6311,7 @@ function ScreenListPanel({ screens, currentPageId, onSelect, allAnnotations, sto
   const [addTitle, setAddTitle] = (0, import_react9.useState)("");
   const [addSaving, setAddSaving] = (0, import_react9.useState)(false);
   const [addError, setAddError] = (0, import_react9.useState)(null);
-  const isCurrentPageRegistered = screensLoaded && screens.some((s) => s.pageId === currentPageId && s.id !== null);
+  const isCurrentPageRegistered = currentPageId === "__all__" || screensLoaded && screens.some((s) => s.pageId === currentPageId && s.id !== null);
   const handleSelect = (pageId) => {
     onSelect(pageId);
   };
@@ -6271,6 +6365,7 @@ function ScreenListPanel({ screens, currentPageId, onSelect, allAnnotations, sto
     return [...active, ...deprecated];
   };
   const filtered = sortScreens(filterStatus ? screens.filter((s) => (s.status ?? "draft") === filterStatus) : screens);
+  const allTotalCount = Object.values(allAnnotations ?? {}).flat().filter((p) => p.status !== "resolved").length;
   return /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)(
     "div",
     {
@@ -6490,6 +6585,40 @@ function ScreenListPanel({ screens, currentPageId, onSelect, allAnnotations, sto
           })
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "sb-scroll", style: { flex: 1, overflowY: "auto" }, children: [
+          (() => {
+            const isAll = currentPageId === "__all__";
+            return /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)(
+              "div",
+              {
+                onClick: () => onSelect("__all__"),
+                style: {
+                  borderBottom: "1px solid rgba(255,255,255,.08)",
+                  background: isAll ? `${SPEC_COLOR}12` : "transparent",
+                  transition: "background .1s",
+                  padding: "10px 16px",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 8
+                },
+                onMouseEnter: (e) => {
+                  if (!isAll) e.currentTarget.style.background = "rgba(255,255,255,.04)";
+                },
+                onMouseLeave: (e) => {
+                  e.currentTarget.style.background = isAll ? `${SPEC_COLOR}12` : "transparent";
+                },
+                children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("span", { style: { fontSize: 12, fontWeight: isAll ? 700 : 500, color: isAll ? SPEC_COLOR : "rgba(255,255,255,.75)", fontFamily: FONT_FAMILY }, children: "\uC804\uCCB4 \uCF54\uBA58\uD2B8" }),
+                  allTotalCount > 0 && /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("span", { style: { fontSize: 9, fontWeight: 700, color: "#93c5fd", background: "rgba(59,130,246,.2)", padding: "1px 5px", borderRadius: 2, flexShrink: 0, fontFamily: FONT_FAMILY }, children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(IconChat, { size: 9, color: "#93c5fd" }),
+                    " ",
+                    allTotalCount
+                  ] })
+                ]
+              }
+            );
+          })(),
           filtered.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", { style: { padding: "20px 16px", color: "rgba(255,255,255,.25)", fontSize: 12 }, children: "\uD574\uB2F9 \uC0C1\uD0DC\uC758 \uD654\uBA74\uC774 \uC5C6\uC2B5\uB2C8\uB2E4." }),
           filtered.map((s) => {
             const isCurrent = s.pageId === currentPageId;
@@ -6549,6 +6678,7 @@ function ScreenSpecTab({ pageId, storage, currentAuthor, onDeleteElement, refres
         title: screen?.title,
         description: screen?.description,
         status: screen?.status ?? "draft",
+        baseWidth: screen?.baseWidth ?? null,
         updatedBy: currentAuthor || null,
         ...patch
       });
@@ -7632,8 +7762,7 @@ function SpecDrawer({
     onScreenListChange?.(v);
   }, [onScreenListChange]);
   (0, import_react9.useEffect)(() => {
-    const saved = localStorage.getItem("sb_screen_list_open");
-    onScreenListChange?.(saved === null ? true : saved === "1");
+    onScreenListChange?.(localStorage.getItem("sb_screen_list_open") === "1");
   }, []);
   (0, import_react9.useEffect)(() => {
     if (!showScreenList) return;
@@ -7666,8 +7795,8 @@ function SpecDrawer({
     setActivePageId(pageId);
   }, [pageId]);
   const allScreens = screens.some((s) => s.pageId === activePageId) ? screens : [{ id: null, pageId: activePageId, title: activePageId, description: "", status: "draft", createdAt: null, updatedAt: null }, ...screens];
-  const activeScreenTitle = allScreens.find((s) => s.pageId === activePageId)?.title ?? activePageId;
-  const drawerPins = allAnnotations?.[activePageId] ?? (activePageId === pageId ? pins : []);
+  const activeScreenTitle = activePageId === "__all__" ? "\uC804\uCCB4 \uCF54\uBA58\uD2B8" : allScreens.find((s) => s.pageId === activePageId)?.title ?? activePageId;
+  const drawerPins = activePageId === "__all__" ? Object.values(allAnnotations ?? {}).flat() : allAnnotations?.[activePageId] ?? (activePageId === pageId ? pins : []);
   const handleScreenSpecSaved = (spec) => {
     setScreens((prev) => {
       const exists = prev.some((s) => s.pageId === spec.pageId);
@@ -7773,39 +7902,37 @@ function SpecDrawer({
                 }
               )
             ] }),
-            /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 4, flexShrink: 0 }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { style: { display: "flex", alignItems: "center", gap: 4 }, children: [
               onTogglePin && /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
                 "button",
                 {
                   onClick: onTogglePin,
-                  title: pinned ? "\uACE0\uC815 \uD574\uC81C \u2014 \uD398\uC774\uC9C0 \uC774\uB3D9 \uC2DC \uD328\uB110\uC774 \uB2EB\uD799\uB2C8\uB2E4" : "\uD328\uB110 \uACE0\uC815 \u2014 \uD398\uC774\uC9C0 \uC774\uB3D9 \uC2DC \uD328\uB110\uC774 \uC720\uC9C0\uB429\uB2C8\uB2E4",
+                  title: pinned ? "\uD328\uB110 \uACE0\uC815 \uD574\uC81C" : "\uD328\uB110 \uACE0\uC815",
                   style: {
+                    background: pinned ? `${SPEC_COLOR}22` : "rgba(255,255,255,.08)",
+                    border: pinned ? `1px solid ${SPEC_COLOR}` : "1px solid transparent",
+                    color: pinned ? SPEC_COLOR : DARK.txS,
                     width: 26,
                     height: 26,
                     borderRadius: 5,
                     cursor: "pointer",
+                    fontSize: 13,
                     flexShrink: 0,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    background: pinned ? `${SPEC_COLOR}22` : "rgba(255,255,255,.08)",
-                    border: `1px solid ${pinned ? SPEC_COLOR + "88" : "transparent"}`,
-                    color: pinned ? SPEC_COLOR : DARK.txS,
                     transition: "all .15s"
                   },
                   onMouseEnter: (e) => {
-                    if (!pinned) {
-                      e.currentTarget.style.background = "rgba(255,255,255,.14)";
-                      e.currentTarget.style.color = DARK.txt;
-                    }
+                    if (!pinned) e.currentTarget.style.background = "rgba(255,255,255,.14)";
                   },
                   onMouseLeave: (e) => {
-                    if (!pinned) {
-                      e.currentTarget.style.background = "rgba(255,255,255,.08)";
-                      e.currentTarget.style.color = DARK.txS;
-                    }
+                    e.currentTarget.style.background = pinned ? `${SPEC_COLOR}22` : "rgba(255,255,255,.08)";
                   },
-                  children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("svg", { width: "12", height: "12", viewBox: "0 0 16 16", fill: "currentColor", xmlns: "http://www.w3.org/2000/svg", children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("path", { d: "M4.146.146A.5.5 0 0 1 4.5 0h7a.5.5 0 0 1 .5.5c0 .68-.342 1.174-.646 1.479-.126.125-.25.224-.354.298v4.431l.078.048c.203.127.476.314.751.555C12.36 7.775 13 8.527 13 9.5a.5.5 0 0 1-.5.5h-4v4.5c0 .276-.224 1.5-.5 1.5s-.5-1.224-.5-1.5V10h-4a.5.5 0 0 1-.5-.5c0-.973.64-1.725 1.17-2.189A5.921 5.921 0 0 1 5 6.708V2.277a2.77 2.77 0 0 1-.354-.298C4.342 1.674 4 1.179 4 .5a.5.5 0 0 1 .146-.354z" }) })
+                  children: /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("svg", { width: "13", height: "13", viewBox: "0 0 24 24", fill: pinned ? SPEC_COLOR : "none", stroke: pinned ? SPEC_COLOR : "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("line", { x1: "12", y1: "17", x2: "12", y2: "22" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("path", { d: "M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z" })
+                  ] })
                 }
               ),
               /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
@@ -8715,7 +8842,8 @@ var import_react14 = require("react");
 var SETTINGS_KEY = "cs_sb_settings_v1";
 var DEFAULT_SETTINGS = {
   panelMode: "overlay",
-  markerAlign: "left"
+  markerAlign: "left",
+  baseWidthMode: "sb"
 };
 function loadSettings() {
   try {
@@ -8855,7 +8983,8 @@ function SpecBridgeAnnotation({
   children,
   overlayMode = false,
   pageWrapper,
-  serviceId
+  serviceId,
+  sbConstraintTarget
 }) {
   const [enabled, setEnabled] = (0, import_react16.useState)(initialEnabled);
   const [showGuide, setShowGuide] = (0, import_react16.useState)(() => !hasDismissedForever());
@@ -8891,6 +9020,7 @@ function SpecBridgeAnnotation({
   const [lastLabelId, setLastLabelIdState] = (0, import_react16.useState)(null);
   const [latestSdkVersion, setLatestSdkVersion] = (0, import_react16.useState)(null);
   const [screenMarkerAlign, setScreenMarkerAlign] = (0, import_react16.useState)(null);
+  const [sbBaseWidth, setSbBaseWidth] = (0, import_react16.useState)(null);
   const containerRef = (0, import_react16.useRef)(null);
   const [drawerPinned, setDrawerPinned] = (0, import_react16.useState)(() => {
     try {
@@ -8909,9 +9039,24 @@ function SpecBridgeAnnotation({
     const onScroll = () => setResizeTick((t) => t + 1);
     window.addEventListener("resize", onResize);
     window.addEventListener("scroll", onScroll, { passive: true });
+    const container = containerRef.current;
+    container?.addEventListener("scroll", onScroll, { passive: true, capture: true });
+    let scrollParent = container?.parentElement ?? null;
+    while (scrollParent && scrollParent !== document.documentElement) {
+      const { overflow, overflowY } = getComputedStyle(scrollParent);
+      if (overflow === "auto" || overflow === "scroll" || overflowY === "auto" || overflowY === "scroll") break;
+      scrollParent = scrollParent.parentElement;
+    }
+    if (scrollParent && scrollParent !== document.documentElement) {
+      scrollParent.addEventListener("scroll", onScroll, { passive: true });
+    }
     return () => {
       window.removeEventListener("resize", onResize);
       window.removeEventListener("scroll", onScroll);
+      container?.removeEventListener("scroll", onScroll, { capture: true });
+      if (scrollParent && scrollParent !== document.documentElement) {
+        scrollParent.removeEventListener("scroll", onScroll);
+      }
     };
   }, []);
   (0, import_react16.useEffect)(() => {
@@ -8971,6 +9116,63 @@ function SpecBridgeAnnotation({
     if (selectedId) trackEvent("sb_panel_open", { page_id: pageId });
   }, [selectedId, pageId]);
   const { settings, setSetting } = useSettings();
+  (0, import_react16.useEffect)(() => {
+    if (!storage.loadSetting) return;
+    storage.loadSetting("sbBaseWidth").then((v) => {
+      const n = v ? parseInt(v, 10) : null;
+      setSbBaseWidth(n && n > 0 ? n : 1440);
+    }).catch(() => {
+    });
+  }, [storage]);
+  (0, import_react16.useEffect)(() => {
+    const el = sbConstraintTarget;
+    if (!el) return;
+    const mode = settings.baseWidthMode;
+    const constraintW = mode === "sb" ? sbBaseWidth : mode === "tablet" ? 768 : mode === "mobile" ? 375 : null;
+    const shouldConstrain = constraintW != null;
+    const resolvedAlign = screenMarkerAlign ?? settings.markerAlign;
+    el.style.transition = "max-width .3s ease";
+    if (shouldConstrain) {
+      el.style.maxWidth = `${constraintW}px`;
+      el.style.width = "100%";
+      if (resolvedAlign === "right") {
+        el.style.marginLeft = "auto";
+        el.style.marginRight = "0";
+      } else if (resolvedAlign === "center") {
+        el.style.marginLeft = "auto";
+        el.style.marginRight = "auto";
+      } else {
+        el.style.marginLeft = "0";
+        el.style.marginRight = "auto";
+      }
+      el.style.outline = "2px solid rgba(255,255,255,.08)";
+      el.style.boxShadow = "0 0 0 1px rgba(255,255,255,.04), 0 8px 40px rgba(0,0,0,.4)";
+      document.documentElement.style.background = "#0a0a12";
+    } else {
+      el.style.maxWidth = "";
+      el.style.width = "";
+      el.style.marginLeft = "";
+      el.style.marginRight = "";
+      el.style.outline = "";
+      el.style.boxShadow = "";
+      document.documentElement.style.background = "";
+    }
+    return () => {
+      el.style.maxWidth = "";
+      el.style.width = "";
+      el.style.marginLeft = "";
+      el.style.marginRight = "";
+      el.style.outline = "";
+      el.style.boxShadow = "";
+      el.style.transition = "";
+      document.documentElement.style.background = "";
+    };
+  }, [sbConstraintTarget, settings.baseWidthMode, sbBaseWidth, screenMarkerAlign, settings.markerAlign]);
+  const handleSbBaseWidthChange = (0, import_react16.useCallback)((v) => {
+    setSbBaseWidth(v);
+    storage.saveSetting?.("sbBaseWidth", v != null ? String(v) : "").catch(() => {
+    });
+  }, [storage]);
   const trackFirstToolbarUse = (0, import_react16.useCallback)((action) => {
     if (firstToolbarUsedRef.current) return;
     firstToolbarUsedRef.current = true;
@@ -9036,14 +9238,20 @@ function SpecBridgeAnnotation({
   }, [trackFirstToolbarUse, pageId]);
   (0, import_react16.useEffect)(() => {
     if (!overlayMode || !pageWrapper) return;
-    const maxW = VIEWPORT_MAX_W[currentViewport];
+    const vpMaxW = VIEWPORT_MAX_W[currentViewport];
     const isDesktop = currentViewport === "desktop";
+    const viewportConstrained = !isDesktop && !sbConstraintTarget;
+    const sbConstrained = settings.baseWidthMode === "sb" && sbBaseWidth != null && !sbConstraintTarget;
+    const isBordered = viewportConstrained || sbConstrained;
+    const effectiveMaxW = viewportConstrained ? vpMaxW : sbConstrained ? sbBaseWidth ?? void 0 : void 0;
     const drawerOffset = enabled && settings.panelMode === "push" && showDrawer ? DRAWER_W + (showScreenListOpen ? SCREEN_LIST_W : 0) : 0;
+    const resolvedAlign = screenMarkerAlign ?? settings.markerAlign;
     pageWrapper.style.transition = "max-width .3s ease, width .3s ease";
-    if (isDesktop) {
+    if (!isBordered) {
       pageWrapper.style.maxWidth = "";
       pageWrapper.style.left = "";
       pageWrapper.style.margin = "";
+      pageWrapper.style.marginLeft = "";
       pageWrapper.style.marginRight = "";
       pageWrapper.style.transform = "translateX(0)";
       pageWrapper.style.width = drawerOffset ? `calc(100% - ${drawerOffset}px)` : "";
@@ -9055,21 +9263,37 @@ function SpecBridgeAnnotation({
         containerRef.current.style.width = drawerOffset ? `calc(100% - ${drawerOffset}px)` : "100%";
       }
     } else {
-      pageWrapper.style.maxWidth = `${maxW}px`;
+      pageWrapper.style.maxWidth = effectiveMaxW ? `${effectiveMaxW}px` : "";
       pageWrapper.style.width = "100%";
-      pageWrapper.style.left = "50%";
-      pageWrapper.style.transform = "translateX(-50%)";
-      pageWrapper.style.margin = "";
-      pageWrapper.style.marginRight = "";
       pageWrapper.style.overflow = "hidden";
       pageWrapper.style.outline = "2px solid rgba(255,255,255,.06)";
       pageWrapper.style.boxShadow = "0 0 0 1px rgba(255,255,255,.04), 0 8px 40px rgba(0,0,0,.4)";
+      if (resolvedAlign === "right") {
+        pageWrapper.style.left = "";
+        pageWrapper.style.transform = "translateX(0)";
+        pageWrapper.style.marginLeft = "auto";
+        pageWrapper.style.marginRight = "0";
+        pageWrapper.style.margin = "";
+      } else if (resolvedAlign === "left") {
+        pageWrapper.style.left = "";
+        pageWrapper.style.transform = "translateX(0)";
+        pageWrapper.style.marginLeft = "0";
+        pageWrapper.style.marginRight = "auto";
+        pageWrapper.style.margin = "";
+      } else {
+        pageWrapper.style.left = "50%";
+        pageWrapper.style.transform = "translateX(-50%)";
+        pageWrapper.style.margin = "";
+        pageWrapper.style.marginLeft = "";
+        pageWrapper.style.marginRight = "";
+      }
     }
     return () => {
       pageWrapper.style.maxWidth = "";
       pageWrapper.style.width = "";
       pageWrapper.style.left = "";
       pageWrapper.style.margin = "";
+      pageWrapper.style.marginLeft = "";
       pageWrapper.style.marginRight = "";
       pageWrapper.style.transition = "";
       pageWrapper.style.transform = "";
@@ -9081,7 +9305,7 @@ function SpecBridgeAnnotation({
         containerRef.current.style.width = "";
       }
     };
-  }, [overlayMode, pageWrapper, currentViewport, enabled, settings.panelMode, showDrawer, showScreenListOpen]);
+  }, [overlayMode, pageWrapper, currentViewport, enabled, settings.panelMode, showDrawer, showScreenListOpen, settings.baseWidthMode, sbBaseWidth, sbConstraintTarget, screenMarkerAlign, settings.markerAlign]);
   const {
     allAnnots,
     pins: allPagePins,
@@ -9283,8 +9507,11 @@ function SpecBridgeAnnotation({
       const clampedX = Math.max(MARGIN, Math.min(rawX, rect.width - PIN_SIZE - MARGIN));
       const clampedY = Math.max(MARGIN, Math.min(rawY, rect.height - PIN_SIZE - MARGIN));
       const resolvedAlign = screenMarkerAlign ?? settings.markerAlign;
-      const storedX = resolvedAlign === "center" ? clampedX - rect.width / 2 : resolvedAlign === "right" ? rect.width - clampedX : clampedX;
-      const pin = await addPin(storedX, clampedY, author, resolvedLabelId, currentSessionId);
+      const alignedX = resolvedAlign === "center" ? clampedX - rect.width / 2 : resolvedAlign === "right" ? rect.width - clampedX : clampedX;
+      const bw = settings.baseWidthMode === "sb" ? sbBaseWidth : null;
+      const storedX = bw ? alignedX / rect.width * bw : alignedX;
+      const storedY = bw ? clampedY / rect.width * bw : clampedY;
+      const pin = await addPin(storedX, storedY, author, resolvedLabelId, currentSessionId);
       if (!pin) return;
       trackEvent("sb_pin_added", { page_id: pageId });
       if (!defaultExists) rememberLastLabel(resolvedLabelId);
@@ -9451,19 +9678,24 @@ function SpecBridgeAnnotation({
         height: "100%",
         pointerEvents: "none",
         overflow: "hidden"
-      } : {
-        position: "relative",
-        minHeight: "100vh",
-        overflow: "hidden",
-        maxWidth: VIEWPORT_MAX_W[currentViewport],
-        ...(() => {
-          const containerMargin = currentViewport !== "desktop" ? { margin: "0 auto" } : { marginRight: enabled && settings.panelMode === "push" && showDrawer ? DRAWER_W + (showScreenListOpen ? SCREEN_LIST_W : 0) : 0 };
-          return containerMargin;
-        })(),
-        transition: "max-width .3s ease, margin .3s ease",
-        outline: currentViewport !== "desktop" ? "2px solid rgba(255,255,255,.06)" : "none",
-        boxShadow: currentViewport !== "desktop" ? "0 0 0 1px rgba(255,255,255,.04), 0 8px 40px rgba(0,0,0,.4)" : "none"
-      },
+      } : (() => {
+        const viewportConstrained = currentViewport !== "desktop" && !sbConstraintTarget;
+        const sbConstrained = settings.baseWidthMode === "sb" && sbBaseWidth != null && !sbConstraintTarget;
+        const isBordered = viewportConstrained || sbConstrained;
+        const effectiveMaxW = viewportConstrained ? VIEWPORT_MAX_W[currentViewport] : sbConstrained ? sbBaseWidth ?? void 0 : void 0;
+        const resolvedAlign = screenMarkerAlign ?? settings.markerAlign;
+        const borderMargin = resolvedAlign === "right" ? { marginLeft: "auto", marginRight: 0 } : resolvedAlign === "center" ? { marginLeft: "auto", marginRight: "auto" } : { marginLeft: 0, marginRight: "auto" };
+        return {
+          position: "relative",
+          minHeight: "100vh",
+          overflow: "hidden",
+          maxWidth: effectiveMaxW,
+          ...isBordered ? borderMargin : { marginRight: enabled && settings.panelMode === "push" && showDrawer ? DRAWER_W + (showScreenListOpen ? SCREEN_LIST_W : 0) : 0 },
+          transition: "max-width .3s ease, margin .3s ease",
+          outline: isBordered ? "2px solid rgba(255,255,255,.06)" : "none",
+          boxShadow: isBordered ? "0 0 0 1px rgba(255,255,255,.04), 0 8px 40px rgba(0,0,0,.4)" : "none"
+        };
+      })(),
       children: [
         children,
         /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("div", { style: overlayMode ? { pointerEvents: "auto" } : void 0, children: [
@@ -9589,7 +9821,10 @@ function SpecBridgeAnnotation({
                     align: resolvedAlign,
                     isExternalHovered: hoveredSpecElementId === spec.elementId,
                     softDeleted: softDeletedSpecIds.has(spec.id ?? ""),
-                    onClick: () => setShowDrawer(true),
+                    onClick: () => {
+                      setDrawerDefaultTab("screenSpec");
+                      setShowDrawer(true);
+                    },
                     onMove: (pos) => {
                       setSpecPins((prev) => prev.map(
                         (s) => s.id === spec.id ? { ...s, pinX: pos.pinX, pinY: pos.pinY } : s
@@ -9611,7 +9846,7 @@ function SpecBridgeAnnotation({
                   },
                   spec.id ?? spec.elementId
                 )),
-                /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("div", { style: { pointerEvents: "none" }, children: currentViewport === "desktop" && visiblePins.map((pin) => {
+                /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("div", { style: { pointerEvents: "none" }, children: currentViewport === "desktop" && settings.baseWidthMode !== "pc" && visiblePins.map((pin) => {
                   const label = pin.labelId ? labelById.get(pin.labelId) : void 0;
                   const isHov = pin.id === hoveredId;
                   const isSel = pin.id === selectedId;
@@ -9625,6 +9860,8 @@ function SpecBridgeAnnotation({
                       align: resolvedAlign,
                       isSelected: isSel,
                       isHovered: isHov,
+                      baseWidth: settings.baseWidthMode === "sb" ? sbBaseWidth : null,
+                      containerWidth: settings.baseWidthMode === "sb" && sbBaseWidth ? window.innerWidth : void 0,
                       onSelect: () => {
                         const nextId = isSel ? null : pin.id;
                         setSelectedId(nextId);
@@ -9824,7 +10061,11 @@ function SpecBridgeAnnotation({
               currentViewport,
               onViewportChange: handleViewportChange,
               settings,
-              onChangeSetting: handleChangeSetting
+              onChangeSetting: handleChangeSetting,
+              baseWidthMode: settings.baseWidthMode,
+              onBaseWidthModeChange: (mode) => setSetting("baseWidthMode", mode),
+              sbBaseWidth,
+              onSbBaseWidthChange: handleSbBaseWidthChange
             }
           )
         ] })
@@ -10339,6 +10580,25 @@ function httpAdapter(options) {
     },
     async deleteScreenSpec(pageId) {
       await request("DELETE", `/api/screen-specs/${encodeURIComponent(pageId)}`);
+    },
+    // ── Screen Folders ───────────────────────────────────
+    async loadFolders() {
+      return request("GET", "/api/folders");
+    },
+    async createFolder(name) {
+      return request("POST", "/api/folders", { name });
+    },
+    async updateFolder(id, patch) {
+      return request("PATCH", `/api/folders/${encodeURIComponent(id)}`, patch);
+    },
+    async deleteFolder(id) {
+      await request("DELETE", `/api/folders/${encodeURIComponent(id)}`);
+    },
+    async reorderFolders(ids) {
+      await request("PATCH", "/api/folders/reorder", { ids });
+    },
+    async reorderScreens(items) {
+      await request("PATCH", "/api/screen-specs/reorder", { items });
     },
     async savePageSpec(pageId, elementId, data) {
       return request("POST", "/api/page-specs", {

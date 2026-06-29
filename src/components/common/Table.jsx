@@ -71,7 +71,7 @@ function SortIcon({ dir }) {
   )
 }
 
-export default function Table({ cols, rows, onRowClick, selectedId, emptyContext, sortKey, sortDir, onSort, actionBar, headerRight }) {
+export default function Table({ cols, rows, onRowClick, selectedId, emptyContext, sortKey, sortDir, onSort, actionBar, headerRight, disableInactive }) {
   if (!rows || rows.length === 0) {
     return (
       <div className="dt-wrap">
@@ -131,7 +131,7 @@ export default function Table({ cols, rows, onRowClick, selectedId, emptyContext
         <tbody>
           {rows.map((row, i) => {
             const isSelected = selectedId !== undefined && selectedId === (row.id ?? i)
-            const isInactive = row.status === 'inactive' || row.status === 'offline' || row.active === false
+            const isInactive = !disableInactive && (row.status === 'inactive' || row.status === 'offline' || row.active === false) && row.policyStatus !== 'applied'
             return (
               <tr
                 key={row.id || i}

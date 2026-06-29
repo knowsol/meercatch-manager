@@ -357,7 +357,9 @@ function Checkbox({ checked, indeterminate, onChange, onClick, disabled }) {
 /* ─── KebabMenu ─── */
 function KebabMenu({ row }) {
   const [open, setOpen] = useState(false)
+  const [pos, setPos] = useState({ top: 0, left: 0 })
   const ref = useRef(null)
+  const btnRef = useRef(null)
 
   useEffect(() => {
     function handleClick(e) {
@@ -366,6 +368,15 @@ function KebabMenu({ row }) {
     document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
   }, [])
+
+  function handleOpen(e) {
+    e.stopPropagation()
+    if (!open && btnRef.current) {
+      const rect = btnRef.current.getBoundingClientRect()
+      setPos({ top: rect.bottom + 4, left: rect.right - 120 })
+    }
+    setOpen(o => !o)
+  }
 
   const menuItem = (label, color, onClick) => (
     <div
@@ -379,7 +390,8 @@ function KebabMenu({ row }) {
   return (
     <div ref={ref} style={{ position: 'relative', display: 'flex', justifyContent: 'center' }} onClick={e => e.stopPropagation()}>
       <button
-        onClick={() => setOpen(o => !o)}
+        ref={btnRef}
+        onClick={handleOpen}
         style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid transparent', borderRadius: 4, background: 'none', cursor: 'pointer', color: 'var(--t3)', fontSize: 16, letterSpacing: 1 }}
         onMouseEnter={e => { e.currentTarget.style.border = '1px solid var(--bd)'; e.currentTarget.style.color = 'var(--t1)' }}
         onMouseLeave={e => { e.currentTarget.style.border = '1px solid transparent'; e.currentTarget.style.color = 'var(--t3)' }}
@@ -387,7 +399,7 @@ function KebabMenu({ row }) {
 
       {open && (
         <div style={{
-          position: 'absolute', top: 'calc(100% + 4px)', right: 0, zIndex: 500,
+          position: 'fixed', top: pos.top, left: pos.left, zIndex: 9999,
           background: 'var(--bg1)', border: '1px solid var(--bd)',
           borderRadius: 4, boxShadow: '0 6px 20px rgba(0,0,0,0.15)',
           width: 'max-content', overflow: 'hidden', textAlign: 'left',
@@ -561,6 +573,13 @@ export default function GroupList() {
   const [page, setPage]           = useState(1)
   const [pageSize, setPageSize]   = useState(PAGE_SIZE)
   const [showModal, setShowModal] = useState(false)
+  const [showAddMenu, setShowAddMenu] = useState(false)
+  const addMenuRef = useRef(null)
+  useEffect(() => {
+    function handleClick(e) { if (addMenuRef.current && !addMenuRef.current.contains(e.target)) setShowAddMenu(false) }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [])
   const [schoolType, setSchoolType] = useState('전체')
   const [sortKey, setSortKey]     = useState(null)
   const [sortDir, setSortDir]     = useState('asc')
@@ -674,23 +693,40 @@ export default function GroupList() {
           </h2>
         </div>
         <div style={{ display: 'flex', gap: 8, paddingTop: 4 }}>
-          <button
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 14px', borderRadius: 4, background: 'var(--bg1)', color: 'var(--t2)', border: '1px solid var(--bd)', cursor: 'pointer', fontSize: 13, fontWeight: 500, transition: 'background 0.15s, color 0.15s' }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg3)'; e.currentTarget.style.color = 'var(--t1)' }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'var(--bg1)'; e.currentTarget.style.color = 'var(--t2)' }}
-          >
-            <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M12 20V8m0 0l-4 4m4-4l4 4M5 4h14"/></svg>
-            엑셀에서 가져오기
-          </button>
-          <button
-            onClick={() => setShowModal(true)}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 14px', borderRadius: 4, background: '#111827', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 500, transition: 'background 0.15s' }}
-            onMouseEnter={e => e.currentTarget.style.background = '#1f2937'}
-            onMouseLeave={e => e.currentTarget.style.background = '#111827'}
-          >
-            <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-            기관 추가
-          </button>
+          <div ref={addMenuRef} style={{ position: 'relative' }}>
+            <button
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 14px', borderRadius: 4, background: '#111827', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 500 }}
+              onClick={() => setShowAddMenu(m => !m)}
+              onMouseEnter={e => e.currentTarget.style.background = '#1f2937'}
+              onMouseLeave={e => e.currentTarget.style.background = '#111827'}
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              기관 추가
+            </button>
+            {showAddMenu && (
+              <div style={{ position: 'absolute', top: 'calc(100% + 6px)', right: 0, background: 'var(--bg1)', border: '1px solid var(--bd)', borderRadius: 4, boxShadow: '0 6px 20px rgba(0,0,0,0.12)', minWidth: 180, zIndex: 200, overflow: 'hidden' }}>
+                <div
+                  style={{ padding: '11px 16px', fontSize: 13, cursor: 'pointer', color: 'var(--t1)', display: 'flex', alignItems: 'center', gap: 8 }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'var(--bg3)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                  onClick={() => { setShowAddMenu(false); setShowModal(true) }}
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                  새로운 기관 추가
+                </div>
+                <div style={{ height: 1, background: 'var(--bd)' }} />
+                <div
+                  style={{ padding: '11px 16px', fontSize: 13, cursor: 'pointer', color: 'var(--t1)', display: 'flex', alignItems: 'center', gap: 8 }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'var(--bg3)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                  onClick={() => setShowAddMenu(false)}
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20V8m0 0l-4 4m4-4l4 4M5 4h14"/></svg>
+                  엑셀에서 가져오기
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -766,6 +802,7 @@ export default function GroupList() {
 
       {/* 테이블 */}
       <Table
+        disableInactive
         cols={COLS}
         rows={rows}
         selectedId={selected?.schoolId}

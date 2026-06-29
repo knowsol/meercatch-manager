@@ -37,7 +37,6 @@ const PAGE_SIZE = 10
 
 const FILTER_DEFS = {
   'OS':   { key: 'os',     multi: true,  values: ['Android', 'iOS', 'Windows', 'WhaleOS', 'ChromeOS'] },
-  '상태': { key: 'active', multi: false, values: ['활성', '비활성'] },
 }
 
 /* 단일 날짜 선택 피커 (필터 칩 내부용) */
@@ -366,7 +365,9 @@ function Checkbox({ checked, indeterminate, onChange, onClick, disabled }) {
 
 function KebabMenu({ row, onEdit, onDelete }) {
   const [open, setOpen] = useState(false)
+  const [pos, setPos] = useState({ top: 0, left: 0 })
   const ref = useRef(null)
+  const btnRef = useRef(null)
 
   useEffect(() => {
     function handleClick(e) {
@@ -375,6 +376,15 @@ function KebabMenu({ row, onEdit, onDelete }) {
     document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
   }, [])
+
+  function handleOpen(e) {
+    e.stopPropagation()
+    if (!open && btnRef.current) {
+      const rect = btnRef.current.getBoundingClientRect()
+      setPos({ top: rect.bottom + 4, left: rect.right - 120 })
+    }
+    setOpen(o => !o)
+  }
 
   const menuItem = (label, color, onClick) => (
     <div
@@ -388,7 +398,8 @@ function KebabMenu({ row, onEdit, onDelete }) {
   return (
     <div ref={ref} style={{ position: 'relative', display: 'flex', justifyContent: 'center' }} onClick={e => e.stopPropagation()}>
       <button
-        onClick={() => setOpen(o => !o)}
+        ref={btnRef}
+        onClick={handleOpen}
         style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid transparent', borderRadius: 4, background: 'none', cursor: 'pointer', color: 'var(--t3)', fontSize: 16, letterSpacing: 1 }}
         onMouseEnter={e => { e.currentTarget.style.border = '1px solid var(--bd)'; e.currentTarget.style.color = 'var(--t1)' }}
         onMouseLeave={e => { e.currentTarget.style.border = '1px solid transparent'; e.currentTarget.style.color = 'var(--t3)' }}
@@ -396,7 +407,7 @@ function KebabMenu({ row, onEdit, onDelete }) {
 
       {open && (
         <div style={{
-          position: 'absolute', top: 'calc(100% + 4px)', right: 0, zIndex: 500,
+          position: 'fixed', top: pos.top, left: pos.left, zIndex: 9999,
           background: 'var(--bg1)', border: '1px solid var(--bd)',
           borderRadius: 4, boxShadow: '0 6px 20px rgba(0,0,0,0.15)',
           width: 'max-content', overflow: 'hidden', textAlign: 'left',
@@ -536,7 +547,7 @@ export default function DetectionPolicyPage() {
     { key: 'os',           label: 'OS',           width: 90 },
     { key: 'pkg',          label: '패키지/주소',  render: v => <span style={{ fontFamily: 'inherit', fontSize: 12 }}>{v}</span> },
     { key: 'registeredAt', label: '등록일',        width: 120, sortable: true, render: v => <span style={{ fontSize: 12 }}>{v}</span> },
-    { key: 'active',       label: '상태',          width: 70, render: v => <span style={{ color: v ? '#10b981' : '#ef4444', fontWeight: 500, fontSize: 13 }}>{v ? '활성' : '비활성'}</span> },
+    { key: 'active',       label: '상태',          width: 70, render: v => <StatusBadge status={v ? 'active' : 'inactive'} /> },
     { key: '_action', label: '', width: 48, align: 'center', render: (_, row) => (
       <KebabMenu
         row={row}
@@ -558,18 +569,6 @@ export default function DetectionPolicyPage() {
           </h2>
         </div>
         <div style={{ display: 'flex', gap: 8, paddingTop: 4 }}>
-          <button
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 14px', borderRadius: 4, background: 'var(--bg1)', color: 'var(--t2)', border: '1px solid var(--bd)', cursor: 'pointer', fontSize: 13, fontWeight: 500 }}
-          >
-            <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M12 20V8m0 0l-4 4m4-4l4 4M5 4h14"/></svg>
-            가져오기
-          </button>
-          <button
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 14px', borderRadius: 4, background: 'var(--bg1)', color: 'var(--t2)', border: '1px solid var(--bd)', cursor: 'pointer', fontSize: 13, fontWeight: 500 }}
-          >
-            <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M12 4v12m0 0l-4-4m4 4l4-4M5 20h14"/></svg>
-            내보내기
-          </button>
           <button
             style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 14px', borderRadius: 4, background: '#111827', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 500 }}
             onClick={() => toast('서비스 추가 기능은 준비 중입니다.')}
@@ -667,7 +666,6 @@ export default function DetectionPolicyPage() {
             <span style={{ fontSize: 12, color: 'var(--t2)', fontWeight: 600 }}>{checked.size}개 선택됨</span>
             <div style={{ width: 1, height: 12, background: 'var(--bd)' }} />
             {[
-              { label: '내보내기', icon: <path d="M12 4v12m0 0l-4-4m4 4l4-4M5 20h14"/> },
               { label: '삭제', icon: <><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></> },
             ].map(({ label, icon }) => (
               <button key={label} style={{

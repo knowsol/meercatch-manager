@@ -22,7 +22,9 @@ const STATUS_MAP = {
   confirmed: ['err',   '확인됨'],
   reviewing: ['warn',  '검토중'],
   dismissed: ['muted', '무시됨'],
-  normal:    ['ok',    '정상'],
+  normal:      ['ok',    '정상'],
+  registered:  ['ok',    '등록완료'],
+  unknown:     ['muted', '알수없음'],
 }
 
 export function StatusBadge({ status }) {

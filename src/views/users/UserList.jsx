@@ -170,17 +170,27 @@ function ColToggle({ cols, hiddenCols, onToggle }) {
 
 function KebabMenu({ items }) {
   const [open, setOpen] = useState(false)
+  const [pos, setPos] = useState({ top: 0, left: 0 })
   const ref = useRef(null)
+  const btnRef = useRef(null)
   useEffect(() => {
     const h = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
     document.addEventListener('mousedown', h)
     return () => document.removeEventListener('mousedown', h)
   }, [])
+  function handleOpen(e) {
+    e.stopPropagation()
+    if (!open && btnRef.current) {
+      const rect = btnRef.current.getBoundingClientRect()
+      setPos({ top: rect.bottom + 4, left: rect.right - 140 })
+    }
+    setOpen(o => !o)
+  }
   return (
     <div ref={ref} style={{ position: 'relative', display: 'inline-flex' }}>
-      <button onClick={e => { e.stopPropagation(); setOpen(o => !o) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--t3)', padding: '2px 6px', borderRadius: 4, fontSize: 16, lineHeight: 1 }}>⋯</button>
+      <button ref={btnRef} onClick={handleOpen} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--t3)', padding: '2px 6px', borderRadius: 4, fontSize: 16, lineHeight: 1 }}>⋯</button>
       {open && (
-        <div onClick={e => e.stopPropagation()} style={{ position: 'absolute', top: 'calc(100% + 2px)', right: 0, zIndex: 500, background: 'var(--bg1)', border: '1px solid var(--bd)', borderRadius: 4, boxShadow: '0 4px 16px rgba(0,0,0,.15)', minWidth: 140, overflow: 'hidden' }}>
+        <div onClick={e => e.stopPropagation()} style={{ position: 'fixed', top: pos.top, left: pos.left, zIndex: 9999, background: 'var(--bg1)', border: '1px solid var(--bd)', borderRadius: 4, boxShadow: '0 4px 16px rgba(0,0,0,.15)', minWidth: 140, overflow: 'hidden' }}>
           {items.map((it, i) => (
             <div key={i}
               onClick={() => { it.onClick(); setOpen(false) }}

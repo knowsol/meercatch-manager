@@ -11,7 +11,7 @@ import StudentDetailPanel from './StudentDetailPanel';
 import StudentNewPanel from './StudentNewPanel';
 import DateRangePicker from '../../components/common/DateRangePicker';
 
-const PAGE_SIZE = 25;
+const PAGE_SIZE = 10;
 
 const STATUS_TABS = [
   { key: '', label: '전체' },
@@ -21,13 +21,57 @@ const STATUS_TABS = [
 
 // ── helper components ──────────────────────────────────────────────────────────
 
-function Checkbox({ checked, indeterminate, onChange }) {
-  const ref = useRef(null);
-  useEffect(() => { if (ref.current) ref.current.indeterminate = !!indeterminate; }, [indeterminate]);
+function SearchableFilterChip({ label, value, values, onSelect, onRemove }) {
+  const [open, setOpen] = useState(false)
+  const [search, setSearch] = useState('')
+  const ref = useRef(null)
+  const inputRef = useRef(null)
+
+  useEffect(() => {
+    const h = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
+    document.addEventListener('mousedown', h)
+    return () => document.removeEventListener('mousedown', h)
+  }, [])
+
+  useEffect(() => {
+    if (open) { setSearch(''); setTimeout(() => inputRef.current?.focus(), 0) }
+  }, [open])
+
+  const filtered = values.filter(v => v.toLowerCase().includes(search.toLowerCase()))
+
   return (
-    <input ref={ref} type="checkbox" checked={!!checked} onChange={onChange}
-      style={{ width: 15, height: 15, accentColor: 'var(--ac)', cursor: 'pointer' }} />
-  );
+    <div ref={ref} style={{ position: 'relative' }}>
+      <span onClick={() => setOpen(o => !o)} style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '0 10px', fontSize: 12, borderRadius: 4, height: 31, border: '1px solid var(--bd)', background: '#fff', cursor: 'pointer', userSelect: 'none', boxSizing: 'border-box' }}>
+        <span style={{ color: 'var(--t3)' }}>{label}</span>
+        {value && <span style={{ color: 'var(--t1)' }}>{value}</span>}
+        <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" style={{ marginLeft: 2, color: 'var(--t3)' }}><polyline points="6 9 12 15 18 9"/></svg>
+        <span onClick={e => { e.stopPropagation(); onRemove() }} style={{ marginLeft: 2, color: 'var(--t3)', fontSize: 14, lineHeight: 1 }}>×</span>
+      </span>
+      {open && (
+        <div style={{ position: 'absolute', top: 'calc(100% + 4px)', left: 0, zIndex: 400, background: 'var(--bg1)', border: '1px solid var(--bd)', borderRadius: 4, boxShadow: '0 6px 20px rgba(0,0,0,0.2)', minWidth: 200, overflow: 'hidden' }}>
+          <div style={{ padding: '8px 10px', borderBottom: '1px solid var(--bd)' }}>
+            <input ref={inputRef} value={search} onChange={e => setSearch(e.target.value)} placeholder="검색..."
+              style={{ width: '100%', fontSize: 12, padding: '5px 8px', boxSizing: 'border-box', border: '1px solid var(--bd)', borderRadius: 4, outline: 'none', background: 'var(--bg2)', color: 'var(--t1)' }} />
+          </div>
+          <div style={{ maxHeight: 200, overflowY: 'auto' }}>
+            {filtered.length === 0
+              ? <div style={{ padding: '10px 14px', fontSize: 12, color: 'var(--t3)' }}>검색 결과 없음</div>
+              : filtered.map(v => (
+                <div key={v} onClick={() => { onSelect(v); setOpen(false) }}
+                  style={{ padding: '9px 14px', fontSize: 13, cursor: 'pointer', color: value === v ? '#f97316' : 'var(--t1)', fontWeight: value === v ? 600 : 400, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'var(--bg2)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                >
+                  {v}
+                  {value === v && <svg width="13" height="13" fill="none" stroke="#f97316" strokeWidth="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>}
+                </div>
+              ))
+            }
+          </div>
+        </div>
+      )}
+    </div>
+  )
 }
 
 function FilterChip({ label, value, options, onRemove, onChange }) {
@@ -174,15 +218,25 @@ function ColToggle({ cols, hiddenCols, onToggle }) {
 
 function KebabMenu({ items }) {
   const [open, setOpen] = useState(false);
+  const [pos, setPos] = useState({ top: 0, left: 0 });
   const ref = useRef(null);
+  const btnRef = useRef(null);
   useEffect(() => {
     const h = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
     document.addEventListener('mousedown', h);
     return () => document.removeEventListener('mousedown', h);
   }, []);
+  function handleOpen(e) {
+    e.stopPropagation();
+    if (!open && btnRef.current) {
+      const rect = btnRef.current.getBoundingClientRect();
+      setPos({ top: rect.bottom + 4, left: rect.right - 130 });
+    }
+    setOpen(o => !o);
+  }
   return (
     <div ref={ref} style={{ position: 'relative' }}>
-      <button onClick={e => { e.stopPropagation(); setOpen(o => !o); }} style={{
+      <button ref={btnRef} onClick={handleOpen} style={{
         background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px',
         color: 'var(--t3)', borderRadius: 4,
       }}
@@ -193,7 +247,7 @@ function KebabMenu({ items }) {
       </button>
       {open && (
         <div style={{
-          position: 'absolute', top: 'calc(100% + 4px)', right: 0, minWidth: 130, zIndex: 500,
+          position: 'fixed', top: pos.top, left: pos.left, minWidth: 130, zIndex: 9999,
           background: 'var(--bg1)', border: '1px solid var(--bd)', borderRadius: 4,
           boxShadow: '0 4px 16px rgba(0,0,0,.2)', overflow: 'hidden',
         }}>
@@ -231,18 +285,26 @@ export default function StudentList() {
   const [schoolFilter, setSchoolFilter] = useState('');
   const [gradeFilter, setGradeFilter] = useState('');
   const [classFilter, setClassFilter] = useState('');
+  const [expandedGrades, setExpandedGrades] = useState(null); // null = 전체 펼침
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(PAGE_SIZE);
-  const [selectedIds, setSelectedIds] = useState([]);
   const [sortKey, setSortKey] = useState('');
   const [sortDir, setSortDir] = useState('asc');
   const [hiddenCols, setHiddenCols] = useState([]);
   const [activeFilters, setActiveFilters] = useState(['grade', 'class']);
 
   const [showExcelImport, setShowExcelImport] = useState(false);
+  const [showAddMenu, setShowAddMenu] = useState(false);
+  const addMenuRef = useRef(null);
+  useEffect(() => {
+    function handleClick(e) { if (addMenuRef.current && !addMenuRef.current.contains(e.target)) setShowAddMenu(false); }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
   const [excelFile, setExcelFile] = useState(null);
 
   useEffect(() => setPage(1), [query, statusFilter, yearFilter, schoolFilter, gradeFilter, classFilter]);
+  useEffect(() => { setExpandedGrades(null); setGradeFilter(''); setClassFilter('') }, [schoolFilter]);
 
   const allStudents = isSchoolAdmin && schoolId
     ? DUMMY.students.filter(s => s.schoolId === schoolId)
@@ -252,6 +314,8 @@ export default function StudentList() {
     .map(id => DUMMY.schools?.find(sc => sc.schoolId === id))
     .filter(Boolean)
     .sort((a, b) => a.name.localeCompare(b.name));
+
+  const groupMap = Object.fromEntries((DUMMY.groups || []).map(g => [g.groupId, g]));
   const grades = [...new Set(allStudents.map(s => s.grade).filter(Boolean))].sort((a, b) => parseInt(a) - parseInt(b));
   const classes = [...new Set(allStudents.map(s => s.classNum).filter(Boolean))].sort((a, b) => parseInt(a) - parseInt(b));
 
@@ -274,7 +338,10 @@ export default function StudentList() {
     const q = query.toLowerCase();
     if (q && !s.name.toLowerCase().includes(q)) return false;
     if (statusFilter && s.status !== statusFilter) return false;
-    if (!isSchoolAdmin && schoolFilter && String(s.schoolId) !== String(schoolFilter)) return false;
+    if (!isSchoolAdmin && schoolFilter) {
+      const school = schools.find(sc => sc.name === schoolFilter)
+      if (!school || String(s.schoolId) !== String(school.schoolId)) return false
+    }
     if (gradeFilter && s.grade !== gradeFilter) return false;
     if (classFilter && s.classNum !== classFilter) return false;
     return true;
@@ -296,25 +363,13 @@ export default function StudentList() {
 
   const COLS_ALL = [
     { key: 'school', label: '학교' },
+    { key: 'groupName', label: '그룹명' },
     { key: 'grade', label: '학년' },
     { key: 'classNum', label: '반' },
     { key: 'num', label: '번호' },
     { key: 'deviceId', label: '단말기' },
-    { key: 'status', label: '상태' },
+    { key: 'status', label: '라이선스' },
   ];
-
-  const allPageIds = paged.map(s => s.studentId);
-  const allChecked = allPageIds.length > 0 && allPageIds.every(id => selectedIds.includes(id));
-  const someChecked = allPageIds.some(id => selectedIds.includes(id)) && !allChecked;
-
-  function toggleAll() {
-    if (allChecked) setSelectedIds(ids => ids.filter(id => !allPageIds.includes(id)));
-    else setSelectedIds(ids => [...new Set([...ids, ...allPageIds])]);
-  }
-
-  function toggleOne(id) {
-    setSelectedIds(ids => ids.includes(id) ? ids.filter(i => i !== id) : [...ids, id]);
-  }
 
   function handleSort(key) {
     if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
@@ -343,20 +398,40 @@ export default function StudentList() {
           </h2>
         </div>
         <div style={{ display: 'flex', gap: 8, paddingTop: 4 }}>
-          <button
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 14px', borderRadius: 4, background: 'var(--bg1)', color: 'var(--t2)', border: '1px solid var(--bd)', cursor: 'pointer', fontSize: 13, fontWeight: 500 }}
-            onClick={() => { setExcelFile(null); setShowExcelImport(true); }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg3)'; e.currentTarget.style.color = 'var(--t1)' }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'var(--bg1)'; e.currentTarget.style.color = 'var(--t2)' }}>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            엑셀에서 가져오기
-          </button>
-          <button
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 14px', borderRadius: 4, background: '#111827', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 500 }}
-            onClick={() => openPanel(<StudentNewPanel />)}>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            학생 추가
-          </button>
+          <div ref={addMenuRef} style={{ position: 'relative' }}>
+            <button
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 14px', borderRadius: 4, background: '#111827', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 500 }}
+              onClick={() => setShowAddMenu(m => !m)}
+              onMouseEnter={e => e.currentTarget.style.background = '#1f2937'}
+              onMouseLeave={e => e.currentTarget.style.background = '#111827'}
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              학생 추가
+            </button>
+            {showAddMenu && (
+              <div style={{ position: 'absolute', top: 'calc(100% + 6px)', right: 0, background: 'var(--bg1)', border: '1px solid var(--bd)', borderRadius: 4, boxShadow: '0 6px 20px rgba(0,0,0,0.12)', minWidth: 180, zIndex: 200, overflow: 'hidden' }}>
+                <div
+                  style={{ padding: '11px 16px', fontSize: 13, cursor: 'pointer', color: 'var(--t1)', display: 'flex', alignItems: 'center', gap: 8 }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'var(--bg3)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                  onClick={() => { setShowAddMenu(false); openPanel(<StudentNewPanel />) }}
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                  새로운 학생 추가
+                </div>
+                <div style={{ height: 1, background: 'var(--bd)' }} />
+                <div
+                  style={{ padding: '11px 16px', fontSize: 13, cursor: 'pointer', color: 'var(--t1)', display: 'flex', alignItems: 'center', gap: 8 }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'var(--bg3)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                  onClick={() => { setShowAddMenu(false); setExcelFile(null); setShowExcelImport(true); }}
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                  엑셀에서 가져오기
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -387,39 +462,23 @@ export default function StudentList() {
         {/* 구분선 */}
         <div style={{ width: 1, height: 20, background: 'var(--bd)', margin: '0 4px' }} />
 
-        {/* 학교 셀렉트 (교육청 관리자에게만 표시) */}
-        {!isSchoolAdmin && (
-          <select className="inp" value={schoolFilter} onChange={e => { setSchoolFilter(e.target.value); setPage(1) }}
-            style={{ padding: '7px 10px', fontSize: 13, minWidth: 140 }}>
-            <option value="">전체 학교</option>
-            {schools.map(s => <option key={s.schoolId} value={String(s.schoolId)}>{s.name}</option>)}
-          </select>
-        )}
+        {/* 학년도 (비활성) */}
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '0 10px', fontSize: 12, borderRadius: 4, height: 31, border: '1px solid var(--bd)', background: 'var(--bg2)', color: 'var(--t3)', userSelect: 'none', boxSizing: 'border-box', cursor: 'not-allowed', opacity: 0.6 }}>
+          <span>학년도</span>
+          <span style={{ color: 'var(--t2)' }}>2026</span>
+        </span>
+
+        {/* 기관이름 */}
+        <SearchableFilterChip
+          label="기관이름"
+          value={schoolFilter}
+          values={schools.map(s => s.name)}
+          onSelect={name => { const found = schools.find(s => s.name === name); setSchoolFilter(found ? found.name : name); setPage(1) }}
+          onRemove={() => { setSchoolFilter(''); setPage(1) }}
+        />
 
         {/* 구분선 */}
         <div style={{ width: 1, height: 20, background: 'var(--bd)', margin: '0 4px' }} />
-
-        {/* Filter chips */}
-        {FILTER_DEFS.filter(f => activeFilters.includes(f.key)).map(f => (
-          <FilterChip
-            key={f.key}
-            label={f.label}
-            value={f.value}
-            options={f.options}
-            onChange={f.onChange}
-            onRemove={() => {
-              f.onChange('');
-              setActiveFilters(a => a.filter(k => k !== f.key));
-            }}
-          />
-        ))}
-
-        <AddFilterButton
-          filters={FILTER_DEFS}
-          active={activeFilters}
-          onAdd={key => setActiveFilters(a => [...a, key])}
-          onRemove={key => setActiveFilters(a => a.filter(k => k !== key))}
-        />
 
         {/* 검색 입력 (우측 정렬) */}
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -443,19 +502,130 @@ export default function StudentList() {
         </div>
       </div>
 
-      {/* TABLE */}
+      {/* TABLE + 트리 패널 */}
+      <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+
+        {/* 학년/반 트리 패널 */}
+        {schoolFilter && (() => {
+          const selectedSchool = schools.find(s => s.name === schoolFilter)
+          const schoolStudents = allStudents.filter(s => selectedSchool && String(s.schoolId) === String(selectedSchool.schoolId))
+          const gradeMap = {}
+          schoolStudents.forEach(s => {
+            if (!s.grade) return
+            if (!gradeMap[s.grade]) gradeMap[s.grade] = new Set()
+            if (s.classNum) gradeMap[s.grade].add(s.classNum)
+          })
+          const gradeList = Object.keys(gradeMap).sort((a, b) => parseInt(a) - parseInt(b))
+
+          const COL_F = { cls: 2, manager: 1, students: 1, license: 1 }
+
+          return (
+            <div style={{ width: 240, flexShrink: 0, borderTop: '2px solid var(--t1)', borderBottom: '1px solid var(--bd)', borderRadius: 0, background: 'var(--bg1)', marginTop: 0, overflow: 'hidden', alignSelf: 'stretch' }}>
+              {/* 헤더 */}
+              <div style={{ display: 'flex', alignItems: 'center', padding: '8px 10px', borderBottom: '1px solid var(--bd)', background: 'var(--bg2)', fontSize: 11, fontWeight: 600, color: 'var(--t3)', gap: 0 }}>
+                <span style={{ flex: COL_F.cls }}>반명</span>
+                <span style={{ flex: COL_F.manager, textAlign: 'right' }}>관리자</span>
+                <span style={{ flex: COL_F.students, textAlign: 'right' }}>학생</span>
+                <span style={{ flex: COL_F.license, textAlign: 'right' }}>라이선스</span>
+              </div>
+              {/* 전체 행 */}
+              <div
+                onClick={() => { setGradeFilter(''); setClassFilter('') }}
+                style={{ display: 'flex', alignItems: 'center', padding: '8px 10px', fontSize: 12, cursor: 'pointer', color: !gradeFilter && !classFilter ? '#f97316' : 'var(--t1)', fontWeight: !gradeFilter && !classFilter ? 600 : 400, background: !gradeFilter && !classFilter ? 'rgba(249,115,22,0.06)' : 'transparent' }}
+                onMouseEnter={e => { if (gradeFilter || classFilter) e.currentTarget.style.background = 'var(--bg2)' }}
+                onMouseLeave={e => { if (gradeFilter || classFilter) e.currentTarget.style.background = 'transparent' }}
+              >
+                <span style={{ flex: COL_F.cls }}>전체</span>
+                <span style={{ flex: COL_F.manager }} />
+                <span style={{ flex: COL_F.students, textAlign: 'right', fontSize: 11, color: !gradeFilter && !classFilter ? '#f97316' : 'var(--t3)' }}>{schoolStudents.length}</span>
+                <span style={{ flex: COL_F.license, textAlign: 'right', fontSize: 11, color: !gradeFilter && !classFilter ? '#f97316' : 'var(--t3)' }}>
+                  {(DUMMY.groups || []).filter(g => g.schoolId === selectedSchool?.schoolId).reduce((a, g) => a + (g.deviceCount || 0), 0)}
+                </span>
+              </div>
+              {/* 학년별 */}
+              <div style={{ overflowY: 'auto', maxHeight: 600 }}>
+                {gradeList.map(grade => {
+                  const classList = [...gradeMap[grade]].sort((a, b) => parseInt(a) - parseInt(b))
+                  const gradeActive = gradeFilter === grade && !classFilter
+                  const gradeExpanded = expandedGrades === null || (expandedGrades instanceof Set && expandedGrades.has(grade))
+                  const gradeLabel = grade.endsWith('학년') ? grade : `${grade}학년`
+                  const gradeStudents = schoolStudents.filter(s => s.grade === grade).length
+                  const gradeLicense = classList.reduce((a, cls) => {
+                    const c1 = cls.endsWith('반') ? cls : `${cls}반`
+                    const grp = (DUMMY.groups || []).find(g => g.schoolId === selectedSchool?.schoolId && g.name === `${gradeLabel} ${c1}`)
+                    return a + (grp?.deviceCount || 0)
+                  }, 0)
+
+                  function toggleExpand(e) {
+                    e.stopPropagation()
+                    setExpandedGrades(prev => {
+                      const base = prev === null ? new Set(gradeList) : new Set(prev)
+                      if (base.has(grade)) base.delete(grade)
+                      else base.add(grade)
+                      return base
+                    })
+                  }
+
+                  return (
+                    <div key={grade}>
+                      {/* 학년 헤더 행 */}
+                      <div
+                        onClick={() => { setGradeFilter(grade); setClassFilter('') }}
+                        style={{ display: 'flex', alignItems: 'center', padding: '7px 10px', fontSize: 12, cursor: 'pointer', background: gradeActive ? 'rgba(249,115,22,0.06)' : 'transparent', color: gradeActive ? '#f97316' : 'var(--t2)', fontWeight: 600 }}
+                        onMouseEnter={e => { if (!gradeActive) e.currentTarget.style.background = 'var(--bg2)' }}
+                        onMouseLeave={e => { if (!gradeActive) e.currentTarget.style.background = 'transparent' }}
+                      >
+                        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
+                          onClick={toggleExpand}
+                          style={{ color: 'var(--t3)', transform: gradeExpanded ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.15s', flexShrink: 0 }}>
+                          <polyline points="9 18 15 12 9 6"/>
+                        </svg>
+                        <span style={{ flex: COL_F.cls }}>{gradeLabel}</span>
+                        <span style={{ flex: COL_F.manager }} />
+                        <span style={{ flex: COL_F.students, textAlign: 'right', fontSize: 11, color: gradeActive ? '#f97316' : 'var(--t3)', fontWeight: 400 }}>{gradeStudents}</span>
+                        <span style={{ flex: COL_F.license, textAlign: 'right', fontSize: 11, color: gradeActive ? '#f97316' : 'var(--t3)', fontWeight: 400 }}>{gradeLicense}</span>
+                      </div>
+                      {/* 반 목록 */}
+                      {gradeExpanded && classList.map(cls => {
+                        const clsActive = gradeFilter === grade && classFilter === cls
+                        const clsLabel = cls.endsWith('반') ? cls : `${cls}반`
+                        const grp = (DUMMY.groups || []).find(g => g.schoolId === selectedSchool?.schoolId && g.name === `${gradeLabel} ${clsLabel}`)
+                        const clsStudents = schoolStudents.filter(s => s.grade === grade && s.classNum === cls).length
+                        return (
+                          <div
+                            key={cls}
+                            onClick={() => { setGradeFilter(grade); setClassFilter(cls) }}
+                            style={{ display: 'flex', alignItems: 'center', padding: '7px 10px', fontSize: 12, cursor: 'pointer', color: clsActive ? '#f97316' : 'var(--t1)', fontWeight: clsActive ? 600 : 400, background: clsActive ? 'rgba(249,115,22,0.06)' : 'transparent' }}
+                            onMouseEnter={e => { if (!clsActive) e.currentTarget.style.background = 'var(--bg2)' }}
+                            onMouseLeave={e => { if (!clsActive) e.currentTarget.style.background = 'transparent' }}
+                          >
+                            <span style={{ flex: COL_F.cls, paddingLeft: 20 }}>{clsLabel}</span>
+                            <span style={{ flex: COL_F.manager, fontSize: 11, color: 'var(--t3)', textAlign: 'right', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{grp?.manager || '—'}</span>
+                            <span style={{ flex: COL_F.students, textAlign: 'right', fontSize: 11, color: clsActive ? '#f97316' : 'var(--t3)' }}>{clsStudents}</span>
+                            <span style={{ flex: COL_F.license, textAlign: 'right', fontSize: 11, color: clsActive ? '#f97316' : 'var(--t3)' }}>{grp?.deviceCount ?? '—'}</span>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )
+        })()}
+
+      {schoolFilter && <div style={{ width: 1, borderLeft: '1px dashed var(--bd)', alignSelf: 'stretch', flexShrink: 0 }} />}
+      <div style={{ flex: 1, minWidth: 0 }}>
       <div className="dt-wrap">
         <table className="dt">
           <thead>
             <tr>
-              <th style={{ width: 36, textAlign: 'center' }}>
-                <Checkbox checked={allChecked} indeterminate={someChecked} onChange={toggleAll} />
-              </th>
               <th style={{ width: 48, color: 'var(--t3)' }}>No.</th>
               <th onClick={() => handleSort('name')} style={{ cursor: 'pointer', userSelect: 'none' }}>
                 이름 {sortKey === 'name' ? (sortDir === 'asc' ? '↑' : '↓') : ''}
               </th>
               {showSchoolCol && <th>학교</th>}
+              {!hiddenCols.includes('groupName') && <th>그룹명</th>}
               {!hiddenCols.includes('grade') && (
                 <th onClick={() => handleSort('grade')} style={{ cursor: 'pointer', userSelect: 'none' }}>
                   학년 {sortKey === 'grade' ? (sortDir === 'asc' ? '↑' : '↓') : ''}
@@ -468,7 +638,7 @@ export default function StudentList() {
               )}
               {!hiddenCols.includes('num') && <th>번호</th>}
               {!hiddenCols.includes('deviceId') && <th>단말기</th>}
-              {!hiddenCols.includes('status') && <th>상태</th>}
+              {!hiddenCols.includes('status') && <th>라이선스</th>}
               <th style={{ width: 36 }} />
             </tr>
           </thead>
@@ -477,22 +647,18 @@ export default function StudentList() {
               const school = DUMMY.schools?.find(sc => sc.schoolId === s.schoolId);
               const device = DUMMY.devices?.find(d => d.deviceId === s.deviceId);
               const no = filtered.length - ((page - 1) * pageSize + i);
-              const isSelected = selectedIds.includes(s.studentId);
               return (
                 <tr
                   key={s.studentId}
                   className="clickable"
                   onClick={() => openPanel(<StudentDetailPanel studentId={s.studentId} />)}
-                  style={{ background: isSelected ? 'rgba(99,102,241,.05)' : undefined }}
                 >
-                  <td style={{ textAlign: 'center' }} onClick={e => { e.stopPropagation(); toggleOne(s.studentId); }}>
-                    <Checkbox checked={isSelected} onChange={() => toggleOne(s.studentId)} />
-                  </td>
                   <td style={{ color: 'var(--t3)', fontSize: 12 }}>{no}</td>
                   <td><span style={{ fontWeight: 600 }}>{s.name}</span></td>
                   {showSchoolCol && <td>{school?.name || '—'}</td>}
-                  {!hiddenCols.includes('grade') && <td>{s.grade}학년</td>}
-                  {!hiddenCols.includes('classNum') && <td>{s.classNum}반</td>}
+                  {!hiddenCols.includes('groupName') && <td>{groupMap[s.groupId]?.name || '—'}</td>}
+                  {!hiddenCols.includes('grade') && <td>{s.grade?.endsWith('학년') ? s.grade : `${s.grade}학년`}</td>}
+                  {!hiddenCols.includes('classNum') && <td>{s.classNum?.endsWith('반') ? s.classNum : `${s.classNum}반`}</td>}
                   {!hiddenCols.includes('num') && <td>{s.num}번</td>}
                   {!hiddenCols.includes('deviceId') && <td>{device?.name || '미배정'}</td>}
                   {!hiddenCols.includes('status') && (
@@ -521,25 +687,6 @@ export default function StudentList() {
         </table>
       </div>
 
-      {/* ACTION BAR (bulk) */}
-      {selectedIds.length > 0 && (
-        <div style={{
-          position: 'fixed', bottom: 80, left: '50%', transform: 'translateX(-50%)',
-          background: 'var(--t1)', color: 'var(--bg1)', borderRadius: 4,
-          padding: '10px 20px', display: 'flex', alignItems: 'center', gap: 12,
-          boxShadow: '0 4px 20px rgba(0,0,0,.3)', zIndex: 300, fontSize: 13, fontWeight: 500,
-        }}>
-          <span>{selectedIds.length}명 선택됨</span>
-          <div style={{ width: 1, height: 16, background: 'rgba(255,255,255,.3)' }} />
-          <button style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', fontSize: 13, fontWeight: 500, opacity: .8 }}
-            onClick={() => {}}>상태 변경</button>
-          <button style={{ background: 'none', border: 'none', color: '#fca5a5', cursor: 'pointer', fontSize: 13, fontWeight: 500 }}
-            onClick={() => {}}>삭제</button>
-          <button style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', fontSize: 13, opacity: .6 }}
-            onClick={() => setSelectedIds([])}>✕</button>
-        </div>
-      )}
-
       {/* PAGINATION FOOTER */}
       <div style={{ marginTop: 16, display: 'flex', alignItems: 'center', gap: 3 }}>
         <ColToggle cols={COLS_ALL} hiddenCols={hiddenCols} onToggle={toggleCol} />
@@ -547,6 +694,9 @@ export default function StudentList() {
           <Pagination page={page} total={total} pageSize={pageSize} onChange={setPage} onPageSizeChange={setPageSize} />
         </div>
       </div>
+      </div>{/* flex: 1 wrapper */}
+
+      </div>{/* flex row wrapper */}
 
       {/* 엑셀에서 가져오기 모달 */}
       {showExcelImport && (

@@ -49,12 +49,27 @@ const COLS_ALL = [
 
 // ── helper components ──────────────────────────────────────────────
 
-function Checkbox({ checked, indeterminate, onChange }) {
+function Checkbox({ checked, indeterminate, onChange, onClick, disabled }) {
   const ref = useRef(null)
   useEffect(() => { if (ref.current) ref.current.indeterminate = !!indeterminate }, [indeterminate])
   return (
-    <input ref={ref} type="checkbox" checked={!!checked} onChange={onChange}
-      style={{ width: 15, height: 15, cursor: 'pointer', accentColor: 'var(--primary)' }} />
+    <div style={{ position: 'relative', width: 18, height: 18, flexShrink: 0, cursor: disabled ? 'not-allowed' : 'pointer' }} onClick={onClick}>
+      <input ref={ref} type="checkbox" checked={checked} onChange={onChange} disabled={disabled}
+        style={{ position: 'absolute', opacity: 0, width: '100%', height: '100%', cursor: disabled ? 'not-allowed' : 'pointer', margin: 0 }}
+      />
+      <div style={{
+        width: 18, height: 18, borderRadius: 4,
+        border: `1.5px solid ${disabled ? 'var(--bd)' : checked ? '#111827' : 'var(--bd)'}`,
+        background: disabled ? 'var(--bg3)' : checked ? '#111827' : '#fff',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        pointerEvents: 'none', transition: 'all 0.1s',
+      }}>
+        {indeterminate && !checked
+          ? <div style={{ width: 8, height: 1.5, background: '#fff', borderRadius: 1 }} />
+          : checked && <svg width="12" height="12" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" style={{ marginTop: -1 }}><polyline points="20 6 9 17 4 12"/></svg>
+        }
+      </div>
+    </div>
   )
 }
 
@@ -181,21 +196,31 @@ function ColToggle({ cols, hiddenCols, onToggle }) {
 
 function KebabMenu({ onDelete, onEdit, toast }) {
   const [open, setOpen] = useState(false)
+  const [pos, setPos] = useState({ top: 0, left: 0 })
   const ref = useRef(null)
+  const btnRef = useRef(null)
   useEffect(() => {
     if (!open) return
     const handler = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
   }, [open])
+  function handleOpen(e) {
+    e.stopPropagation()
+    if (!open && btnRef.current) {
+      const rect = btnRef.current.getBoundingClientRect()
+      setPos({ top: rect.bottom + 4, left: rect.right - 120 })
+    }
+    setOpen(o => !o)
+  }
   return (
     <div ref={ref} style={{ position:'relative', display:'inline-block' }}>
-      <button onClick={e => { e.stopPropagation(); setOpen(o => !o) }}
+      <button ref={btnRef} onClick={handleOpen}
         style={{ background:'none', border:'none', cursor:'pointer', color:'var(--t2)', fontSize:18, padding:0, lineHeight:1 }}>
         ...
       </button>
       {open && (
-        <div style={{ position:'absolute', right:0, top:'calc(100% + 4px)', background:'var(--bg)', border:'1px solid var(--border)', borderRadius:8, boxShadow:'0 4px 16px rgba(0,0,0,.12)', zIndex:300, minWidth:120, padding:'4px 0' }}>
+        <div style={{ position:'fixed', top: pos.top, left: pos.left, background:'var(--bg)', border:'1px solid var(--border)', borderRadius:8, boxShadow:'0 4px 16px rgba(0,0,0,.12)', zIndex:9999, minWidth:120, padding:'4px 0' }}>
           <button onClick={() => { setOpen(false); if (onEdit) onEdit(); else toast('수정 기능 준비 중입니다.') }}
             style={{ display:'block', width:'100%', textAlign:'left', padding:'7px 14px', border:'none', background:'transparent', color:'var(--t1)', fontSize:13, cursor:'pointer' }}>
             수정
@@ -223,7 +248,7 @@ export default function WhitelistPage() {
   const [activeFilters, setActiveFilters] = useState([])
   const [page, setPage]                 = useState(1)
   const [pageSize, setPageSize]         = useState(10)
-  const [selected, setSelected]         = useState([])
+  const [checked, setChecked]           = useState(new Set())
   const [hiddenCols, setHiddenCols]     = useState([])
   const [sortKey, setSortKey]           = useState(null)
   const [sortDir, setSortDir]           = useState('asc')
@@ -256,25 +281,36 @@ export default function WhitelistPage() {
       })
     : filtered
 
-  const total = statusFilter === '전체' && !query && !activeFilters.length ? 34682 : filtered.length
+  const total = filtered.length
   const pageRows = sorted.slice((page - 1) * pageSize, page * pageSize)
 
   const allOnPage = pageRows.map(r => r.no)
-  const allChecked = allOnPage.length > 0 && allOnPage.every(id => selected.includes(id))
-  const someChecked = allOnPage.some(id => selected.includes(id)) && !allChecked
+  const allChecked = allOnPage.length > 0 && allOnPage.every(id => checked.has(id))
+  const someChecked = allOnPage.some(id => checked.has(id)) && !allChecked
 
   const toggleAll = () => {
-    if (allChecked) setSelected(s => s.filter(id => !allOnPage.includes(id)))
-    else setSelected(s => [...new Set([...s, ...allOnPage])])
+    setChecked(prev => {
+      const next = new Set(prev)
+      if (allChecked) allOnPage.forEach(id => next.delete(id))
+      else allOnPage.forEach(id => next.add(id))
+      return next
+    })
   }
-  const toggleOne = id => setSelected(s => s.includes(id) ? s.filter(x => x !== id) : [...s, id])
+  const toggleOne = (id, e) => {
+    e?.stopPropagation()
+    setChecked(prev => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
+  }
 
   const visibleCols = COLS_ALL.filter(c => !hiddenCols.includes(c.key))
 
   const cols = [
     {
       key: '_chk', label: <Checkbox checked={allChecked} indeterminate={someChecked} onChange={toggleAll} />,
-      width: '44px', render: (_, row) => <Checkbox checked={selected.includes(row.no)} onChange={() => toggleOne(row.no)} />
+      width: '44px', render: (_, row) => <Checkbox checked={checked.has(row.no)} onChange={() => {}} onClick={e => toggleOne(row.no, e)} />
     },
     ...visibleCols,
     {
@@ -283,14 +319,26 @@ export default function WhitelistPage() {
     },
   ]
 
-  const actionBar = selected.length > 0 && (
-    <div style={{ display:'flex', alignItems:'center', gap:8, padding:'8px 12px', background:'var(--primary-subtle, #eef2ff)', borderRadius:6, marginBottom:8, fontSize:13 }}>
-      <span style={{ color:'var(--primary)', fontWeight:600 }}>{selected.length}개 선택됨</span>
-      <button className="btn btn-outline" style={{ fontSize:12, height:28, padding:'0 10px' }}
-        onClick={() => { toast('선택 항목을 삭제합니다.'); setSelected([]) }}>삭제</button>
-      <button className="btn btn-outline" style={{ fontSize:12, height:28, padding:'0 10px', marginLeft:'auto' }}
-        onClick={() => setSelected([])}>선택 해제</button>
-    </div>
+  const actionBar = checked.size > 0 && (
+    <>
+      <span style={{ fontSize: 12, color: 'var(--t2)', fontWeight: 600 }}>{checked.size}개 선택됨</span>
+      <div style={{ width: 1, height: 12, background: 'var(--bd)' }} />
+      <button
+        onClick={() => { toast('선택 항목을 삭제합니다.'); setChecked(new Set()) }}
+        style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', fontSize: 12, borderRadius: 4, border: '1px solid var(--bd)', background: 'transparent', color: '#ef4444', cursor: 'pointer', transition: 'background 0.15s' }}
+        onMouseEnter={e => e.currentTarget.style.background = 'var(--bg2)'}
+        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+      >
+        <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        삭제
+      </button>
+      <button
+        onClick={() => setChecked(new Set())}
+        style={{ fontSize: 12, color: 'var(--t3)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px' }}
+        onMouseEnter={e => e.currentTarget.style.color = 'var(--t1)'}
+        onMouseLeave={e => e.currentTarget.style.color = 'var(--t3)'}
+      >취소</button>
+    </>
   )
 
   const addFilter = key => {
@@ -318,16 +366,6 @@ export default function WhitelistPage() {
           </h2>
         </div>
         <div style={{ display: 'flex', gap: 8, paddingTop: 4 }}>
-          <button style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 14px', borderRadius: 4, background: 'var(--bg1)', color: 'var(--t2)', border: '1px solid var(--bd)', cursor: 'pointer', fontSize: 13, fontWeight: 500 }}
-            onClick={() => toast('가져오기 준비 중입니다.')}>
-            <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            가져오기
-          </button>
-          <button style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 14px', borderRadius: 4, background: 'var(--bg1)', color: 'var(--t2)', border: '1px solid var(--bd)', cursor: 'pointer', fontSize: 13, fontWeight: 500 }}
-            onClick={() => toast('내보내기 준비 중입니다.')}>
-            <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            내보내기
-          </button>
           <button style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 14px', borderRadius: 4, background: '#111827', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 500 }}
             onClick={() => toast('항목 추가 기능은 준비 중입니다.')}>
             <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -366,9 +404,6 @@ export default function WhitelistPage() {
         {/* 날짜 범위 피커 */}
         <DateRangePicker from={dateFrom} to={dateTo} onChange={({ from, to }) => { setDateFrom(from); setDateTo(to); setPage(1) }} />
 
-        {/* 구분선 */}
-        <div style={{ width: 1, height: 20, background: 'var(--bd)', margin: '0 4px' }} />
-
         {/* Active filter chips */}
         {activeFilters.map(key => {
           const def = FILTER_DEFS.find(d => d.key === key)
@@ -379,8 +414,6 @@ export default function WhitelistPage() {
               onRemove={() => removeFilter(key)} />
           )
         })}
-
-        <AddFilterButton defs={FILTER_DEFS} activeKeys={activeFilters} onAdd={addFilter} />
 
         {/* 검색 입력 (우측 정렬) */}
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -404,12 +437,10 @@ export default function WhitelistPage() {
         </div>
       </div>
 
-      {/* ACTION BAR */}
-      {actionBar}
-
       {/* TABLE */}
       <Table cols={cols} rows={pageRows}
-        sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
+        sortKey={sortKey} sortDir={sortDir} onSort={handleSort}
+        actionBar={actionBar} />
 
       {/* PAGINATION FOOTER */}
       <div style={{ marginTop: 16, display: 'flex', alignItems: 'center', gap: 3 }}>

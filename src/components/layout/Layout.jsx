@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react';
+import dynamic from 'next/dynamic';
 import { useRouter, usePathname } from 'next/navigation';
 import Sidebar from './Sidebar';
 import PanelShell from '../common/Panel';
@@ -7,6 +8,8 @@ import ToastContainer from '../common/Toast';
 import { useToast } from '../../hooks/useToast';
 import { DUMMY } from '../../data/dummy';
 import { createContext, useContext } from 'react';
+
+const SpecBridgeWrapper = dynamic(() => import('../SpecBridgeWrapper'), { ssr: false });
 
 const ToastCtx = createContext(() => {});
 export const useToastCtx = () => useContext(ToastCtx);
@@ -107,9 +110,12 @@ export default function Layout({ children }) {
           {/* License expiry banner */}
           {!bannerDismissed && <ExpiryBanner onDismiss={() => setBannerDismissed(true)} />}
 
-          {/* Page body */}
+          {/* Page body — SpecBridgeWrapper는 .mb(스크롤 컨테이너) 안에 위치해야
+               핀이 스크롤과 함께 이동함 (루트에 두면 div-scroll에서 핀이 고정됨) */}
           <PageActionsCtx.Provider value={setPageActions}>
-            <div className="mb">{children}</div>
+            <div className="mb">
+              <SpecBridgeWrapper>{children}</SpecBridgeWrapper>
+            </div>
           </PageActionsCtx.Provider>
         </div>
         <PanelShell />
