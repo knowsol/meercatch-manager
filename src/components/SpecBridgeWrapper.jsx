@@ -1,5 +1,5 @@
 'use client'
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo, useState, useEffect, useCallback } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { SpecBridgeAnnotation, httpAdapter } from '@specbridge-v1/sdk'
 
@@ -8,7 +8,7 @@ const API_KEY = process.env.NEXT_PUBLIC_SPECBRIDGE_KEY
 
 export default function SpecBridgeWrapper({ children }) {
   const [mounted, setMounted] = useState(false)
-  const [sbConstraintTarget, setSbConstraintTarget] = useState(null)
+  const [constraintTarget, setConstraintTarget] = useState(null)
   const pathname = usePathname() || '/'
   const router = useRouter()
   const storage = useMemo(
@@ -16,21 +16,36 @@ export default function SpecBridgeWrapper({ children }) {
     []
   )
 
-  useEffect(() => {
-    setMounted(true)
-    setSbConstraintTarget(document.querySelector('.app') || document.body)
+  // Callback ref: fires as soon as the dummy div mounts — before useEffect runs
+  const dummyRefCallback = useCallback((node) => {
+    if (node) setConstraintTarget(node)
   }, [])
 
-  if (!mounted || !storage) return <>{children}</>
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // Always render the dummy div so it's captured by dummyRefCallback on first render
+  const dummyDiv = (
+    <div
+      ref={dummyRefCallback}
+      style={{ position: 'fixed', width: 0, height: 0, overflow: 'hidden', pointerEvents: 'none' }}
+    />
+  )
+
+  if (!mounted || !storage) return <>{dummyDiv}{children}</>
 
   return (
-    <SpecBridgeAnnotation
-      pageId={pathname}
-      storage={storage}
-      onNavigate={(pageId) => router.push(pageId)}
-      sbConstraintTarget={sbConstraintTarget}
-    >
-      {children}
-    </SpecBridgeAnnotation>
+    <>
+      {dummyDiv}
+      <SpecBridgeAnnotation
+        pageId={pathname}
+        storage={storage}
+        onNavigate={(pageId) => router.push(pageId)}
+        sbConstraintTarget={constraintTarget}
+      >
+        {children}
+      </SpecBridgeAnnotation>
+    </>
   )
 }
