@@ -135,34 +135,89 @@ const _schools = [
   { schoolId:'s103', name:'청주중학교',        type:'중학교',   status:'active',   address:'충북 청주시 상당구 상당로 77',          manager:'노지원', loginId:'cheongju103',  email:'cheongju@edu.kr',   contact:'043-111-2223',  schoolCode:'9711833', createdAt:'2026.01.14. 오전 10:00' },
 ];
 
+const _firstNames = ['민준','서연','지훈','수빈','예진','태현','지원','현우','민서','도윤','하린','준서','지수','예원','성민','은지','재원','보라','태민','나은','시우','재훈','보미','수아','민결','은서','지현','선우','가은','정우','예슬','수현','은호','민기','서진','재민','준영','지호','성욱','주원'];
+const _lastNames = ['김','이','박','최','정','강','조','윤','임','한','신','오','서','권','황','안','송','류','전','고'];
+
+function _genStudents(groups) {
+  const result = [];
+  let sid = 1;
+  groups.forEach(g => {
+    const m = g.name.match(/(\d+)학년\s+(\d+)반/);
+    const grade = m ? `${m[1]}학년` : '1학년';
+    const classNum = m ? `${m[2]}반` : '1반';
+    const count = g.studentCount || 5;
+    for (let i = 0; i < count; i++) {
+      const seed = (sid * 17 + i * 31) % 1000;
+      result.push({
+        studentId: `st${sid++}`,
+        name: _lastNames[seed % _lastNames.length] + _firstNames[(seed * 3 + i * 7) % _firstNames.length],
+        schoolId: g.schoolId,
+        groupId: g.groupId,
+        grade,
+        classNum,
+        num: i + 1,
+        deviceId: null,
+        status: seed % 8 === 0 ? 'inactive' : 'active',
+      });
+    }
+  });
+  return result;
+}
+
+const _models = ['iPad 10th Gen', 'iPad 9th Gen', 'iPad Air 5', 'iPad mini 6', 'Galaxy Tab S9', 'Galaxy Tab A9'];
+const _oses   = ['iOS', 'Android', 'Windows', 'ChromeBook'];
+const _idChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+
+function _genDevices(groups, schools) {
+  const schoolMap = {};
+  schools.forEach(s => { schoolMap[s.schoolId] = s.name; });
+  const result = [];
+  let did = 1;
+  groups.forEach(g => {
+    const count = g.deviceCount || 0;
+    const schoolName = schoolMap[g.schoolId] || g.name;
+    for (let i = 0; i < count; i++) {
+      const seed = (did * 13 + i * 7) % 1000;
+      const isOnline = seed % 5 !== 0;
+      const isPending = seed % 11 === 0;
+      let idSeed = did * 7919 + i * 1009;
+      let identifier = '';
+      for (let k = 0; k < 10; k++) {
+        identifier += _idChars[idSeed % _idChars.length];
+        idSeed = (idSeed * 6271 + 1) % 46337;
+      }
+      const hour = 8 + (seed % 8);
+      const min  = seed % 60;
+      const day  = isOnline ? 17 : (15 + seed % 3);
+      result.push({
+        deviceId: `d${did}`,
+        name: `DEV-${String(did).padStart(4, '0')}`,
+        identifier,
+        groupId: g.groupId,
+        groupName: schoolName,
+        status: isOnline ? 'online' : 'offline',
+        policyStatus: isPending ? 'pending' : 'applied',
+        lastContact: `2026-03-${String(day).padStart(2, '0')} ${String(hour).padStart(2, '0')}:${String(min).padStart(2, '0')}`,
+        model: _models[seed % _models.length],
+        os: _oses[(seed * 3) % _oses.length],
+      });
+      did++;
+    }
+  });
+  return result;
+}
+
+const _groups = [
+  ..._gen(_schools),
+  { groupId:'gx1', name:'컴퓨터실',   studentCount:28, deviceCount:28, policyCount:1, pauseStatus:'normal', status:'active',   updatedAt:'2026-03-10', schoolId:'s1' },
+  { groupId:'gx2', name:'도서관',     studentCount:15, deviceCount:15, policyCount:0, pauseStatus:'normal', status:'active',   updatedAt:'2026-03-12', schoolId:'s2' },
+  { groupId:'gx3', name:'방과후교실', studentCount:20, deviceCount:18, policyCount:1, pauseStatus:'normal', status:'inactive', updatedAt:'2026-02-20', schoolId:'s3' },
+];
+
 export const DUMMY = {
   schools: _schools,
-  groups: [
-    ..._gen(_schools),
-    { groupId:'gx1', name:'컴퓨터실',   studentCount:28, deviceCount:28, policyCount:1, pauseStatus:'normal', status:'active',   updatedAt:'2026-03-10', schoolId:'s1' },
-    { groupId:'gx2', name:'도서관',     studentCount:15, deviceCount:15, policyCount:0, pauseStatus:'normal', status:'active',   updatedAt:'2026-03-12', schoolId:'s2' },
-    { groupId:'gx3', name:'방과후교실', studentCount:20, deviceCount:18, policyCount:1, pauseStatus:'normal', status:'inactive', updatedAt:'2026-02-20', schoolId:'s3' },
-  ],
-  devices: [
-    { deviceId:'d1',  name:'iPad-001', identifier:'A1B2C3D4E5', groupId:'g1', groupName:'학동중학교',   status:'online',  policyStatus:'applied', lastContact:'2026-03-17 14:30', model:'iPad 10th Gen', os:'iOS' },
-    { deviceId:'d2',  name:'iPad-002', identifier:'B2C3D4E5F6', groupId:'g1', groupName:'학동중학교',   status:'online',  policyStatus:'applied', lastContact:'2026-03-17 14:28', model:'iPad 10th Gen', os:'iOS' },
-    { deviceId:'d3',  name:'iPad-003', identifier:'C3D4E5F6G7', groupId:'g2', groupName:'서초중학교',   status:'offline', policyStatus:'applied', lastContact:'2026-03-16 17:45', model:'iPad 9th Gen',  os:'Android' },
-    { deviceId:'d4',  name:'iPad-004', identifier:'D4E5F6G7H8', groupId:'g2', groupName:'서초중학교',   status:'online',  policyStatus:'applied', lastContact:'2026-03-17 14:25', model:'iPad 10th Gen', os:'Windows' },
-    { deviceId:'d5',  name:'iPad-005', identifier:'E5F6G7H8I9', groupId:'g3', groupName:'강남고등학교', status:'online',  policyStatus:'applied', lastContact:'2026-03-17 14:31', model:'iPad Air 5',    os:'ChromeBook' },
-    { deviceId:'d6',  name:'iPad-006', identifier:'F6G7H8I9J0', groupId:'g4', groupName:'마포초등학교', status:'online',  policyStatus:'applied', lastContact:'2026-03-17 13:55', model:'iPad 10th Gen', os:'Android' },
-    { deviceId:'d7',  name:'iPad-007', identifier:'G7H8I9J0K1', groupId:'g4', groupName:'마포초등학교', status:'offline', policyStatus:'pending',  lastContact:'2026-03-15 09:10', model:'iPad 9th Gen',  os:'ChromeBook' },
-    { deviceId:'d8',  name:'iPad-008', identifier:'H8I9J0K1L2', groupId:'g5', groupName:'분당고등학교', status:'online',  policyStatus:'applied', lastContact:'2026-03-17 14:20', model:'iPad 10th Gen', os:'ChromeBook' },
-    { deviceId:'d9',  name:'iPad-009', identifier:'I9J0K1L2M3', groupId:'g5', groupName:'분당고등학교', status:'online',  policyStatus:'applied', lastContact:'2026-03-17 14:22', model:'iPad Air 5',    os:'iOS' },
-    { deviceId:'d10', name:'iPad-010', identifier:'J0K1L2M3N4', groupId:'g6', groupName:'은평중학교',   status:'online',  policyStatus:'applied', lastContact:'2026-03-17 14:10', model:'iPad 10th Gen', os:'Android' },
-    { deviceId:'d11', name:'iPad-011', identifier:'K1L2M3N4O5', groupId:'g6', groupName:'은평중학교',   status:'online',  policyStatus:'applied', lastContact:'2026-03-17 14:12', model:'iPad 10th Gen', os:'Windows' },
-    { deviceId:'d12', name:'iPad-012', identifier:'L2M3N4O5P6', groupId:'g7', groupName:'성북초등학교', status:'offline', policyStatus:'applied', lastContact:'2026-03-17 08:00', model:'iPad 9th Gen',  os:'ChromeBook' },
-    { deviceId:'d13', name:'iPad-013', identifier:'M3N4O5P6Q7', groupId:'g7', groupName:'성북초등학교', status:'online',  policyStatus:'applied', lastContact:'2026-03-17 14:35', model:'iPad Air 5',    os:'Android' },
-    { deviceId:'d14', name:'iPad-014', identifier:'N4O5P6Q7R8', groupId:'g8', groupName:'강서고등학교', status:'online',  policyStatus:'applied', lastContact:'2026-03-17 14:30', model:'iPad 10th Gen', os:'Windows' },
-    { deviceId:'d15', name:'iPad-015', identifier:'O5P6Q7R8S9', groupId:'g6', groupName:'은평중학교',   status:'online',  policyStatus:'applied', lastContact:'2026-03-17 14:32', model:'iPad mini 6',   os:'iOS' },
-    { deviceId:'d16', name:'iPad-016', identifier:'P6Q7R8S9T0', groupId:'g1', groupName:'학동중학교',   status:'online',  policyStatus:'applied', lastContact:'2026-03-17 14:18', model:'iPad 10th Gen', os:'Windows' },
-    { deviceId:'d17', name:'iPad-017', identifier:'Q7R8S9T0U1', groupId:'g1', groupName:'학동중학교',   status:'online',  policyStatus:'applied', lastContact:'2026-03-17 14:25', model:'iPad Air 5',    os:'iOS' },
-    { deviceId:'d18', name:'iPad-018', identifier:'R8S9T0U1V2', groupId:'g2', groupName:'서초중학교',   status:'offline', policyStatus:'pending',  lastContact:'2026-03-16 15:30', model:'iPad 9th Gen',  os:'ChromeBook' },
-  ],
+  groups: _groups,
+  devices: _genDevices(_groups, _schools),
   services: [
     { serviceId:'sv1',  name:'YouTube',       packageName:'com.google.android.youtube' },
     { serviceId:'sv2',  name:'Netflix',        packageName:'com.netflix.mediaclient' },
@@ -286,112 +341,7 @@ export const DUMMY = {
     alertThreshold: 3,
     notiType: 'basic',
   },
-  students: [
-    // ── s1 학동중학교 (중학교, 3학년×5반 = 15개 학급) ──────────────────
-    // 1학년 1반 (g1)
-    { studentId:'st1',  name:'김민준', schoolId:'s1', groupId:'g1', grade:'1학년', classNum:'1반', num: 3,  deviceId:'d1',  status:'active' },
-    { studentId:'st16', name:'강예린', schoolId:'s1', groupId:'g1', grade:'1학년', classNum:'1반', num: 8,  deviceId:null,  status:'active' },
-    { studentId:'st17', name:'권민준', schoolId:'s1', groupId:'g1', grade:'1학년', classNum:'1반', num: 14, deviceId:null,  status:'active' },
-    { studentId:'st18', name:'문소희', schoolId:'s1', groupId:'g1', grade:'1학년', classNum:'1반', num: 21, deviceId:null,  status:'active' },
-    { studentId:'st19', name:'배준서', schoolId:'s1', groupId:'g1', grade:'1학년', classNum:'1반', num: 27, deviceId:null,  status:'inactive' },
-    // 1학년 2반 (g2)
-    { studentId:'st2',  name:'이서연', schoolId:'s1', groupId:'g2', grade:'1학년', classNum:'2반', num: 2,  deviceId:'d2',  status:'active' },
-    { studentId:'st20', name:'안지우', schoolId:'s1', groupId:'g2', grade:'1학년', classNum:'2반', num: 9,  deviceId:null,  status:'active' },
-    { studentId:'st21', name:'황수아', schoolId:'s1', groupId:'g2', grade:'1학년', classNum:'2반', num: 15, deviceId:null,  status:'active' },
-    { studentId:'st22', name:'전민호', schoolId:'s1', groupId:'g2', grade:'1학년', classNum:'2반', num: 22, deviceId:null,  status:'active' },
-    { studentId:'st23', name:'고예진', schoolId:'s1', groupId:'g2', grade:'1학년', classNum:'2반', num: 28, deviceId:null,  status:'active' },
-    // 1학년 3반 (g3)
-    { studentId:'st24', name:'류나은', schoolId:'s1', groupId:'g3', grade:'1학년', classNum:'3반', num: 5,  deviceId:null,  status:'active' },
-    { studentId:'st25', name:'서시우', schoolId:'s1', groupId:'g3', grade:'1학년', classNum:'3반', num: 11, deviceId:null,  status:'active' },
-    { studentId:'st26', name:'조예은', schoolId:'s1', groupId:'g3', grade:'1학년', classNum:'3반', num: 17, deviceId:null,  status:'active' },
-    { studentId:'st27', name:'백민재', schoolId:'s1', groupId:'g3', grade:'1학년', classNum:'3반', num: 23, deviceId:null,  status:'inactive' },
-    { studentId:'st28', name:'허도윤', schoolId:'s1', groupId:'g3', grade:'1학년', classNum:'3반', num: 29, deviceId:null,  status:'active' },
-    // 1학년 4반 (g4)
-    { studentId:'st29', name:'유지아', schoolId:'s1', groupId:'g4', grade:'1학년', classNum:'4반', num: 1,  deviceId:null,  status:'active' },
-    { studentId:'st30', name:'노승현', schoolId:'s1', groupId:'g4', grade:'1학년', classNum:'4반', num: 7,  deviceId:null,  status:'active' },
-    { studentId:'st31', name:'심보미', schoolId:'s1', groupId:'g4', grade:'1학년', classNum:'4반', num: 13, deviceId:null,  status:'active' },
-    { studentId:'st32', name:'하재원', schoolId:'s1', groupId:'g4', grade:'1학년', classNum:'4반', num: 20, deviceId:null,  status:'active' },
-    { studentId:'st33', name:'곽세진', schoolId:'s1', groupId:'g4', grade:'1학년', classNum:'4반', num: 26, deviceId:null,  status:'active' },
-    // 1학년 5반 (g5)
-    { studentId:'st34', name:'변예슬', schoolId:'s1', groupId:'g5', grade:'1학년', classNum:'5반', num: 4,  deviceId:null,  status:'active' },
-    { studentId:'st35', name:'공수빈', schoolId:'s1', groupId:'g5', grade:'1학년', classNum:'5반', num: 10, deviceId:null,  status:'active' },
-    { studentId:'st36', name:'천혜진', schoolId:'s1', groupId:'g5', grade:'1학년', classNum:'5반', num: 16, deviceId:null,  status:'inactive' },
-    { studentId:'st37', name:'방다빈', schoolId:'s1', groupId:'g5', grade:'1학년', classNum:'5반', num: 24, deviceId:null,  status:'active' },
-    { studentId:'st38', name:'성지수', schoolId:'s1', groupId:'g5', grade:'1학년', classNum:'5반', num: 30, deviceId:null,  status:'active' },
-    // 2학년 1반 (g6)
-    { studentId:'st39', name:'김민결', schoolId:'s1', groupId:'g6', grade:'2학년', classNum:'1반', num: 3,  deviceId:'d10', status:'active' },
-    { studentId:'st40', name:'이은서', schoolId:'s1', groupId:'g6', grade:'2학년', classNum:'1반', num: 8,  deviceId:'d11', status:'active' },
-    { studentId:'st41', name:'박하린', schoolId:'s1', groupId:'g6', grade:'2학년', classNum:'1반', num: 14, deviceId:'d15', status:'active' },
-    { studentId:'st42', name:'최선우', schoolId:'s1', groupId:'g6', grade:'2학년', classNum:'1반', num: 21, deviceId:null,  status:'active' },
-    { studentId:'st43', name:'정가은', schoolId:'s1', groupId:'g6', grade:'2학년', classNum:'1반', num: 27, deviceId:null,  status:'active' },
-    // 2학년 2반 (g7)
-    { studentId:'st44', name:'강정우', schoolId:'s1', groupId:'g7', grade:'2학년', classNum:'2반', num: 2,  deviceId:'d12', status:'active' },
-    { studentId:'st45', name:'윤태현', schoolId:'s1', groupId:'g7', grade:'2학년', classNum:'2반', num: 9,  deviceId:'d13', status:'active' },
-    { studentId:'st46', name:'장지현', schoolId:'s1', groupId:'g7', grade:'2학년', classNum:'2반', num: 15, deviceId:null,  status:'inactive' },
-    { studentId:'st47', name:'임보라', schoolId:'s1', groupId:'g7', grade:'2학년', classNum:'2반', num: 22, deviceId:null,  status:'active' },
-    { studentId:'st48', name:'한혜원', schoolId:'s1', groupId:'g7', grade:'2학년', classNum:'2반', num: 28, deviceId:null,  status:'active' },
-    // 2학년 3반 (g8)
-    { studentId:'st49', name:'신성민', schoolId:'s1', groupId:'g8', grade:'2학년', classNum:'3반', num: 5,  deviceId:'d16', status:'active' },
-    { studentId:'st50', name:'오재훈', schoolId:'s1', groupId:'g8', grade:'2학년', classNum:'3반', num: 11, deviceId:'d17', status:'active' },
-    { studentId:'st51', name:'서효진', schoolId:'s1', groupId:'g8', grade:'2학년', classNum:'3반', num: 17, deviceId:'d18', status:'active' },
-    { studentId:'st52', name:'권우진', schoolId:'s1', groupId:'g8', grade:'2학년', classNum:'3반', num: 23, deviceId:null,  status:'active' },
-    { studentId:'st53', name:'황경민', schoolId:'s1', groupId:'g8', grade:'2학년', classNum:'3반', num: 29, deviceId:null,  status:'active' },
-    // 2학년 4반 (g9)
-    { studentId:'st54', name:'안은지', schoolId:'s1', groupId:'g9', grade:'2학년', classNum:'4반', num: 1,  deviceId:null,  status:'active' },
-    { studentId:'st55', name:'송성현', schoolId:'s1', groupId:'g9', grade:'2학년', classNum:'4반', num: 7,  deviceId:null,  status:'active' },
-    { studentId:'st56', name:'류민아', schoolId:'s1', groupId:'g9', grade:'2학년', classNum:'4반', num: 13, deviceId:null,  status:'inactive' },
-    { studentId:'st57', name:'전태민', schoolId:'s1', groupId:'g9', grade:'2학년', classNum:'4반', num: 20, deviceId:null,  status:'active' },
-    { studentId:'st58', name:'고지원', schoolId:'s1', groupId:'g9', grade:'2학년', classNum:'4반', num: 26, deviceId:null,  status:'active' },
-    // 2학년 5반 (g10)
-    { studentId:'st59', name:'남도현', schoolId:'s1', groupId:'g10', grade:'2학년', classNum:'5반', num: 4,  deviceId:null,  status:'active' },
-    { studentId:'st60', name:'심예서', schoolId:'s1', groupId:'g10', grade:'2학년', classNum:'5반', num: 10, deviceId:null,  status:'active' },
-    { studentId:'st61', name:'하민철', schoolId:'s1', groupId:'g10', grade:'2학년', classNum:'5반', num: 16, deviceId:null,  status:'active' },
-    { studentId:'st62', name:'곽수현', schoolId:'s1', groupId:'g10', grade:'2학년', classNum:'5반', num: 24, deviceId:null,  status:'active' },
-    { studentId:'st63', name:'변은호', schoolId:'s1', groupId:'g10', grade:'2학년', classNum:'5반', num: 30, deviceId:null,  status:'inactive' },
-    // 3학년 1반 (g11)
-    { studentId:'st64', name:'조민기', schoolId:'s1', groupId:'g11', grade:'3학년', classNum:'1반', num: 3,  deviceId:null,  status:'active' },
-    { studentId:'st65', name:'백서진', schoolId:'s1', groupId:'g11', grade:'3학년', classNum:'1반', num: 8,  deviceId:null,  status:'active' },
-    { studentId:'st66', name:'허예원', schoolId:'s1', groupId:'g11', grade:'3학년', classNum:'1반', num: 14, deviceId:null,  status:'active' },
-    { studentId:'st67', name:'유재민', schoolId:'s1', groupId:'g11', grade:'3학년', classNum:'1반', num: 21, deviceId:null,  status:'inactive' },
-    { studentId:'st68', name:'노준영', schoolId:'s1', groupId:'g11', grade:'3학년', classNum:'1반', num: 27, deviceId:null,  status:'active' },
-    // 3학년 2반 (g12)
-    { studentId:'st69', name:'성지호', schoolId:'s1', groupId:'g12', grade:'3학년', classNum:'2반', num: 2,  deviceId:null,  status:'active' },
-    { studentId:'st70', name:'차민경', schoolId:'s1', groupId:'g12', grade:'3학년', classNum:'2반', num: 9,  deviceId:null,  status:'active' },
-    { studentId:'st71', name:'주혜린', schoolId:'s1', groupId:'g12', grade:'3학년', classNum:'2반', num: 15, deviceId:null,  status:'active' },
-    { studentId:'st72', name:'우소연', schoolId:'s1', groupId:'g12', grade:'3학년', classNum:'2반', num: 22, deviceId:null,  status:'active' },
-    { studentId:'st73', name:'구태환', schoolId:'s1', groupId:'g12', grade:'3학년', classNum:'2반', num: 28, deviceId:null,  status:'active' },
-    // 3학년 3반 (g13)
-    { studentId:'st74', name:'나민성', schoolId:'s1', groupId:'g13', grade:'3학년', classNum:'3반', num: 5,  deviceId:null,  status:'active' },
-    { studentId:'st75', name:'지현아', schoolId:'s1', groupId:'g13', grade:'3학년', classNum:'3반', num: 11, deviceId:null,  status:'active' },
-    { studentId:'st76', name:'엄준서', schoolId:'s1', groupId:'g13', grade:'3학년', classNum:'3반', num: 17, deviceId:null,  status:'inactive' },
-    { studentId:'st77', name:'원예지', schoolId:'s1', groupId:'g13', grade:'3학년', classNum:'3반', num: 23, deviceId:null,  status:'active' },
-    { studentId:'st78', name:'채성욱', schoolId:'s1', groupId:'g13', grade:'3학년', classNum:'3반', num: 29, deviceId:null,  status:'active' },
-    // 3학년 4반 (g14)
-    { studentId:'st14', name:'홍길동', schoolId:'s1', groupId:'g14', grade:'3학년', classNum:'4반', num: 1,  deviceId:'d14', status:'active' },
-    { studentId:'st79', name:'김주원', schoolId:'s1', groupId:'g14', grade:'3학년', classNum:'4반', num: 7,  deviceId:null,  status:'active' },
-    { studentId:'st80', name:'이도훈', schoolId:'s1', groupId:'g14', grade:'3학년', classNum:'4반', num: 13, deviceId:null,  status:'active' },
-    { studentId:'st81', name:'박수연', schoolId:'s1', groupId:'g14', grade:'3학년', classNum:'4반', num: 20, deviceId:null,  status:'active' },
-    { studentId:'st82', name:'최예림', schoolId:'s1', groupId:'g14', grade:'3학년', classNum:'4반', num: 26, deviceId:null,  status:'inactive' },
-    // 3학년 5반 (g15)
-    { studentId:'st83', name:'강민서', schoolId:'s1', groupId:'g15', grade:'3학년', classNum:'5반', num: 4,  deviceId:null,  status:'active' },
-    { studentId:'st84', name:'권지훈', schoolId:'s1', groupId:'g15', grade:'3학년', classNum:'5반', num: 10, deviceId:null,  status:'active' },
-    { studentId:'st85', name:'문예진', schoolId:'s1', groupId:'g15', grade:'3학년', classNum:'5반', num: 16, deviceId:null,  status:'active' },
-    { studentId:'st86', name:'배현우', schoolId:'s1', groupId:'g15', grade:'3학년', classNum:'5반', num: 24, deviceId:null,  status:'active' },
-    { studentId:'st87', name:'손승아', schoolId:'s1', groupId:'g15', grade:'3학년', classNum:'5반', num: 30, deviceId:null,  status:'inactive' },
-    // ── 타 학교 학생 ─────────────────────────────────────────────────────
-    { studentId:'st3',  name:'박지훈', schoolId:'s2', groupId:'g16',  grade:'1학년', classNum:'3반', num: 12, deviceId:'d3',  status:'active' },
-    { studentId:'st4',  name:'최유진', schoolId:'s2', groupId:'g27',  grade:'3학년', classNum:'2반', num: 19, deviceId:'d4',  status:'active' },
-    { studentId:'st15', name:'김철수', schoolId:'s2', groupId:'g23',  grade:'2학년', classNum:'3반', num: 6,  deviceId:'d15', status:'active' },
-    { studentId:'st5',  name:'정다은', schoolId:'s3', groupId:'g36',  grade:'2학년', classNum:'1반', num: 25, deviceId:'d5',  status:'inactive' },
-    { studentId:'st6',  name:'강현우', schoolId:'s4', groupId:'g68',  grade:'5학년', classNum:'3반', num: 8,  deviceId:'d6',  status:'active' },
-    { studentId:'st7',  name:'윤소희', schoolId:'s4', groupId:'g71',  grade:'6학년', classNum:'1반', num: 17, deviceId:'d7',  status:'active' },
-    { studentId:'st8',  name:'임태양', schoolId:'s5', groupId:'g79',  grade:'1학년', classNum:'4반', num: 4,  deviceId:'d8',  status:'active' },
-    { studentId:'st9',  name:'한채원', schoolId:'s5', groupId:'g82',  grade:'2학년', classNum:'2반', num: 22, deviceId:'d9',  status:'active' },
-    { studentId:'st10', name:'오준혁', schoolId:'s6', groupId:'g96',  grade:'1학년', classNum:'1반', num: 11, deviceId:null,  status:'active' },
-    { studentId:'st11', name:'배수진', schoolId:'s6', groupId:'g103', grade:'3학년', classNum:'3반', num: 28, deviceId:null,  status:'inactive' },
-    { studentId:'st12', name:'신동현', schoolId:'s7', groupId:'g112', grade:'4학년', classNum:'2반', num: 15, deviceId:'d12', status:'active' },
-    { studentId:'st13', name:'류아영', schoolId:'s8', groupId:'g137', grade:'2학년', classNum:'1반', num: 7,  deviceId:'d13', status:'active' },
-  ],
+  students: _genStudents(_groups),
 };
 
 // Computed totals

@@ -40,9 +40,7 @@ const MENU = [
   { id: 'dashboard',        icon: 'dashboard',        label: '대시보드',        short: '홈',       path: '/',                 common: true  },
   { section: '운영 관리' },
   { id: 'groups',           icon: 'groups',           label: '기관 관리',       short: '기관',     path: '/groups',           common: false },
-  { id: 'classes',          icon: 'classes',          label: '그룹 관리',       short: '그룹',     path: '/classes',          common: true  },
-  { id: 'students',         icon: 'students',         label: '학생 관리',       short: '학생',     path: '/students',         common: true  },
-  { id: 'devices',          icon: 'devices',          label: '단말기 관리',     short: '단말기',   path: '/devices',          common: true  },
+  { id: 'classes', icon: 'classes', label: '그룹 관리', short: '그룹', path: '/classes', common: true },
   { id: 'policies',         icon: 'policies',         label: '정책 관리',       short: '정책',     path: '/policies',         common: false },
   { section: '모니터링' },
   { id: 'detections',       icon: 'detections',       label: '탐지 현황',       short: '탐지',     path: '/detections',       common: true  },
@@ -93,25 +91,26 @@ export default function Sidebar({ mobileOpen, onMobileClose }) {
           </div>
           <div className="sb-logo-text">Meercatch Manager</div>
         </div>
-        <button
-          className="sb-toggle"
-          onClick={e => { e.stopPropagation(); setCollapsed(c => !c); }}
-          style={{ marginLeft: 'auto', flexShrink: 0 }}
-        >
-          {collapsed ? '▶' : '◀'}
-        </button>
+        <div style={{ marginLeft: 'auto', display: 'flex', gap: 4, flexShrink: 0 }}>
+          <button
+            className="sb-toggle"
+            onClick={e => { e.stopPropagation(); setCollapsed(c => !c); }}
+          >
+            {collapsed ? '▶' : '◀'}
+          </button>
+        </div>
       </div>
 
       {/* 학년도 / 학교 선택 */}
       {!collapsed && (
-        <div style={{ padding: '10px 8px', display: 'flex', gap: 6, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <div style={{ padding: '10px 8px', display: 'flex', gap: 6, borderTop: '1px solid var(--sb-bd)' }}>
           <select
             defaultValue="2026"
             disabled
             style={{
               flex: 2, minWidth: 0, padding: '7px 6px', fontSize: 12,
-              background: 'rgb(16 19 30)', color: 'rgba(255,255,255,0.4)',
-              border: '1px solid rgb(51 51 51)', borderRadius: 4,
+              background: 'var(--sb-select-bg)', color: 'var(--sb-select-dim)',
+              border: '1px solid var(--sb-select-bd)', borderRadius: 4,
               cursor: 'not-allowed', outline: 'none', opacity: 1,
             }}
           >
@@ -124,8 +123,8 @@ export default function Sidebar({ mobileOpen, onMobileClose }) {
             defaultValue="1"
             style={{
               flex: 3, minWidth: 0, padding: '7px 6px', fontSize: 12,
-              background: 'rgb(16 19 30)', color: '#fff',
-              border: '1px solid rgb(51 51 51)', borderRadius: 4,
+              background: 'var(--sb-select-bg)', color: 'var(--sb-select-fg)',
+              border: '1px solid var(--sb-select-bd)', borderRadius: 4,
               cursor: 'pointer', outline: 'none',
             }}
           >
