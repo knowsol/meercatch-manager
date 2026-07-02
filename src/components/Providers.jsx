@@ -3,6 +3,7 @@ import { useEffect } from 'react'
 import { ThemeProvider } from '../context/ThemeContext'
 import { AuthProvider } from '../context/AuthContext'
 import { PanelProvider } from '../context/PanelContext'
+import { SchoolProvider } from '../context/SchoolContext'
 
 function TokenLoader() {
   useEffect(() => {
@@ -20,10 +21,12 @@ export default function Providers({ children }) {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <PanelProvider>
-          <TokenLoader />
-          {children}
-        </PanelProvider>
+        <SchoolProvider>
+          <PanelProvider>
+            <TokenLoader />
+            {children}
+          </PanelProvider>
+        </SchoolProvider>
       </AuthProvider>
     </ThemeProvider>
   )

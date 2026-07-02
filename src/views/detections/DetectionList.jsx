@@ -388,7 +388,7 @@ function HistoryView() {
   const toggleCol = key => setHiddenCols(prev => prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]);
   const doSearch = () => { setQuery(search); setPage(1); };
   const [typeFilter, setTypeFilter]     = useState('전체');
-  const [yearFilter]                    = useState('2026');
+  const [yearFilter, setYearFilter]     = useState('');
   const [schoolFilter, setSchoolFilter] = useState('');
   const [chips, setChips]               = useState([]);
   const [lastAddedId, setLastAddedId]   = useState(null);
@@ -401,6 +401,7 @@ function HistoryView() {
 
   const filtered = HISTORY.filter(r => {
     if (typeFilter !== '전체' && r.type !== typeFilter) return false;
+    if (yearFilter && !r.detectedAt.startsWith(yearFilter)) return false;
     if (schoolFilter && r.school !== schoolFilter) return false;
     if (query && !r.school.includes(query) && !r.schoolYear.includes(query) && !r.classNum.includes(query)) return false;
     for (const chip of chips) {
@@ -457,11 +458,17 @@ function HistoryView() {
 
         <div style={{ width: 1, height: 20, background: 'var(--bd)', margin: '0 4px' }} />
 
-        {/* 학년도 칩 (비활성) */}
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '0 10px', fontSize: 12, borderRadius: 4, height: 31, border: '1px solid var(--bd)', background: 'var(--bg2)', color: 'var(--t3)', userSelect: 'none', boxSizing: 'border-box', cursor: 'not-allowed', opacity: 0.6 }}>
-          <span>학년도</span>
-          <span style={{ color: 'var(--t2)' }}>{yearFilter}</span>
-        </span>
+        {/* 학년도 셀렉트 */}
+        <select
+          value={yearFilter}
+          onChange={e => { setYearFilter(e.target.value); setPage(1); }}
+          style={{ height: 31, padding: '0 8px', fontSize: 12, borderRadius: 4, border: '1px solid var(--bd)', background: '#fff', color: 'var(--t1)', cursor: 'pointer', outline: 'none' }}
+        >
+          <option value="">전체 학년도</option>
+          <option value="2024">2024년도</option>
+          <option value="2025">2025년도</option>
+          <option value="2026">2026년도</option>
+        </select>
 
         {/* 기관이름 칩 */}
         <SearchableFilterChip
@@ -568,7 +575,7 @@ export default function DetectionList() {
   const [search, setSearch] = useState('');
   const [query, setQuery] = useState('');
   const doSearch = () => { setQuery(search); setPage(1); };
-  const [yearFilter, setYearFilter] = useState('2026');
+  const [yearFilter, setYearFilter] = useState('');
   const [schoolFilter, setSchoolFilter] = useState('');
   const [chips, setChips] = useState([]);
   const [lastAddedId, setLastAddedId] = useState(null);
@@ -773,11 +780,17 @@ export default function DetectionList() {
             </div>
             <div style={{ width: 1, height: 20, background: 'var(--bd)', margin: '0 4px' }} />
 
-            {/* 학년도 칩 (비활성) */}
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '0 10px', fontSize: 12, borderRadius: 4, height: 31, border: '1px solid var(--bd)', background: 'var(--bg2)', color: 'var(--t3)', userSelect: 'none', boxSizing: 'border-box', cursor: 'not-allowed', opacity: 0.6 }}>
-              <span>학년도</span>
-              <span style={{ color: 'var(--t2)' }}>{yearFilter}</span>
-            </span>
+            {/* 학년도 셀렉트 */}
+            <select
+              value={yearFilter}
+              onChange={e => { setYearFilter(e.target.value); setPage(1); }}
+              style={{ height: 31, padding: '0 8px', fontSize: 12, borderRadius: 4, border: '1px solid var(--bd)', background: '#fff', color: 'var(--t1)', cursor: 'pointer', outline: 'none' }}
+            >
+              <option value="">전체 학년도</option>
+              <option value="2024">2024년도</option>
+              <option value="2025">2025년도</option>
+              <option value="2026">2026년도</option>
+            </select>
 
             {/* 기관이름 칩 */}
             <SearchableFilterChip

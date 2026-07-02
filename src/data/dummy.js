@@ -164,9 +164,12 @@ function _genStudents(groups) {
   return result;
 }
 
-const _models = ['iPad 10th Gen', 'iPad 9th Gen', 'iPad Air 5', 'iPad mini 6', 'Galaxy Tab S9', 'Galaxy Tab A9'];
-const _oses   = ['iOS', 'Android', 'Windows', 'ChromeBook'];
-const _idChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+const _models    = ['iPad 10th Gen', 'iPad 9th Gen', 'iPad Air 5', 'iPad mini 6', 'Galaxy Tab S9', 'Galaxy Tab A9'];
+const _oses      = ['iOS', 'Android', 'Windows', 'ChromeBook'];
+const _idChars   = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+const _nicknames = ['김민준', '이서연', '박도윤', '최지우', '정하은', '강수아', '조현우', '윤지호', '장서현', '임예준',
+  '오아린', '신유준', '권나은', '황지민', '안서준', '송하린', '홍민서', '전수빈', '고예린', '문준혁',
+  '배지훈', '류수현', '남다연', '변준서', '마하율', '서지안', '노아름', '심현우', '원채린', '표민기'];
 
 function _genDevices(groups, schools) {
   const schoolMap = {};
@@ -189,6 +192,24 @@ function _genDevices(groups, schools) {
       const hour = 8 + (seed % 8);
       const min  = seed % 60;
       const day  = isOnline ? 17 : (15 + seed % 3);
+      const mSeed    = did * 37 + seed;
+      const mCount   = mSeed % 5 === 0 ? 0 : mSeed % 9 === 0 ? 3 : mSeed % 4 === 0 ? 2 : 1;
+      const _managers = ['김관리', '이담당', '박매니저', '최운영', '정관리자'];
+      const members  = Array.from({ length: mCount }, (_, m) => {
+        const ms    = mSeed + m * 11;
+        const regDay  = 1 + (ms % 28);
+        const regMonth = 1 + (ms % 3);
+        const accDay  = regDay + (ms % 10);
+        const accHour = 8 + (ms % 12);
+        const accMin  = ms % 60;
+        return {
+          memberId:    `m_${did}_${m}`,
+          nickname:    _nicknames[ms % _nicknames.length],
+          registeredAt: `2026-0${regMonth}-${String(regDay).padStart(2,'0')}`,
+          lastAccess:  `2026-03-${String(Math.min(accDay,31)).padStart(2,'0')} ${String(accHour).padStart(2,'0')}:${String(accMin).padStart(2,'0')}`,
+          manager:     _managers[ms % _managers.length],
+        };
+      });
       result.push({
         deviceId: `d${did}`,
         name: `DEV-${String(did).padStart(4, '0')}`,
@@ -200,6 +221,7 @@ function _genDevices(groups, schools) {
         lastContact: `2026-03-${String(day).padStart(2, '0')} ${String(hour).padStart(2, '0')}:${String(min).padStart(2, '0')}`,
         model: _models[seed % _models.length],
         os: _oses[(seed * 3) % _oses.length],
+        members,
       });
       did++;
     }

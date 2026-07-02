@@ -2,6 +2,8 @@
 import { useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
+import { useSchool } from '../../context/SchoolContext';
+import { DUMMY } from '../../data/dummy';
 
 const IC = {
   dashboard:         '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
@@ -72,6 +74,7 @@ export default function Sidebar({ mobileOpen, onMobileClose }) {
   const router = useRouter();
   const pathname = usePathname();
   const { userName, logout } = useAuth();
+  const { selectedSchoolId, setSelectedSchoolId } = useSchool();
 
   const initial = userName ? userName.charAt(0) : 'a';
 
@@ -120,7 +123,8 @@ export default function Sidebar({ mobileOpen, onMobileClose }) {
             <option value="2023">2023 학년도</option>
           </select>
           <select
-            defaultValue="1"
+            value={selectedSchoolId ?? ''}
+            onChange={e => setSelectedSchoolId(e.target.value)}
             style={{
               flex: 3, minWidth: 0, padding: '7px 6px', fontSize: 12,
               background: 'var(--sb-select-bg)', color: 'var(--sb-select-fg)',
@@ -128,17 +132,9 @@ export default function Sidebar({ mobileOpen, onMobileClose }) {
               cursor: 'pointer', outline: 'none',
             }}
           >
-            <option value="1">부산광역시교육청</option>
-            <option value="2">부산초등학교</option>
-            <option value="3">해운대중학교</option>
-            <option value="4">동래고등학교</option>
-            <option value="5">부산진초등학교</option>
-            <option value="6">사직중학교</option>
-            <option value="7">경남고등학교</option>
-            <option value="8">연제초등학교</option>
-            <option value="9">금정중학교</option>
-            <option value="10">부산여자고등학교</option>
-            <option value="11">남산초등학교</option>
+            {DUMMY.schools.map(s => (
+              <option key={s.schoolId} value={s.schoolId}>{s.name}</option>
+            ))}
           </select>
         </div>
       )}
